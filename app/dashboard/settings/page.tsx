@@ -14,6 +14,9 @@ type FirmSettings = {
 
 const SPECIALTY_OPTIONS = ['민사', '형사', '가사', '교통사고', '행정', '노동', '부동산', '상속', '기업']
 
+const INPUT_CLASS =
+  'w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 placeholder-slate-400 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-shadow'
+
 export default function SettingsPage() {
   const { session, loading } = useAuth()
   const [form, setForm] = useState<FirmSettings>({
@@ -29,14 +32,25 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
+  const [fetchError, setFetchError] = useState('')
 
   useEffect(() => {
-    if (!session) return
+    if (loading) return
+    if (!session) {
+      setFetching(false)
+      return
+    }
+
     fetch('/api/dashboard/settings', {
       headers: { Authorization: `Bearer ${session.access_token}` },
     })
-      .then((r) => r.json())
-      .then(({ firm }) => {
+      .then(async (r) => {
+        if (!r.ok) {
+          const data = await r.json().catch(() => ({}))
+          setFetchError(data.error ?? '사무소 정보를 불러오지 못했습니다.')
+          return
+        }
+        const { firm } = await r.json()
         if (!firm) return
         setForm({
           name: firm.name ?? '',
@@ -48,8 +62,9 @@ export default function SettingsPage() {
           notification_email: firm.notification_email ?? true,
         })
       })
+      .catch(() => setFetchError('네트워크 오류가 발생했습니다.'))
       .finally(() => setFetching(false))
-  }, [session])
+  }, [session, loading])
 
   async function handleSave() {
     if (!session) return
@@ -57,22 +72,27 @@ export default function SettingsPage() {
     setSaved(false)
     setError('')
 
-    const res = await fetch('/api/dashboard/settings', {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify(form),
-    })
+    try {
+      const res = await fetch('/api/dashboard/settings', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify(form),
+      })
 
-    setSaving(false)
-    if (res.ok) {
-      setSaved(true)
-      setTimeout(() => setSaved(false), 3000)
-    } else {
-      const data = await res.json()
-      setError(data.error ?? '저장 중 오류가 발생했습니다.')
+      if (res.ok) {
+        setSaved(true)
+        setTimeout(() => setSaved(false), 3000)
+      } else {
+        const data = await res.json().catch(() => ({}))
+        setError(data.error ?? '저장 중 오류가 발생했습니다.')
+      }
+    } catch {
+      setError('네트워크 오류가 발생했습니다.')
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -89,6 +109,14 @@ export default function SettingsPage() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  if (fetchError) {
+    return (
+      <div className="p-6">
+        <p className="text-red-600 text-sm">{fetchError}</p>
       </div>
     )
   }
@@ -111,7 +139,7 @@ export default function SettingsPage() {
                 value={form.name}
                 onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
                 placeholder="예) 김변호사 법률사무소"
-                className="input"
+                className={INPUT_CLASS}
               />
             </Field>
             <Field label="담당 변호사">
@@ -120,7 +148,7 @@ export default function SettingsPage() {
                 value={form.lawyer_name}
                 onChange={(e) => setForm((p) => ({ ...p, lawyer_name: e.target.value }))}
                 placeholder="예) 김민준"
-                className="input"
+                className={INPUT_CLASS}
               />
             </Field>
             <Field label="대표 전화">
@@ -129,7 +157,7 @@ export default function SettingsPage() {
                 value={form.phone}
                 onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
                 placeholder="예) 02-1234-5678"
-                className="input"
+                className={INPUT_CLASS}
               />
             </Field>
             <Field label="업무시간">
@@ -138,7 +166,7 @@ export default function SettingsPage() {
                 value={form.hours}
                 onChange={(e) => setForm((p) => ({ ...p, hours: e.target.value }))}
                 placeholder="예) 평일 09:00-18:00"
-                className="input"
+                className={INPUT_CLASS}
               />
             </Field>
           </div>
@@ -174,7 +202,7 @@ export default function SettingsPage() {
             onChange={(e) => setForm((p) => ({ ...p, greeting: e.target.value }))}
             rows={3}
             placeholder={`예) 안녕하세요, ${form.name || '사무소명'}입니다. 무엇을 도와드릴까요?`}
-            className="input resize-none"
+            className={`${INPUT_CLASS} resize-none`}
           />
         </section>
 
@@ -182,9 +210,12 @@ export default function SettingsPage() {
         <section className="bg-white rounded-xl border border-slate-200 p-5">
           <h2 className="text-sm font-semibold text-slate-700 mb-4">알림 설정</h2>
           <label className="flex items-center gap-3 cursor-pointer">
-            <div
+            <button
+              type="button"
+              role="switch"
+              aria-checked={form.notification_email}
               onClick={() => setForm((p) => ({ ...p, notification_email: !p.notification_email }))}
-              className={`relative w-10 h-6 rounded-full transition-colors ${
+              className={`relative w-10 h-6 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 ${
                 form.notification_email ? 'bg-indigo-600' : 'bg-slate-200'
               }`}
             >
@@ -193,7 +224,7 @@ export default function SettingsPage() {
                   form.notification_email ? 'translate-x-5' : 'translate-x-1'
                 }`}
               />
-            </div>
+            </button>
             <span className="text-sm text-slate-700">이메일 알림 (접수 완료 시)</span>
           </label>
         </section>

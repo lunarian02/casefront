@@ -51,19 +51,45 @@ export interface Message {
 export interface CaseEvent {
   date: string
   subject: string
-  object: string
+  object: string | null
   action: string
   summary: string
+}
+
+export interface CaseRequirement {
+  element: string
+  status: 'confirmed' | 'denied' | 'unknown'
+  detail: string
 }
 
 export interface CaseSummary {
   client_name: string
   client_phone: string
   is_returning: boolean
-  case_type: '민사' | '형사' | '가사' | '교통' | '행정' | '기타'
+
+  // Case classification
+  case_type: '민사' | '형사' | '가사' | '도산' | '노동' | '기타'
+  case_subtype: '대여금' | '부동산' | '사기' | '폭행·상해' | '통매음·명예훼손' | '스토킹' | '이혼' | '상속' | '손해배상' | '성범죄' | '파산·회생' | '해고·임금체불' | '기타'
+  case_sub_tag: string | null
+  position: string | null  // 피해자 | 피의자 | 원고 | 피고 | 기타
+
+  // Structured facts
   events: CaseEvent[]
+  requirements: CaseRequirement[]
+  evidence: string[]
+  unconfirmed: string[]
+
+  // Documents and notes
   document_request: string[]
+  client_request: string
+  ai_notes: string
+
+  // Urgency
   urgency: 'urgent' | 'normal' | 'low'
   urgency_reason: string
+
+  // Summary
   summary_text: string
+  conversation_turns: number
+  timestamp: string
 }
