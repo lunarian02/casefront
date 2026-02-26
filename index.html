@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CaseFront – AI Legal Reception for Law Firms | 카톡 + 전화 AI 접수</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #06080b;
+  --surface: #0c0f14;
+  --surface2: #111620;
+  --border: #1a2030;
+  --border-h: #243048;
+  --mint: #10b981;
+  --mint-l: #34d399;
+  --mint-xl: #6ee7b7;
+  --kakao: #FEE500;
+  --kakao-d: #3C1E1E;
+  --text: #c8cdd5;
+  --text-m: #6b7a8d;
+  --white: #f1f5f9;
+  --glow-mint: rgba(16,185,129,0.12);
+  --glow-kakao: rgba(254,229,0,0.10);
+  --grad1: linear-gradient(135deg, #10b981, #06b6d4);
+  --grad2: linear-gradient(135deg, #FEE500, #f59e0b);
+  --grad3: linear-gradient(135deg, #10b981, #34d399);
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+
+body{
+  font-family:'Outfit','Noto Sans KR',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ===== LANGUAGE ===== */
+[data-lang="ko"]{display:none!important}
+body.ko [data-lang="ko"]{display:revert!important}
+body.ko [data-lang="en"]{display:none!important}
+.price-item [data-lang="ko"]{display:none!important}
+body.ko .price-item [data-lang="ko"]{display:inline!important}
+body.ko .price-item [data-lang="en"]{display:none!important}
+body.ko h2.sec-title[data-lang="ko"]{display:block!important;text-align:center}
+body.ko h2.sec-title[data-lang="en"]{display:none!important}
+.nav-links a[data-lang="ko"]{display:none!important}
+body.ko .nav-links a[data-lang="ko"]{display:inline!important}
+body.ko .nav-links a.nav-cta[data-lang="ko"]{display:inline-block!important}
+body.ko .nav-links a[data-lang="en"]{display:none!important}
+.hero-ctas a[data-lang="ko"]{display:none!important}
+body.ko .hero-ctas a[data-lang="ko"]{display:inline-flex!important}
+body.ko .hero-ctas a[data-lang="en"]{display:none!important}
+.email-row input[data-lang="ko"],.email-row button[data-lang="ko"]{display:none!important}
+body.ko .email-row input[data-lang="ko"],body.ko .email-row button[data-lang="ko"]{display:block!important}
+body.ko .email-row input[data-lang="en"],body.ko .email-row button[data-lang="en"]{display:none!important}
+.phone-top h3[data-lang="ko"]{display:none!important}
+body.ko .phone-top h3[data-lang="ko"]{display:block!important}
+body.ko .phone-top h3[data-lang="en"]{display:none!important}
+.feat h3[data-lang="ko"]{display:none!important}
+body.ko .feat h3[data-lang="ko"]{display:block!important}
+body.ko .feat h3[data-lang="en"]{display:none!important}
+.step h3[data-lang="ko"]{display:none!important}
+body.ko .step h3[data-lang="ko"]{display:block!important}
+body.ko .step h3[data-lang="en"]{display:none!important}
+.price-card h3[data-lang="ko"],.price-card a[data-lang="ko"]{display:none!important}
+body.ko .price-card h3[data-lang="ko"]{display:block!important}
+body.ko .price-card a[data-lang="ko"]{display:inline-flex!important}
+body.ko .price-card h3[data-lang="en"],body.ko .price-card a[data-lang="en"]{display:none!important}
+.cta-box h2[data-lang="ko"]{display:none!important}
+body.ko .cta-box h2[data-lang="ko"]{display:block!important}
+body.ko .cta-box h2[data-lang="en"]{display:none!important}
+.channel-tab[data-lang="ko"]{display:none!important}
+body.ko .channel-tab[data-lang="ko"]{display:flex!important}
+body.ko .channel-tab[data-lang="en"]{display:none!important}
+.msg-label[data-lang="ko"]{display:none!important}
+body.ko .msg-label[data-lang="ko"]{display:block!important}
+body.ko .msg-label[data-lang="en"]{display:none!important}
+
+/* ===== ICONS (SVG line icons as CSS) ===== */
+.icon{
+  width:44px;height:44px;
+  border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+  flex-shrink:0;
+}
+.icon svg{width:22px;height:22px;stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.icon-mint{background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.12)}
+.icon-mint svg{stroke:var(--mint-l)}
+.icon-kakao{background:rgba(254,229,0,0.06);border:1px solid rgba(254,229,0,0.12)}
+.icon-kakao svg{stroke:var(--kakao)}
+.icon-grad{background:linear-gradient(135deg,rgba(16,185,129,0.08),rgba(6,182,212,0.08));border:1px solid rgba(16,185,129,0.12)}
+.icon-grad svg{stroke:url(#gradMint)}
+
+/* ===== LANG TOGGLE ===== */
+.lang-toggle{display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.lang-btn{padding:6px 14px;font-size:11px;font-weight:600;letter-spacing:.5px;border:none;cursor:pointer;transition:all .3s;font-family:'Outfit',sans-serif;background:transparent;color:var(--text-m)}
+.lang-btn.active{background:var(--mint);color:var(--bg)}
+.lang-btn:hover:not(.active){color:var(--mint-l)}
+
+/* ===== NAV ===== */
+nav{
+  position:fixed;top:0;width:100%;z-index:100;
+  padding:14px 40px;
+  display:flex;justify-content:space-between;align-items:center;
+  background:rgba(6,8,11,0.85);
+  backdrop-filter:blur(32px);
+  border-bottom:1px solid var(--border);
+}
+.logo{font-family:'DM Serif Display',serif;font-size:24px;color:var(--white);text-decoration:none;letter-spacing:.5px}
+.logo span{color:var(--mint-l)}
+.nav-right{display:flex;align-items:center;gap:24px}
+.nav-links{display:flex;gap:24px;align-items:center}
+.nav-links a{color:var(--text-m);text-decoration:none;font-size:13px;font-weight:400;transition:color .3s}
+.nav-links a:hover{color:var(--mint-xl)}
+.nav-cta{padding:8px 20px!important;background:var(--mint)!important;color:var(--bg)!important;border-radius:6px;font-weight:700!important;font-size:12px!important;letter-spacing:.5px!important;transition:all .3s!important}
+.nav-cta:hover{background:var(--mint-l)!important;transform:translateY(-1px);box-shadow:0 4px 20px var(--glow-mint)}
+
+/* ===== HERO ===== */
+.hero{min-height:100vh;display:flex;align-items:center;position:relative;overflow:hidden}
+.hero-bg{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse at 20% 40%,rgba(16,185,129,0.05) 0%,transparent 50%),
+    radial-gradient(ellipse at 80% 20%,rgba(6,182,212,0.03) 0%,transparent 40%),
+    radial-gradient(ellipse at 50% 100%,rgba(17,22,32,0.8) 0%,transparent 50%),
+    var(--bg);
+}
+.hero-grid{
+  position:absolute;inset:0;opacity:.02;
+  background-image:
+    linear-gradient(rgba(16,185,129,0.5) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(16,185,129,0.5) 1px,transparent 1px);
+  background-size:56px 56px;
+}
+/* Floating gradient orbs */
+.orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;animation:float 12s ease-in-out infinite}
+.orb-1{width:400px;height:400px;background:rgba(16,185,129,0.06);top:-100px;left:-100px;animation-delay:0s}
+.orb-2{width:300px;height:300px;background:rgba(6,182,212,0.04);bottom:0;right:-50px;animation-delay:-4s}
+.orb-3{width:200px;height:200px;background:rgba(254,229,0,0.03);top:30%;right:20%;animation-delay:-8s}
+
+@keyframes float{
+  0%,100%{transform:translate(0,0)}
+  33%{transform:translate(20px,-15px)}
+  66%{transform:translate(-10px,20px)}
+}
+
+.hero-content{
+  position:relative;z-index:2;
+  max-width:1200px;margin:0 auto;
+  padding:120px 40px 80px;
+  display:grid;grid-template-columns:1.2fr .8fr;gap:64px;align-items:center;
+}
+
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:6px 16px;
+  border:1px solid rgba(16,185,129,0.15);border-radius:100px;
+  font-size:10px;color:var(--mint-l);letter-spacing:2px;text-transform:uppercase;
+  margin-bottom:24px;background:rgba(16,185,129,0.03);
+  animation:fadeUp .8s ease both;
+}
+.hero-badge .dot{width:5px;height:5px;background:var(--mint-l);border-radius:50%;animation:pulse 2s infinite}
+
+.hero-left h1{
+  font-family:'DM Serif Display',serif;font-size:48px;font-weight:400;line-height:1.2;
+  color:var(--white);margin-bottom:20px;animation:fadeUp .8s ease .1s both;
+}
+.hero-left h1 .em{
+  background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+
+.hero-desc{font-size:16px;color:var(--text-m);line-height:1.75;margin-bottom:14px;font-weight:300;animation:fadeUp .8s ease .2s both}
+.hero-desc-sub{font-size:14px;color:var(--text-m);font-weight:300;margin-bottom:16px;animation:fadeUp .8s ease .28s both;opacity:.7}
+
+/* Dual badges */
+.dual-badge{display:flex;align-items:center;gap:10px;margin-bottom:32px;animation:fadeUp .8s ease .35s both;flex-wrap:wrap}
+.badge-item{
+  display:flex;align-items:center;gap:6px;
+  padding:6px 14px;border-radius:100px;font-size:11px;font-weight:600;letter-spacing:.3px;
+}
+.badge-item svg{width:14px;height:14px;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.b-kakao{background:rgba(254,229,0,0.06);border:1px solid rgba(254,229,0,0.15);color:var(--kakao)}
+.b-kakao svg{stroke:var(--kakao)}
+.b-phone{background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.12);color:var(--mint-l)}
+.b-phone svg{stroke:var(--mint-l)}
+.badge-plus{color:var(--text-m);font-size:12px;font-weight:300}
+
+.hero-ctas{display:flex;gap:12px;animation:fadeUp .8s ease .45s both}
+.btn-primary{
+  padding:13px 32px;background:var(--mint);color:var(--bg);
+  border:none;border-radius:8px;font-size:14px;font-weight:700;
+  cursor:pointer;transition:all .3s;text-decoration:none;
+  display:inline-flex;align-items:center;gap:6px;font-family:'Outfit','Noto Sans KR',sans-serif;
+}
+.btn-primary:hover{background:var(--mint-l);transform:translateY(-2px);box-shadow:0 8px 32px var(--glow-mint)}
+.btn-ghost{
+  padding:13px 32px;background:transparent;color:var(--text);
+  border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:500;
+  cursor:pointer;transition:all .3s;text-decoration:none;font-family:'Outfit','Noto Sans KR',sans-serif;
+}
+.btn-ghost:hover{border-color:var(--mint);color:var(--mint-l)}
+
+/* ===== PHONE MOCKUP ===== */
+.hero-right{display:flex;justify-content:center;animation:fadeUp 1s ease .5s both}
+.phone-mockup{
+  width:290px;background:var(--surface);border-radius:28px;padding:12px;
+  border:1px solid var(--border);
+  box-shadow:0 40px 80px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.02);
+}
+.phone-screen{background:var(--bg);border-radius:18px;overflow:hidden;min-height:400px}
+
+.channel-tabs{display:flex;border-bottom:1px solid var(--border)}
+.channel-tab{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:5px;
+  padding:11px 8px;font-size:11px;font-weight:600;cursor:pointer;
+  transition:all .3s;color:var(--text-m);
+  border:none;border-bottom:2px solid transparent;background:transparent;
+  font-family:'Outfit','Noto Sans KR',sans-serif;
+}
+.channel-tab svg{width:14px;height:14px;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.channel-tab.active{color:var(--kakao);border-bottom-color:var(--kakao)}
+.channel-tab.active svg{stroke:var(--kakao)}
+.channel-tab.phone-tab.active{color:var(--mint-l);border-bottom-color:var(--mint-l)}
+.channel-tab.phone-tab.active svg{stroke:var(--mint-l)}
+.channel-tab:not(.active){color:var(--text-m)}
+.channel-tab:not(.active) svg{stroke:var(--text-m)}
+.channel-tab:not(.active):hover{color:var(--text)}
+
+.chat-area{padding:14px 12px}
+.phone-top{text-align:center;margin-bottom:14px}
+.phone-icon-wrap{
+  width:36px;height:36px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 6px;
+}
+.phone-icon-wrap.ki{background:var(--kakao)}
+.phone-icon-wrap.ci{background:var(--mint)}
+.phone-icon-wrap svg{width:18px;height:18px;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke:var(--bg)}
+.phone-top p{font-size:9px;color:var(--text-m);letter-spacing:.5px}
+.phone-top h3{font-size:12px;color:var(--white);margin-top:2px;font-weight:500}
+
+.msg-label{font-size:9px;color:var(--text-m);margin-bottom:3px;letter-spacing:.5px}
+.msg-label.r{text-align:right}
+.msg{padding:9px 13px;border-radius:14px;font-size:11.5px;line-height:1.55;margin-bottom:7px;max-width:87%;animation:bubbleIn .5s ease both}
+.msg-ai{background:var(--surface2);color:var(--text);border-bottom-left-radius:4px}
+.kakao-chat .msg-user{background:var(--kakao);color:var(--kakao-d);margin-left:auto;border-bottom-right-radius:4px;font-weight:500}
+.phone-chat .msg-user{background:var(--mint);color:var(--bg);margin-left:auto;border-bottom-right-radius:4px;font-weight:500}
+
+.typing{display:flex;gap:4px;padding:9px 13px;background:var(--surface2);border-radius:14px;border-bottom-left-radius:4px;width:fit-content}
+.typing .dot{width:4px;height:4px;background:var(--text-m);border-radius:50%;animation:bounce 1.4s infinite}
+.typing .dot:nth-child(2){animation-delay:.2s}
+.typing .dot:nth-child(3){animation-delay:.4s}
+
+.msg-photo .photo-placeholder{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,0.08);
+  border:1px dashed rgba(255,255,255,0.2);
+  border-radius:10px;padding:10px 14px;
+  font-size:11px;color:var(--text-m);
+}
+.msg-photo .photo-placeholder svg{width:28px;height:28px;opacity:0.5;flex-shrink:0}
+
+.chat-view{display:none}.chat-view.active{display:block}
+
+/* ===== STATS ===== */
+.stats{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:48px 40px}
+.stats-grid{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:32px;text-align:center}
+.stat h3{font-family:'DM Serif Display',serif;font-size:38px;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px}
+.stat p{font-size:12px;color:var(--text-m);line-height:1.5}
+
+/* ===== SECTIONS ===== */
+.sec-label{font-size:10px;color:var(--mint-l);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px;font-weight:600}
+.sec-label.c{text-align:center}
+.sec-title{font-family:'DM Serif Display',serif;font-size:38px;color:var(--white);margin-bottom:8px;font-weight:400}
+.sec-title.c{text-align:center}
+.sec-sub{font-size:15px;color:var(--text-m);font-weight:300;margin-bottom:56px}
+.sec-sub.c{text-align:center}
+
+/* ===== FEATURES ===== */
+.features{padding:110px 40px;max-width:1100px;margin:0 auto}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+
+.feat{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:32px 24px;transition:all .4s;position:relative;overflow:hidden;
+}
+.feat::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--mint),transparent);opacity:0;transition:opacity .4s;
+}
+.feat:hover{transform:translateY(-3px);border-color:var(--border-h);box-shadow:0 16px 48px rgba(0,0,0,.25)}
+.feat:hover::before{opacity:1}
+.feat .icon{margin-bottom:18px}
+.feat h3{font-size:16px;font-weight:600;color:var(--white);margin-bottom:3px}
+.feat .en-sub{font-size:12px;color:var(--mint-l);font-weight:400;margin-bottom:10px;opacity:.6;letter-spacing:.3px}
+.feat p{font-size:13px;line-height:1.7;color:var(--text-m);font-weight:300}
+.ch-tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:9px;font-weight:700;letter-spacing:.5px;vertical-align:middle;margin-left:2px}
+.ch-kakao{background:rgba(254,229,0,.08);color:var(--kakao)}
+.ch-phone{background:rgba(16,185,129,.08);color:var(--mint-l)}
+.ch-both{background:rgba(16,185,129,.05);color:var(--mint-xl)}
+
+/* ===== HOW IT WORKS ===== */
+.how{padding:110px 40px;background:var(--surface)}
+.how-inner{max-width:1100px;margin:0 auto}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:56px}
+.step{text-align:center;padding:28px 14px;border-radius:14px;border:1px solid transparent;transition:all .3s}
+.step:hover{border-color:var(--border);background:rgba(16,185,129,.01)}
+.step-num{font-family:'DM Serif Display',serif;font-size:44px;background:linear-gradient(135deg,rgba(16,185,129,.08),rgba(6,182,212,.04));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:10px}
+.step-circle{
+  width:52px;height:52px;margin:0 auto 16px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+}
+.step-circle svg{width:24px;height:24px;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.step-circle.sc-mint{background:var(--mint);box-shadow:0 4px 20px var(--glow-mint)}
+.step-circle.sc-mint svg{stroke:var(--bg)}
+.step-circle.sc-kakao{background:var(--kakao);box-shadow:0 4px 20px var(--glow-kakao)}
+.step-circle.sc-kakao svg{stroke:var(--kakao-d)}
+.step h3{font-size:15px;font-weight:600;color:var(--white);margin-bottom:2px}
+.step .en{font-size:11px;color:var(--mint-l);font-weight:400;margin-bottom:8px;opacity:.5;letter-spacing:.3px}
+.step p{font-size:12px;color:var(--text-m);line-height:1.6;font-weight:300}
+
+/* ===== PRICING ===== */
+.pricing{padding:110px 40px;max-width:820px;margin:0 auto;text-align:center}
+.price-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  padding:48px 40px;margin-top:44px;position:relative;overflow:hidden;
+}
+.price-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--kakao),var(--mint),#06b6d4)}
+.soon-badge{
+  display:inline-block;padding:5px 14px;background:rgba(16,185,129,.05);
+  border:1px solid rgba(16,185,129,.12);border-radius:100px;
+  font-size:10px;color:var(--mint-l);letter-spacing:2px;text-transform:uppercase;font-weight:600;margin-bottom:14px;
+}
+.price-card h3{font-family:'DM Serif Display',serif;font-size:24px;color:var(--white);margin-bottom:28px;font-weight:400}
+.price-list{display:grid;grid-template-columns:1fr 1fr;gap:12px 24px;text-align:left;margin-bottom:32px}
+.price-item{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text);font-weight:300}
+.price-item .ck{width:16px;height:16px;border-radius:50%;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.price-item .ck svg{width:10px;height:10px;stroke:var(--mint-l);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ===== CTA ===== */
+.cta{
+  padding:110px 40px;
+  background:radial-gradient(ellipse at 50% 50%,rgba(16,185,129,.03) 0%,transparent 50%),var(--surface);
+  text-align:center;
+}
+.cta-box{max-width:540px;margin:0 auto}
+.cta-line{width:40px;height:1px;background:var(--grad1);margin:0 auto 18px}
+.cta-box h2{font-family:'DM Serif Display',serif;font-size:34px;color:var(--white);margin-bottom:8px;font-weight:400}
+.cta-box .sub{font-size:14px;color:var(--text-m);font-weight:300;margin-bottom:32px}
+.email-row{display:flex;gap:8px;max-width:440px;margin:0 auto 12px}
+.email-row input{
+  flex:1;padding:13px 16px;background:var(--bg);border:1px solid var(--border);
+  border-radius:8px;color:var(--white);font-size:13px;font-family:'Outfit','Noto Sans KR',sans-serif;
+  outline:none;transition:border-color .3s;
+}
+.email-row input::placeholder{color:var(--text-m)}
+.email-row input:focus{border-color:var(--mint)}
+.email-row button{
+  padding:13px 24px;background:var(--mint);color:var(--bg);
+  border:none;border-radius:8px;font-size:13px;font-weight:700;
+  cursor:pointer;transition:all .3s;font-family:'Outfit','Noto Sans KR',sans-serif;white-space:nowrap;
+}
+.email-row button:hover{background:var(--mint-l);transform:translateY(-1px);box-shadow:0 6px 20px var(--glow-mint)}
+.cta-note{font-size:11px;color:var(--text-m)}
+
+/* ===== FOOTER ===== */
+footer{
+  padding:40px;border-top:1px solid var(--border);max-width:1100px;margin:0 auto;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.foot-logo{font-family:'DM Serif Display',serif;font-size:18px;color:var(--white)}
+.foot-logo span{color:var(--mint-l)}
+.foot-info{font-size:11px;color:var(--text-m);text-align:right;line-height:1.6}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes bubbleIn{from{opacity:0;transform:translateY(6px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-3px)}}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:900px){
+  .hero-content{grid-template-columns:1fr;gap:40px;padding:100px 24px 60px}
+  .hero-left h1{font-size:30px}
+  .hero-right{order:-1}
+  .phone-mockup{width:250px}
+  .feat-grid{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:16px}
+  .steps{grid-template-columns:repeat(2,1fr);gap:20px}
+  .price-list{grid-template-columns:1fr}
+  .email-row{flex-direction:column}
+  .sec-title{font-size:26px}
+  nav{padding:12px 20px}
+  .nav-links a:not(.nav-cta){display:none!important}
+  body.ko .nav-links a:not(.nav-cta){display:none!important}
+  footer{flex-direction:column;gap:12px;text-align:center}
+  .foot-info{text-align:center}
+  .hero-ctas{flex-direction:column}
+  .dual-badge{justify-content:center}
+}
+</style>
+</head>
+<body>
+
+<!-- SVG gradient defs (hidden) -->
+<svg style="position:absolute;width:0;height:0">
+  <defs>
+    <linearGradient id="gradMint" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+    <linearGradient id="gradKakao" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FEE500"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">Case<span>Front</span></a>
+  <div class="nav-right">
+    <div class="nav-links">
+      <a href="#features" data-lang="en">Features</a>
+      <a href="#features" data-lang="ko">기능</a>
+      <a href="#how" data-lang="en">How It Works</a>
+      <a href="#how" data-lang="ko">작동방식</a>
+      <a href="#pricing" data-lang="en">Pricing</a>
+      <a href="#pricing" data-lang="ko">가격</a>
+      <a href="#waitlist" class="nav-cta" data-lang="en">Get Early Access</a>
+      <a href="#waitlist" class="nav-cta" data-lang="ko">사전등록</a>
+    </div>
+    <div class="lang-toggle">
+      <button class="lang-btn active" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" onclick="setLang('ko')">한국어</button>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="hero-content">
+    <div class="hero-left">
+      <div class="hero-badge"><span class="dot"></span> Powered by Silicon Valley AI</div>
+
+      <h1 data-lang="en">Every missed inquiry is a<br>missed <span class="em">retainer</span></h1>
+      <h1 data-lang="ko">놓치는 문의는<br>놓치는 <span class="em">수임료</span>입니다</h1>
+
+      <p class="hero-desc" data-lang="en">AI handles your law firm's KakaoTalk messages and phone calls 24/7 — collects case details, delivers organized summaries instantly.</p>
+      <p class="hero-desc" data-lang="ko">AI가 법률 사무소의 카카오톡 상담과 전화를 24시간 응대하고, 상담 내용을 정리해 변호사에게 즉시 전달합니다.</p>
+
+      <div class="dual-badge">
+        <span class="badge-item b-kakao">
+          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          KakaoTalk
+        </span>
+        <span class="badge-plus">+</span>
+        <span class="badge-item b-phone">
+          <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          Phone
+        </span>
+      </div>
+
+      <p class="hero-desc-sub" data-lang="en">Your AI legal receptionist — on every channel, around the clock.</p>
+      <p class="hero-desc-sub" data-lang="ko">모든 채널을 커버하는 AI 법률 비서 — 카톡도, 전화도.</p>
+
+      <div class="hero-ctas">
+        <a href="#waitlist" class="btn-primary" data-lang="en">Get Early Access →</a>
+        <a href="#waitlist" class="btn-primary" data-lang="ko">사전등록 →</a>
+        <a href="#how" class="btn-ghost" data-lang="en">See How It Works</a>
+        <a href="#how" class="btn-ghost" data-lang="ko">작동방식 보기</a>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="phone-mockup">
+        <div class="phone-screen">
+          <div class="channel-tabs">
+            <button class="channel-tab active" data-lang="en" data-target="kakao" onclick="switchChat('kakao')">
+              <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> KakaoTalk
+            </button>
+            <button class="channel-tab active" data-lang="ko" data-target="kakao" onclick="switchChat('kakao')">
+              <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> 카카오톡
+            </button>
+            <button class="channel-tab phone-tab" data-lang="en" data-target="phone" onclick="switchChat('phone')">
+              <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> Phone
+            </button>
+            <button class="channel-tab phone-tab" data-lang="ko" data-target="phone" onclick="switchChat('phone')">
+              <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> 전화
+            </button>
+          </div>
+
+          <div class="chat-view kakao-chat active" id="chat-kakao">
+            <div class="chat-area">
+              <div class="phone-top">
+                <div class="phone-icon-wrap ki">
+                  <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </div>
+                <p>CaseFront AI · KakaoTalk</p>
+                <h3 data-lang="en">Kim & Associates</h3>
+                <h3 data-lang="ko">김변호사 법률사무소</h3>
+              </div>
+              <div class="msg-label" data-lang="en">CaseFront AI</div>
+              <div class="msg-label" data-lang="ko">CaseFront AI</div>
+              <div class="msg msg-ai" data-lang="en">Welcome! How can we help you today?</div>
+              <div class="msg msg-ai" data-lang="ko">안녕하세요! 어떤 법률 문제로 문의 주셨나요?</div>
+              <div class="msg-label r" data-lang="en">Client</div>
+              <div class="msg-label r" data-lang="ko">고객</div>
+              <div class="msg msg-user" data-lang="en">I had a car accident. Sending photos.</div>
+              <div class="msg msg-user" data-lang="ko">교통사고 났어요. 사진 보낼게요</div>
+              <div class="msg msg-user msg-photo">
+                <div class="photo-placeholder">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  <span data-lang="en">accident_photo.jpg</span>
+                  <span data-lang="ko">사고현장.jpg</span>
+                </div>
+              </div>
+              <div class="msg-label" data-lang="en">CaseFront AI</div>
+              <div class="msg-label" data-lang="ko">CaseFront AI</div>
+              <div class="msg msg-ai" data-lang="en">Photo received! Looks like an accident scene. Any injuries?</div>
+              <div class="msg msg-ai" data-lang="ko">사진 잘 받았습니다. 다치신 곳은 없으신가요?</div>
+              <div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+            </div>
+          </div>
+
+          <div class="chat-view phone-chat" id="chat-phone">
+            <div class="chat-area">
+              <div class="phone-top">
+                <div class="phone-icon-wrap ci">
+                  <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                </div>
+                <p>CaseFront AI · Voice Call</p>
+                <h3 data-lang="en">Kim & Associates</h3>
+                <h3 data-lang="ko">김변호사 법률사무소</h3>
+              </div>
+              <div class="msg-label" data-lang="en">CaseFront AI</div>
+              <div class="msg-label" data-lang="ko">CaseFront AI</div>
+              <div class="msg msg-ai" data-lang="en">Hello, thank you for calling Kim & Associates. How can I help you?</div>
+              <div class="msg msg-ai" data-lang="ko">안녕하세요, 김변호사 법률사무소입니다. 어떤 건으로 연락 주셨나요?</div>
+              <div class="msg-label r" data-lang="en">Caller</div>
+              <div class="msg-label r" data-lang="ko">고객</div>
+              <div class="msg msg-user" data-lang="en">I was in a car accident and need legal help</div>
+              <div class="msg msg-user" data-lang="ko">교통사고가 나서 법률 상담이 필요합니다</div>
+              <div class="msg-label" data-lang="en">CaseFront AI</div>
+              <div class="msg-label" data-lang="ko">CaseFront AI</div>
+              <div class="msg msg-ai" data-lang="en">I'm sorry to hear that. When did the accident happen?</div>
+              <div class="msg msg-ai" data-lang="ko">안타깝네요. 사고가 언제 발생했나요?</div>
+              <div class="msg-label r" data-lang="en">Caller</div>
+              <div class="msg-label r" data-lang="ko">고객</div>
+              <div class="msg msg-user" data-lang="en">Yesterday. I have photos of the scene.</div>
+              <div class="msg msg-user" data-lang="ko">어제요. 사진도 있는데요.</div>
+              <div class="msg-label" data-lang="en">CaseFront AI</div>
+              <div class="msg-label" data-lang="ko">CaseFront AI</div>
+              <div class="msg msg-ai" data-lang="en">Great — I'll text you our KakaoTalk link so you can send the photos there.</div>
+              <div class="msg msg-ai" data-lang="ko">네, 카카오톡 채널 링크를 문자로 보내드릴게요. 거기로 사진 보내주시면 됩니다.</div>
+              <div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats">
+  <div class="stats-grid">
+    <div class="stat">
+      <h3>24/7</h3>
+      <p data-lang="en">Always-on reception<br>KakaoTalk + Phone</p>
+      <p data-lang="ko">연중무휴 응대<br>카카오톡 + 전화</p>
+    </div>
+    <div class="stat">
+      <h3>30s</h3>
+      <p data-lang="en">Instant summary<br>delivered via KakaoTalk</p>
+      <p data-lang="ko">상담 요약 즉시 전달<br>카카오톡으로 수신</p>
+    </div>
+    <div class="stat">
+      <h3>2x</h3>
+      <p data-lang="en">Dual channel coverage<br>Chat + Voice</p>
+      <p data-lang="ko">듀얼 채널 커버<br>채팅 + 음성</p>
+    </div>
+    <div class="stat">
+      <h3>100%</h3>
+      <p data-lang="en">Legal terminology<br>recognition accuracy</p>
+      <p data-lang="ko">법률 용어 특화<br>인식 정확도</p>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <p class="sec-label c">CORE FEATURES</p>
+  <h2 class="sec-title c" data-lang="en">Two channels, one AI brain</h2>
+  <h2 class="sec-title c" data-lang="ko">두 채널, 하나의 AI 두뇌</h2>
+  <p class="sec-sub c" data-lang="en">KakaoTalk and phone — covered by the same intelligent legal AI.</p>
+  <p class="sec-sub c" data-lang="ko">카카오톡과 전화 — 같은 AI가 일관된 응대를 합니다.</p>
+
+  <div class="feat-grid">
+    <div class="feat">
+      <div class="icon icon-kakao">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <h3 data-lang="en">KakaoTalk Channel AI</h3>
+      <h3 data-lang="ko">카카오톡 채널 AI</h3>
+      <p class="en-sub">Chat-Based Intake</p>
+      <p data-lang="en">Your firm gets its own branded KakaoTalk channel. AI responds instantly, classifies the case, and collects contact details — under your firm's name. <span class="ch-tag ch-kakao">KAKAO</span></p>
+      <p data-lang="ko">사무소 이름으로 전용 카카오톡 채널이 생깁니다. AI가 즉시 응답하고, 사건을 분류하고, 연락처를 수집합니다. <span class="ch-tag ch-kakao">카톡</span></p>
+    </div>
+    <div class="feat">
+      <div class="icon icon-mint">
+        <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      </div>
+      <h3 data-lang="en">AI Phone Reception</h3>
+      <h3 data-lang="ko">AI 전화 응대</h3>
+      <p class="en-sub">Voice-Based Intake</p>
+      <p data-lang="en">AI answers calls in natural Korean, identifies case types, and guides clients to send documents via KakaoTalk. <span class="ch-tag ch-phone">PHONE</span></p>
+      <p data-lang="ko">AI가 자연스러운 한국어로 전화를 받고, 사건 유형을 파악하고, 자료는 카톡으로 보내도록 안내합니다. <span class="ch-tag ch-phone">전화</span></p>
+    </div>
+    <div class="feat">
+      <div class="icon icon-grad">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke="url(#gradMint)"/><circle cx="8.5" cy="8.5" r="1.5" stroke="url(#gradMint)"/><polyline points="21 15 16 10 5 21" stroke="url(#gradMint)"/></svg>
+      </div>
+      <h3 data-lang="en">Photo & File Intake</h3>
+      <h3 data-lang="ko">사진 · 파일 접수</h3>
+      <p class="en-sub">Evidence Collection</p>
+      <p data-lang="en">Clients send photos of evidence, contracts, medical reports directly in chat. AI classifies and organizes all attachments. <span class="ch-tag ch-kakao">KAKAO</span></p>
+      <p data-lang="ko">고객이 증거사진, 계약서, 진단서를 카톡으로 바로 전송합니다. AI가 자료를 분류하고 정리합니다. <span class="ch-tag ch-kakao">카톡</span></p>
+    </div>
+    <div class="feat">
+      <div class="icon icon-grad">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="url(#gradMint)"/><polyline points="14 2 14 8 20 8" stroke="url(#gradMint)"/><line x1="16" y1="13" x2="8" y2="13" stroke="url(#gradMint)"/><line x1="16" y1="17" x2="8" y2="17" stroke="url(#gradMint)"/><polyline points="10 9 9 9 8 9" stroke="url(#gradMint)"/></svg>
+      </div>
+      <h3 data-lang="en">Unified Case Summary</h3>
+      <h3 data-lang="ko">통합 상담 정리</h3>
+      <p class="en-sub">Instant Documentation</p>
+      <p data-lang="en">Chat or call — receive a structured summary with case type, key facts, client contact and attached files via KakaoTalk within 30 seconds. <span class="ch-tag ch-both">BOTH</span></p>
+      <p data-lang="ko">카톡이든 전화든, 사건유형·핵심 사실·고객 연락처·첨부자료가 30초 안에 카카오톡으로 전달됩니다. <span class="ch-tag ch-both">통합</span></p>
+    </div>
+    <div class="feat">
+      <div class="icon icon-mint">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <h3 data-lang="en">Your Firm, Your Channel</h3>
+      <h3 data-lang="ko">사무소별 전용 채널</h3>
+      <p class="en-sub">Branded Experience</p>
+      <p data-lang="en">Each firm gets a dedicated KakaoTalk channel under their own name. Clients see your brand, not ours.</p>
+      <p data-lang="ko">각 사무소 이름으로 전용 카카오톡 채널이 만들어집니다. 고객은 변호사님 사무소와 대화합니다.</p>
+    </div>
+    <div class="feat">
+      <div class="icon icon-mint">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <h3 data-lang="en">Security & Privilege</h3>
+      <h3 data-lang="ko">보안 & 비밀유지</h3>
+      <p class="en-sub">Attorney-Client Privilege</p>
+      <p data-lang="en">All data — chat logs, call recordings, and uploaded files — encrypted with enterprise-grade security.</p>
+      <p data-lang="ko">채팅 기록, 통화 녹음, 첨부파일 모두 암호화 저장. 변호사-의뢰인 비밀유지 준수.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="how-inner">
+    <p class="sec-label c">HOW IT WORKS</p>
+    <h2 class="sec-title c" data-lang="en">Set up in 5 minutes. Two channels, instantly.</h2>
+    <h2 class="sec-title c" data-lang="ko">설치 5분. 카톡 + 전화, 바로 시작.</h2>
+    <p class="sec-sub c" data-lang="en">One setup covers both KakaoTalk and phone.</p>
+    <p class="sec-sub c" data-lang="ko">한 번 설정으로 카카오톡과 전화를 동시에.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-circle sc-mint">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </div>
+        <h3 data-lang="en">Register Your Firm</h3>
+        <h3 data-lang="ko">사무소 정보 등록</h3>
+        <p class="en">Firm Setup</p>
+        <p data-lang="en">Enter firm name, practice areas, hours, and attorney details.</p>
+        <p data-lang="ko">사무소명, 전문 분야, 상담 시간, 변호사 정보를 입력합니다.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-circle sc-kakao">
+          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <h3 data-lang="en">Connect KakaoTalk</h3>
+        <h3 data-lang="ko">카카오톡 채널 연결</h3>
+        <p class="en">Chat Channel</p>
+        <p data-lang="en">Link your KakaoTalk channel. Clients message your firm 24/7.</p>
+        <p data-lang="ko">카카오톡 채널을 연결합니다. 고객이 언제든 채팅으로 문의합니다.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-circle sc-mint">
+          <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        </div>
+        <h3 data-lang="en">Connect Phone Line</h3>
+        <h3 data-lang="ko">전화번호 연결</h3>
+        <p class="en">Voice Channel</p>
+        <p data-lang="en">Route office calls through CaseFront AI. Callers with documents are guided to send them via your KakaoTalk channel.</p>
+        <p data-lang="ko">기존 번호를 유지하면서 AI 음성 응대를 연결합니다. 자료가 있는 고객은 카톡으로 전송하도록 안내합니다.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-circle sc-mint">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h3 data-lang="en">Get Summaries</h3>
+        <h3 data-lang="ko">요약 리포트 수신</h3>
+        <p class="en">Instant Reports</p>
+        <p data-lang="en">All inquiries — chat or call — summarized and delivered in seconds.</p>
+        <p data-lang="ko">모든 상담 내용이 정리되어 변호사 카카오톡으로 전달됩니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing" id="pricing">
+  <p class="sec-label">PRICING</p>
+  <h2 class="sec-title" data-lang="en">1/10th the cost of a receptionist</h2>
+  <h2 class="sec-title" data-lang="ko">사무장 인건비의 1/10</h2>
+  <p class="sec-sub" data-lang="en">Two channels for the price of neither.</p>
+  <p class="sec-sub" data-lang="ko">카톡 + 전화, 사무장보다 저렴하게.</p>
+  <div class="price-card">
+    <div class="soon-badge">COMING SOON</div>
+    <h3 data-lang="en">Early access pricing for waitlist members</h3>
+    <h3 data-lang="ko">사전등록 시 얼리버드 할인 제공</h3>
+    <div class="price-list">
+      <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span> <span data-lang="en">KakaoTalk channel AI</span><span data-lang="ko">카카오톡 채널 AI 응대</span></div>
+      <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span> <span data-lang="en">AI phone reception</span><span data-lang="ko">AI 전화 응대</span></div>
+      <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span> <span data-lang="en">Photo & file intake via chat</span><span data-lang="ko">사진 · 파일 카톡 접수</span></div>
+      <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span> <span data-lang="en">Your own branded KakaoTalk channel</span><span data-lang="ko">사무소 전용 카카오톡 채널</span></div>
+      <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span> <span data-lang="en">Unified case summaries + attachments</span><span data-lang="ko">통합 상담 요약 + 첨부자료 정리</span></div>
+      <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span> <span data-lang="en">KakaoTalk instant delivery</span><span data-lang="ko">카카오톡 즉시 전달</span></div>
+      <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span> <span data-lang="en">24/7 dual-channel</span><span data-lang="ko">24시간 듀얼 채널</span></div>
+      <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span> <span data-lang="en">AI evidence classification</span><span data-lang="ko">AI 자료 자동 분류</span></div>
+      <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span> <span data-lang="en">Encrypted storage</span><span data-lang="ko">암호화 데이터 저장</span></div>
+      <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span> <span data-lang="en">Analytics dashboard</span><span data-lang="ko">전용 대시보드 제공</span></div>
+    </div>
+    <a href="#waitlist" class="btn-primary" data-lang="en">Join the Waitlist →</a>
+    <a href="#waitlist" class="btn-primary" data-lang="ko">사전등록하고 할인 받기 →</a>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta" id="waitlist">
+  <div class="cta-box">
+    <div class="cta-line"></div>
+    <h2 data-lang="en">Be the first to try CaseFront</h2>
+    <h2 data-lang="ko">가장 먼저 시작하세요</h2>
+    <p class="sub" data-lang="en">KakaoTalk + Phone AI — join the waitlist today.</p>
+    <p class="sub" data-lang="ko">카카오톡 + 전화 AI — 지금 사전등록하세요.</p>
+    <div class="email-row">
+      <input type="email" data-lang="en" placeholder="Enter your email address">
+      <input type="email" data-lang="ko" placeholder="이메일 주소를 입력하세요">
+      <button type="submit" data-lang="en">Join Waitlist</button>
+      <button type="submit" data-lang="ko">사전등록</button>
+    </div>
+    <p class="cta-note" data-lang="en">No spam — we'll only notify you at launch.</p>
+    <p class="cta-note" data-lang="ko">스팸 없음 · 출시 알림만 보내드립니다.</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot-logo">Case<span>Front</span></div>
+  <div class="foot-info">
+    © 2026 CaseFront. All rights reserved.<br>
+    Based in California, USA · Built for Korean Law Firms
+  </div>
+</footer>
+
+<script>
+function setLang(lang){
+  document.body.classList.toggle('ko',lang==='ko');
+  document.querySelectorAll('.lang-btn').forEach(b=>{
+    b.classList.toggle('active',b.textContent.trim()===(lang==='ko'?'한국어':'EN'));
+  });
+  // Re-apply active tab for current chat
+  const currentView=document.querySelector('.chat-view.active');
+  if(currentView){
+    const target=currentView.id.replace('chat-','');
+    switchChat(target);
+  }
+}
+
+function switchChat(target){
+  document.querySelectorAll('.chat-view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('chat-'+target).classList.add('active');
+  const isKo=document.body.classList.contains('ko');
+  document.querySelectorAll('.channel-tab').forEach(t=>{
+    t.classList.remove('active');
+    if(t.dataset.target===target){
+      const lang=t.getAttribute('data-lang');
+      if((isKo&&lang==='ko')||(!isKo&&lang==='en'))t.classList.add('active');
+    }
+  });
+}
+
+let currentChat='kakao';
+setInterval(()=>{
+  currentChat=currentChat==='kakao'?'phone':'kakao';
+  switchChat(currentChat);
+},4500);
+</script>
+</body>
+</html>
