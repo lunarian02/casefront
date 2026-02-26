@@ -11,15 +11,16 @@ export async function generateResponse(
   firm: Firm
 ): Promise<{ reply: string; caseSummary?: CaseSummary }> {
   try {
+    const systemPrompt = getSystemPrompt(firm) + getStageHint(history.length)
+
     const model = genAI.getGenerativeModel({
       model: 'gemini-2.5-flash',
+      systemInstruction: systemPrompt,
       generationConfig: {
         maxOutputTokens: 1024,
         temperature: 0.7,
       },
     })
-
-    const systemPrompt = getSystemPrompt(firm) + getStageHint(history.length)
 
     // Convert history to Gemini chat format
     const chatHistory = history.slice(0, -1).map((msg) => ({
@@ -29,7 +30,6 @@ export async function generateResponse(
 
     const chat = model.startChat({
       history: chatHistory,
-      systemInstruction: systemPrompt,
     })
 
     const lastMessage = history[history.length - 1]
