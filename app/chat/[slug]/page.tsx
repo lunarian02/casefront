@@ -8,6 +8,8 @@ interface Message {
   content: string
 }
 
+const CASE_TYPE_OPTIONS = ['민사', '형사', '가사', '교통사고', '기타']
+
 export default function ChatPage() {
   const params = useParams()
   const slug = params.slug as string
@@ -17,6 +19,7 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(false)
   const [completed, setCompleted] = useState(false)
   const [firmName, setFirmName] = useState('')
+  const [showOptions, setShowOptions] = useState(false)
   const [userId] = useState(() => {
     if (typeof window === 'undefined') return crypto.randomUUID()
     const stored = sessionStorage.getItem('cf_user_id')
@@ -29,7 +32,6 @@ export default function ChatPage() {
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Load firm name and send initial greeting
   useEffect(() => {
     async function init() {
       setLoading(true)
@@ -43,12 +45,14 @@ export default function ChatPage() {
         if (data.reply) {
           setMessages([{ role: 'assistant', content: data.reply }])
           setFirmName(data.firmName || 'CaseFront')
+          setShowOptions(true)
         }
       } catch {
         setMessages([{
           role: 'assistant',
           content: '안녕하세요! AI 법률 접수 비서입니다. 어떤 법률 문제로 오셨나요?',
         }])
+        setShowOptions(true)
       } finally {
         setLoading(false)
       }
@@ -59,12 +63,12 @@ export default function ChatPage() {
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, loading])
+  }, [messages, loading, showOptions])
 
-  async function sendMessage() {
-    const text = input.trim()
-    if (!text || loading || completed) return
+  async function send(text: string) {
+    if (!text.trim() || loading || completed) return
 
+    setShowOptions(false)
     setInput('')
     setMessages((prev) => [...prev, { role: 'user', content: text }])
     setLoading(true)
@@ -97,7 +101,7 @@ export default function ChatPage() {
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      sendMessage()
+      send(input)
     }
   }
 
@@ -134,6 +138,23 @@ export default function ChatPage() {
             </div>
           </div>
         ))}
+
+        {/* Quick reply options — 첫 인사 후 표시 */}
+        {showOptions && !loading && (
+          <div className="flex justify-start pl-10">
+            <div className="flex flex-wrap gap-2 max-w-[85%]">
+              {CASE_TYPE_OPTIONS.map((opt) => (
+                <button
+                  key={opt}
+                  onClick={() => send(opt)}
+                  className="px-4 py-2 bg-white text-[#3c1e1e] text-sm font-medium rounded-full border-2 border-[#fee500] shadow-sm hover:bg-[#fee500] transition-colors active:scale-95"
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Typing indicator */}
         {loading && (
@@ -178,7 +199,7 @@ export default function ChatPage() {
           className="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm outline-none disabled:opacity-50 focus:ring-2 focus:ring-[#fee500]"
         />
         <button
-          onClick={sendMessage}
+          onClick={() => send(input)}
           disabled={!input.trim() || loading || completed}
           className="w-9 h-9 rounded-full bg-[#fee500] flex items-center justify-center disabled:opacity-40 transition-opacity shrink-0"
         >
