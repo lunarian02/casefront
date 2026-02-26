@@ -8,7 +8,7 @@ interface Message {
   content: string
 }
 
-const CASE_TYPE_OPTIONS = ['민사', '형사', '가사', '교통사고', '기타']
+const CASE_TYPE_OPTIONS = ['민사', '형사', '가사', '교통사고', '행정', '기타']
 
 export default function ChatPage() {
   const params = useParams()
