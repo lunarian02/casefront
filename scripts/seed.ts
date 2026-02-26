@@ -15,13 +15,16 @@ async function seed() {
       {
         id: randomUUID(),
         name: '테스트 법률사무소',
+        slug: 'test-law',
         lawyer_name: '김변호사',
-        kakao_channel_id: '케이스프론트테스트',
+        lawyer_email: 'test@example.com',
         phone: '02-1234-5678',
         hours: '평일 09:00-18:00',
         specialties: ['민사', '형사', '가사', '교통사고'],
+        greeting: '안녕하세요, 테스트 법률사무소입니다.',
+        notification_email: true,
       },
-      { onConflict: 'kakao_channel_id' }
+      { onConflict: 'slug' }
     )
     .select()
     .single()
@@ -32,6 +35,7 @@ async function seed() {
   }
 
   console.log('Test firm seeded:', data)
+  console.log('\nTest chat URL: http://localhost:3000/chat/test-law')
 }
 
 seed()

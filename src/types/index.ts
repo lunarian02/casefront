@@ -1,13 +1,16 @@
 export interface Firm {
   id: string
   name: string
+  slug: string | null
   lawyer_name: string
+  lawyer_email: string | null
   kakao_channel_id: string | null
   kakao_search_id: string | null
   phone: string | null
   email: string | null
   hours: string | null
   specialties: string[] | string
+  greeting: string | null
   status: string | null
   created_at: string
   // 알림 설정

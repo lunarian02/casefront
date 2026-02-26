@@ -1,6 +1,18 @@
 import { supabaseAdmin } from '@/lib/supabase'
 import type { Firm } from '@/types'
 
+export async function getFirmBySlug(slug: string): Promise<Firm | null> {
+  const { data, error } = await supabaseAdmin
+    .from('firms')
+    .select('*')
+    .eq('slug', slug)
+    .maybeSingle()
+
+  if (error) throw error
+
+  return data as Firm | null
+}
+
 export async function getFirmByKakaoChannel(channelId: string): Promise<Firm | null> {
   const { data, error } = await supabaseAdmin
     .from('firms')

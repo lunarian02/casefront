@@ -1,4 +1,10 @@
+import { Resend } from 'resend'
 import type { Firm, CaseSummary } from '@/types'
+
+// Lazy initialization to avoid build-time error when env var is missing
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY!)
+}
 
 const URGENCY_LABELS: Record<CaseSummary['urgency'], string> = {
   urgent: '긴급',
@@ -6,43 +12,78 @@ const URGENCY_LABELS: Record<CaseSummary['urgency'], string> = {
   low: '여유',
 }
 
-function buildNotifyMessage(firm: Firm, summary: CaseSummary, caseId?: string): string {
-  const urgencyLabel = URGENCY_LABELS[summary.urgency]
-  const urgencyPrefix = summary.urgency === 'urgent' ? `[${urgencyLabel}] ` : ''
-
-  let message = `${urgencyPrefix}${summary.case_type} 건 접수 — ${summary.client_name}님\n`
-  message += `연락처: ${summary.client_phone}\n`
-  message += `요약: ${summary.summary_text}\n`
-
-  if (summary.urgency === 'urgent' && summary.urgency_reason) {
-    message += `긴급 사유: ${summary.urgency_reason}\n`
-  }
-
-  if (caseId) {
-    message += `\n자세히 보기: https://casefront.app/dashboard/cases/${caseId}`
-  }
-
-  return message
-}
-
 export async function notifyLawyer(
   firm: Firm,
   summary: CaseSummary,
   caseId?: string
 ): Promise<void> {
-  const message = buildNotifyMessage(firm, summary, caseId)
-
-  // Phase 1: Log notification (actual channels added when API keys are configured)
-  console.log(`[Notify] ${firm.name} (${firm.lawyer_name}): ${message}`)
-
-  // Phase 1 - Kakao Alimtalk (when KAKAO_ALIMTALK_KEY is set)
-  if (process.env.KAKAO_ALIMTALK_KEY && firm.phone) {
-    await sendKakaoAlimtalk(firm.phone, message)
+  if (!firm.lawyer_email) {
+    console.log(`[Notify] No email for firm ${firm.name}, skipping`)
+    return
   }
-}
 
-async function sendKakaoAlimtalk(phone: string, message: string): Promise<void> {
-  // TODO: Implement Kakao Alimtalk API call
-  // Reference: https://developers.kakao.com/docs/latest/ko/message/rest-api
-  console.log(`[KakaoAlimtalk] → ${phone}: ${message}`)
+  if (!process.env.RESEND_API_KEY) {
+    console.log(`[Notify] No RESEND_API_KEY, skipping email`)
+    return
+  }
+
+  const urgencyLabel = URGENCY_LABELS[summary.urgency]
+  const subject = `[CaseFront] 새 접수 — ${summary.case_type} 건 (${urgencyLabel})`
+  const dashboardUrl = caseId
+    ? `https://app.casefront.app/dashboard/cases/${caseId}`
+    : `https://app.casefront.app/dashboard`
+
+  const urgencyBadge =
+    summary.urgency === 'urgent'
+      ? `🔴 긴급${summary.urgency_reason ? ` — ${summary.urgency_reason}` : ''}`
+      : summary.urgency === 'normal'
+        ? '🔵 일반'
+        : '⚪ 여유'
+
+  const html = `
+<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+  <h2 style="color: #1a1a2e;">📋 새 사건 접수 알림</h2>
+
+  <div style="background: #f8f9fa; border-radius: 8px; padding: 16px; margin: 16px 0;">
+    <p><strong>사무소:</strong> ${firm.name}</p>
+    <p><strong>고객명:</strong> ${summary.client_name}</p>
+    <p><strong>연락처:</strong> ${summary.client_phone}</p>
+    <p><strong>사건 유형:</strong> ${summary.case_type}</p>
+    <p><strong>긴급도:</strong> ${urgencyBadge}</p>
+  </div>
+
+  <div style="background: #fff; border-left: 4px solid #4f46e5; padding: 12px 16px; margin: 16px 0;">
+    <strong>사건 요약</strong>
+    <p style="color: #374151;">${summary.summary_text}</p>
+  </div>
+
+  ${
+    summary.document_request?.length > 0
+      ? `<div style="margin: 16px 0;">
+    <strong>요청 증빙자료</strong>
+    <ul style="color: #374151;">
+      ${summary.document_request.map((d) => `<li>${d}</li>`).join('')}
+    </ul>
+  </div>`
+      : ''
+  }
+
+  <a href="${dashboardUrl}" style="display: inline-block; background: #4f46e5; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; margin-top: 16px;">
+    대시보드에서 확인하기 →
+  </a>
+
+  <p style="color: #9ca3af; font-size: 12px; margin-top: 24px;">
+    CaseFront AI 법률 접수 비서 | <a href="https://casefront.app">casefront.app</a>
+  </p>
+</div>
+`
+
+  await getResend().emails.send({
+    from: 'CaseFront <noreply@casefront.app>',
+    to: firm.lawyer_email,
+    subject,
+    html,
+  })
+
+  console.log(`[Notify] Email sent to ${firm.lawyer_email}`)
 }
