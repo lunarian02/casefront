@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { getSystemPrompt, getStageHint } from '@/prompts/systemPrompt'
 import type { Message, Firm, CaseSummary } from '@/types'
+import type { ClientContext } from '@/services/clientService'
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY!)
 
@@ -8,10 +9,11 @@ const CASE_SUMMARY_SEPARATOR = '---CASE_SUMMARY---'
 
 export async function generateResponse(
   history: Message[],
-  firm: Firm
+  firm: Firm,
+  clientContext?: ClientContext | null
 ): Promise<{ reply: string; caseSummary?: CaseSummary }> {
   try {
-    const systemPrompt = getSystemPrompt(firm) + getStageHint(history.length)
+    const systemPrompt = getSystemPrompt(firm, clientContext) + getStageHint(history.length)
 
     const model = genAI.getGenerativeModel({
       model: 'gemini-2.5-flash',

@@ -13,19 +13,28 @@ export interface Firm {
   greeting: string | null
   status: string | null
   created_at: string
-  // 알림 설정
   notification_kakao: boolean
   notification_email: boolean
   lawyer_kakao_id: string | null
+}
+
+export interface Client {
+  id: string
+  firm_id: string
+  name: string
+  phone: string
+  created_at: string
+  last_contact_at: string
 }
 
 export interface Session {
   id: string
   kakao_user_id: string
   firm_id: string
+  client_id: string | null
   status: 'active' | 'completed' | 'expired'
   case_type: string | null
-  channel: string  // 'kakao' | 'phone' | etc.
+  channel: string
   created_at: string
   updated_at: string
   completed_at: string | null
@@ -50,6 +59,7 @@ export interface CaseEvent {
 export interface CaseSummary {
   client_name: string
   client_phone: string
+  is_returning: boolean
   case_type: '민사' | '형사' | '가사' | '교통' | '행정' | '기타'
   events: CaseEvent[]
   document_request: string[]

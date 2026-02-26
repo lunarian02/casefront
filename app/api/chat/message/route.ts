@@ -7,6 +7,7 @@ import {
   saveCaseSummary,
 } from '@/services/sessionManager'
 import { generateResponse } from '@/services/aiService'
+import { identifyClient } from '@/services/clientService'
 import { notifyLawyer } from '@/services/notifyService'
 
 export async function POST(request: Request) {
@@ -33,18 +34,21 @@ export async function POST(request: Request) {
     // 3. Save user message
     await saveMessage(session.id, 'user', content)
 
-    // 4. Get conversation history
+    // 4. Try to identify client from message (name + phone)
+    const clientContext = await identifyClient(content, firm.id, session)
+
+    // 5. Get conversation history
     const history = await getHistory(session.id)
 
-    // 5. Generate AI response
-    const { reply, caseSummary } = await generateResponse(history, firm)
+    // 6. Generate AI response (with client context for returning customer hint)
+    const { reply, caseSummary } = await generateResponse(history, firm, clientContext)
 
-    // 6. Save AI reply
+    // 7. Save AI reply
     await saveMessage(session.id, 'assistant', reply)
 
-    // 7. If intake complete, save summary and notify lawyer
+    // 8. If intake complete, save summary and notify lawyer
     if (caseSummary) {
-      await saveCaseSummary(session.id, firm.id, caseSummary)
+      await saveCaseSummary(session.id, firm.id, caseSummary, clientContext?.clientId)
       notifyLawyer(firm, caseSummary, session.id).catch((err) =>
         console.error('Notify failed:', err)
       )

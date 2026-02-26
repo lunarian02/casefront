@@ -82,13 +82,15 @@ export async function getHistory(sessionId: string): Promise<Message[]> {
 export async function saveCaseSummary(
   sessionId: string,
   firmId: string,
-  summary: CaseSummary
+  summary: CaseSummary,
+  clientId?: string | null
 ): Promise<void> {
   const { error: summaryError } = await supabaseAdmin
     .from('case_summaries')
     .upsert({
       session_id: sessionId,
       firm_id: firmId,
+      client_id: clientId ?? null,
       client_name: summary.client_name,
       client_phone: summary.client_phone,
       case_type: summary.case_type,
