@@ -45,7 +45,7 @@ export async function POST(request: Request) {
     // 7. If intake complete, save summary and notify lawyer
     if (caseSummary) {
       await saveCaseSummary(session.id, firm.id, caseSummary)
-      notifyLawyer(firm, caseSummary).catch((err) =>
+      notifyLawyer(firm, caseSummary, session.id).catch((err) =>
         console.error('Notify failed:', err)
       )
     }

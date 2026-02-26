@@ -94,6 +94,7 @@ export async function saveCaseSummary(
       case_type: summary.case_type,
       summary: summary, // JSONB — stores entire CaseSummary including events[], document_request, urgency_reason
       urgency: summary.urgency,
+      urgency_reason: summary.urgency_reason ?? null,
     })
 
   if (summaryError) throw summaryError
