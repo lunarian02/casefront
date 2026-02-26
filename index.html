@@ -1,1073 +1,2136 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CaseFront – AI Legal Reception for Law Firms | AI 법률 접수 비서</title>
-<meta name="description" content="CaseFront: AI가 법률 사무소의 고객 상담을 24시간 응대하고, 사건을 정리해 변호사에게 즉시 전달합니다.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg: #06080b;
-  --surface: #0c0f14;
-  --surface2: #111620;
-  --border: #1a2030;
-  --border-h: #243048;
-  --mint: #10b981;
-  --mint-l: #34d399;
-  --mint-xl: #6ee7b7;
-  --kakao: #FEE500;
-  --kakao-d: #3C1E1E;
-  --text: #c8cdd5;
-  --text-m: #6b7a8d;
-  --white: #f1f5f9;
-  --urgent: #ef4444;
-  --glow-mint: rgba(16,185,129,0.12);
-  --glow-kakao: rgba(254,229,0,0.10);
-  --grad1: linear-gradient(135deg, #10b981, #06b6d4);
-  --grad2: linear-gradient(135deg, #FEE500, #f59e0b);
-  --grad3: linear-gradient(135deg, #10b981, #34d399);
-}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CaseFront – AI Legal Reception for Law Firms | AI 법률 접수 비서</title>
+  <meta name="description" content="CaseFront: AI가 법률 사무소의 고객 상담을 24시간 응대하고, 사건을 정리해 변호사에게 즉시 전달합니다.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #06080b;
+      --surface: #0c0f14;
+      --surface2: #111620;
+      --border: #1a2030;
+      --border-h: #243048;
+      --mint: #10b981;
+      --mint-l: #34d399;
+      --mint-xl: #6ee7b7;
+      --kakao: #FEE500;
+      --kakao-d: #3C1E1E;
+      --text: #c8cdd5;
+      --text-m: #6b7a8d;
+      --white: #f1f5f9;
+      --urgent: #ef4444;
+      --glow-mint: rgba(16, 185, 129, 0.12);
+      --glow-kakao: rgba(254, 229, 0, 0.10);
+      --grad1: linear-gradient(135deg, #10b981, #06b6d4);
+      --grad2: linear-gradient(135deg, #FEE500, #f59e0b);
+      --grad3: linear-gradient(135deg, #10b981, #34d399);
+    }
 
-*{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
 
-body{
-  font-family:'Outfit','Noto Sans KR',sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  overflow-x:hidden;
-  -webkit-font-smoothing:antialiased;
-}
+    html {
+      scroll-behavior: smooth
+    }
 
-/* ===== LANGUAGE ===== */
-[data-lang="ko"]{display:none!important}
-body.ko [data-lang="ko"]{display:revert!important}
-body.ko [data-lang="en"]{display:none!important}
-.price-item [data-lang="ko"]{display:none!important}
-body.ko .price-item [data-lang="ko"]{display:inline!important}
-body.ko .price-item [data-lang="en"]{display:none!important}
-body.ko h2.sec-title[data-lang="ko"]{display:block!important;text-align:center}
-body.ko h2.sec-title[data-lang="en"]{display:none!important}
-.nav-links a[data-lang="ko"]{display:none!important}
-body.ko .nav-links a[data-lang="ko"]{display:inline-flex!important}
-body.ko .nav-links a[data-lang="en"]{display:none!important}
-body.ko .hero-badge [data-lang="ko"]{display:inline!important}
-body.ko .hero-badge [data-lang="en"]{display:none!important}
+    body {
+      font-family: 'Outfit', 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
 
-/* ===== NAV ===== */
-nav{
-  position:fixed;top:0;left:0;right:0;z-index:100;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:16px 48px;
-  background:rgba(6,8,11,0.85);
-  backdrop-filter:blur(20px);
-  border-bottom:1px solid var(--border);
-}
-.logo{
-  font-family:'DM Serif Display',serif;
-  font-size:22px;color:var(--white);text-decoration:none;
-  letter-spacing:-0.5px;
-}
-.logo span{color:var(--mint)}
-.nav-right{display:flex;align-items:center;gap:24px}
-.nav-links{display:flex;gap:24px;align-items:center}
-.nav-links a{
-  color:var(--text-m);text-decoration:none;font-size:14px;font-weight:500;
-  transition:color .2s;
-}
-.nav-links a:hover{color:var(--white)}
-.nav-cta{
-  background:var(--mint)!important;color:var(--bg)!important;
-  padding:8px 18px!important;border-radius:8px!important;font-weight:600!important;
-}
-.nav-cta:hover{background:var(--mint-l)!important}
-.lang-toggle{display:flex;gap:4px;background:var(--surface2);border-radius:6px;padding:2px}
-.lang-btn{
-  padding:4px 10px;border:none;background:transparent;color:var(--text-m);
-  font-size:12px;border-radius:4px;cursor:pointer;font-weight:500;
-}
-.lang-btn.active{background:var(--border-h);color:var(--white)}
+    /* ===== LANGUAGE ===== */
+    [data-lang="ko"] {
+      display: none !important
+    }
 
-/* ===== HERO ===== */
-.hero{
-  position:relative;min-height:100vh;display:flex;align-items:center;
-  padding:120px 48px 80px;overflow:hidden;
-}
-.hero-bg{
-  position:absolute;inset:0;
-  background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(16,185,129,0.08),transparent 70%),
-             radial-gradient(ellipse 50% 40% at 80% 50%,rgba(254,229,0,0.04),transparent 60%);
-}
-.hero-grid{
-  position:absolute;inset:0;
-  background-image:linear-gradient(var(--border) 1px,transparent 1px),
-                   linear-gradient(90deg,var(--border) 1px,transparent 1px);
-  background-size:60px 60px;
-  opacity:0.3;
-  mask-image:radial-gradient(ellipse 70% 60% at 50% 40%,black,transparent);
-}
-.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.5;pointer-events:none}
-.orb-1{width:400px;height:400px;background:rgba(16,185,129,0.12);top:-100px;left:10%}
-.orb-2{width:300px;height:300px;background:rgba(254,229,0,0.08);top:20%;right:5%}
-.orb-3{width:200px;height:200px;background:rgba(6,182,212,0.1);bottom:10%;left:30%}
+    body.ko [data-lang="ko"] {
+      display: revert !important
+    }
 
-.hero-content{
-  position:relative;z-index:2;display:flex;gap:64px;
-  max-width:1200px;margin:0 auto;width:100%;align-items:center;
-}
-.hero-left{flex:1;max-width:560px}
-.hero-right{flex:1;display:flex;justify-content:center}
+    body.ko [data-lang="en"] {
+      display: none !important
+    }
 
-.hero-badge{
-  display:inline-flex;align-items:center;gap:8px;
-  padding:6px 14px;border-radius:20px;
-  background:var(--surface2);border:1px solid var(--border);
-  font-size:12px;color:var(--text-m);font-weight:500;margin-bottom:24px;
-}
-.hero-badge .dot{
-  width:6px;height:6px;border-radius:50%;background:var(--mint);
-  animation:pulse 2s infinite;
-}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+    .price-item [data-lang="ko"] {
+      display: none !important
+    }
 
-.hero h1{
-  font-family:'DM Serif Display',serif;
-  font-size:clamp(36px,4.5vw,56px);line-height:1.15;
-  color:var(--white);margin-bottom:20px;letter-spacing:-1px;
-}
-.hero h1 .em{
-  background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
-  background-clip:text;
-}
-.hero-desc{font-size:17px;line-height:1.7;color:var(--text);margin-bottom:20px}
-.hero-desc-sub{font-size:14px;color:var(--text-m);margin-bottom:28px}
+    body.ko .price-item [data-lang="ko"] {
+      display: inline !important
+    }
 
-.kakao-badge{
-  display:inline-flex;align-items:center;gap:8px;
-  padding:8px 18px;border-radius:12px;
-  background:rgba(254,229,0,0.1);border:1px solid rgba(254,229,0,0.2);
-  font-size:14px;color:var(--kakao);font-weight:600;margin-bottom:20px;
-}
-.kakao-badge svg{width:18px;height:18px;stroke:var(--kakao);fill:none;stroke-width:2}
+    body.ko .price-item [data-lang="en"] {
+      display: none !important
+    }
 
-.hero-ctas{display:flex;gap:12px;flex-wrap:wrap}
-.btn-primary{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:14px 28px;background:var(--mint);color:var(--bg);
-  font-weight:600;font-size:15px;border-radius:10px;text-decoration:none;
-  transition:all .2s;border:none;cursor:pointer;
-}
-.btn-primary:hover{background:var(--mint-l);transform:translateY(-1px)}
-.btn-ghost{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:14px 28px;background:transparent;color:var(--text);
-  font-weight:500;font-size:15px;border-radius:10px;text-decoration:none;
-  border:1px solid var(--border-h);transition:all .2s;
-}
-.btn-ghost:hover{border-color:var(--mint);color:var(--mint)}
+    body.ko h2.sec-title[data-lang="ko"] {
+      display: block !important;
+      text-align: center
+    }
 
-/* ===== PHONE MOCKUP ===== */
-.phone-mockup{
-  width:320px;
-  background:var(--surface);border:1px solid var(--border-h);
-  border-radius:28px;overflow:hidden;
-  box-shadow:0 40px 80px rgba(0,0,0,0.4),0 0 0 1px rgba(255,255,255,0.03) inset;
-}
-.phone-screen{display:flex;flex-direction:column;height:520px}
+    body.ko h2.sec-title[data-lang="en"] {
+      display: none !important
+    }
 
-.phone-top{
-  padding:20px 16px 12px;text-align:center;
-  border-bottom:1px solid var(--border);
-}
-.phone-icon-wrap{
-  width:40px;height:40px;border-radius:12px;
-  display:inline-flex;align-items:center;justify-content:center;
-  margin-bottom:8px;
-}
-.phone-icon-wrap.ki{background:rgba(254,229,0,0.15)}
-.phone-icon-wrap.ki svg{width:20px;height:20px;stroke:var(--kakao);fill:none;stroke-width:2}
-.phone-top p{font-size:11px;color:var(--text-m);margin-bottom:2px}
-.phone-top h3{font-size:14px;color:var(--white);font-weight:600}
+    .nav-links a[data-lang="ko"] {
+      display: none !important
+    }
 
-.chat-area{
-  flex:1;padding:12px 14px;overflow-y:auto;
-  display:flex;flex-direction:column;gap:4px;
-}
-.msg-label{font-size:10px;color:var(--text-m);margin-top:6px}
-.msg-label.r{text-align:right}
-.msg{
-  padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.5;
-  max-width:85%;word-break:break-word;
-  animation:msgIn 0.4s ease-out both;
-}
-@keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.msg-ai{background:var(--surface2);color:var(--text);border-top-left-radius:4px;align-self:flex-start}
-.msg-user{background:var(--kakao);color:#1a1a1a;border-top-right-radius:4px;align-self:flex-end}
+    body.ko .nav-links a[data-lang="ko"] {
+      display: inline-flex !important
+    }
 
-.typing{
-  display:flex;gap:4px;padding:10px 14px;
-  background:var(--surface2);border-radius:14px;border-top-left-radius:4px;
-  align-self:flex-start;max-width:60px;
-}
-.typing .dot{
-  width:6px;height:6px;background:var(--text-m);border-radius:50%;
-  animation:dotBounce 1.2s infinite;
-}
-.typing .dot:nth-child(2){animation-delay:0.2s}
-.typing .dot:nth-child(3){animation-delay:0.4s}
-@keyframes dotBounce{0%,80%,100%{opacity:0.3;transform:scale(0.8)}40%{opacity:1;transform:scale(1)}}
+    body.ko .nav-links a[data-lang="en"] {
+      display: none !important
+    }
 
-/* ===== NOTIFICATION DEMO ===== */
-.notif-demo{
-  margin-top:12px;padding:12px 14px;
-  background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);
-  border-radius:12px;
-}
-.notif-header{display:flex;align-items:center;gap:6px;margin-bottom:6px}
-.notif-header svg{width:14px;height:14px;stroke:var(--mint);fill:none;stroke-width:2}
-.notif-header span{font-size:10px;color:var(--mint);font-weight:600;text-transform:uppercase}
-.notif-badge{
-  font-size:9px;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:auto;
-}
-.notif-badge.urgent{background:rgba(239,68,68,0.2);color:var(--urgent)}
-.notif-badge.normal{background:rgba(16,185,129,0.2);color:var(--mint)}
-.notif-text{font-size:12px;color:var(--text);line-height:1.5}
-.notif-text strong{color:var(--white)}
-.notif-meta{font-size:10px;color:var(--text-m);margin-top:4px}
+    body.ko .hero-badge [data-lang="ko"] {
+      display: inline !important
+    }
 
-/* ===== STATS ===== */
-.stats{padding:60px 48px;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
-.stats-grid{
-  display:grid;grid-template-columns:repeat(4,1fr);gap:32px;
-  max-width:1000px;margin:0 auto;text-align:center;
-}
-.stat h3{
-  font-family:'DM Serif Display',serif;font-size:40px;
-  background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
-  background-clip:text;margin-bottom:8px;
-}
-.stat p{font-size:13px;color:var(--text-m);line-height:1.5}
+    body.ko .hero-badge [data-lang="en"] {
+      display: none !important
+    }
 
-/* ===== SECTIONS ===== */
-.sec-label{
-  font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:2px;
-  color:var(--mint);margin-bottom:12px;
-}
-.sec-label.c{text-align:center}
-.sec-title{
-  font-family:'DM Serif Display',serif;font-size:clamp(28px,3vw,40px);
-  color:var(--white);margin-bottom:12px;letter-spacing:-0.5px;
-}
-.sec-title.c{text-align:center}
-.sec-sub{font-size:16px;color:var(--text-m);margin-bottom:48px;max-width:560px}
-.sec-sub.c{text-align:center;margin-left:auto;margin-right:auto}
+    /* ===== NAV ===== */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 48px;
+      background: rgba(6, 8, 11, 0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
 
-/* ===== FEATURES ===== */
-.features{padding:100px 48px}
-.feat-grid{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
-  max-width:1100px;margin:0 auto;
-}
-.feat{
-  padding:32px;border-radius:16px;
-  background:var(--surface);border:1px solid var(--border);
-  transition:all .3s;position:relative;overflow:hidden;
-}
-.feat:hover{border-color:var(--border-h);transform:translateY(-2px)}
-.feat::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:var(--grad1);opacity:0;transition:opacity .3s;
-}
-.feat:hover::before{opacity:1}
-.icon{
-  width:44px;height:44px;border-radius:12px;
-  display:flex;align-items:center;justify-content:center;margin-bottom:16px;
-}
-.icon svg{width:22px;height:22px;stroke-width:2;fill:none}
-.icon-kakao{background:rgba(254,229,0,0.12)}
-.icon-kakao svg{stroke:var(--kakao)}
-.icon-mint{background:rgba(16,185,129,0.12)}
-.icon-mint svg{stroke:var(--mint)}
-.icon-grad{background:rgba(16,185,129,0.12)}
-.icon-grad svg{stroke:var(--mint)}
+    .logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px;
+      color: var(--white);
+      text-decoration: none;
+      letter-spacing: -0.5px;
+    }
 
-.feat h3{font-size:17px;color:var(--white);font-weight:600;margin-bottom:4px}
-.feat .en-sub{font-size:12px;color:var(--mint);font-weight:500;margin-bottom:10px}
-.feat p:last-child{font-size:14px;color:var(--text-m);line-height:1.6}
+    .logo span {
+      color: var(--mint)
+    }
 
-.phase-tag{
-  display:inline-block;font-size:10px;font-weight:600;
-  padding:2px 8px;border-radius:4px;margin-top:10px;
-}
-.phase-tag.now{background:rgba(16,185,129,0.15);color:var(--mint)}
-.phase-tag.soon{background:rgba(254,229,0,0.1);color:var(--kakao)}
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 24px
+    }
 
-/* ===== HOW IT WORKS ===== */
-.how{padding:100px 48px;background:var(--surface)}
-.how-inner{max-width:900px;margin:0 auto}
-.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;position:relative}
-.steps::before{
-  content:'';position:absolute;top:48px;left:12%;right:12%;
-  height:2px;background:var(--border);z-index:0;
-}
-.step{text-align:center;position:relative;z-index:1}
-.step-num{
-  font-size:11px;font-weight:700;color:var(--mint);
-  letter-spacing:1px;margin-bottom:12px;
-}
-.step-circle{
-  width:64px;height:64px;border-radius:50%;margin:0 auto 16px;
-  display:flex;align-items:center;justify-content:center;
-  border:2px solid var(--border);background:var(--bg);
-  transition:all .3s;
-}
-.step-circle svg{width:24px;height:24px;stroke-width:2;fill:none}
-.sc-kakao{border-color:rgba(254,229,0,0.3)}
-.sc-kakao svg{stroke:var(--kakao)}
-.sc-mint{border-color:rgba(16,185,129,0.3)}
-.sc-mint svg{stroke:var(--mint)}
-.step:hover .step-circle{transform:scale(1.08);border-color:var(--mint)}
-.step h3{font-size:15px;color:var(--white);font-weight:600;margin-bottom:4px}
-.step .en{font-size:11px;color:var(--mint);margin-bottom:8px}
-.step p:last-child{font-size:13px;color:var(--text-m);line-height:1.5}
+    .nav-links {
+      display: flex;
+      gap: 24px;
+      align-items: center
+    }
 
-/* ===== SUMMARY DEMO ===== */
-.summary-section{padding:100px 48px}
-.summary-inner{max-width:1100px;margin:0 auto;display:flex;gap:48px;align-items:center}
-.summary-left{flex:1}
-.summary-right{flex:1}
-.summary-card{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:16px;padding:28px;font-size:13px;
-}
-.summary-card-header{
-  display:flex;align-items:center;gap:8px;margin-bottom:20px;
-  padding-bottom:12px;border-bottom:1px solid var(--border);
-}
-.summary-card-header svg{width:18px;height:18px;stroke:var(--mint);fill:none;stroke-width:2}
-.summary-card-header span{font-size:14px;font-weight:600;color:var(--white)}
-.summary-card-header .badge{
-  margin-left:auto;font-size:10px;padding:3px 8px;border-radius:4px;font-weight:700;
-}
-.badge-urgent{background:rgba(239,68,68,0.15);color:var(--urgent)}
-.badge-normal{background:rgba(16,185,129,0.15);color:var(--mint)}
+    .nav-links a {
+      color: var(--text-m);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color .2s;
+    }
 
-.summary-row{display:flex;gap:12px;margin-bottom:12px;align-items:flex-start}
-.summary-label{
-  min-width:70px;font-size:11px;color:var(--text-m);font-weight:500;
-  padding-top:2px;flex-shrink:0;
-}
-.summary-value{font-size:13px;color:var(--text);line-height:1.5}
-.summary-value strong{color:var(--white)}
+    .nav-links a:hover {
+      color: var(--white)
+    }
 
-.timeline-item{
-  position:relative;padding-left:16px;margin-bottom:10px;
-  border-left:2px solid var(--border);
-}
-.timeline-item:last-child{margin-bottom:0}
-.timeline-date{font-size:10px;color:var(--mint);font-weight:600;margin-bottom:2px}
-.timeline-text{font-size:12px;color:var(--text);line-height:1.5}
+    .nav-cta {
+      background: var(--mint) !important;
+      color: var(--bg) !important;
+      padding: 8px 18px !important;
+      border-radius: 8px !important;
+      font-weight: 600 !important;
+    }
 
-.doc-list{display:flex;flex-direction:column;gap:4px}
-.doc-item{
-  display:flex;align-items:center;gap:6px;
-  font-size:12px;color:var(--text);
-}
-.doc-item svg{width:12px;height:12px;stroke:var(--mint);fill:none;stroke-width:2;flex-shrink:0}
+    .nav-cta:hover {
+      background: var(--mint-l) !important
+    }
 
-/* ===== PRICING ===== */
-.pricing{padding:100px 48px;background:var(--surface)}
-.pricing .sec-label,.pricing .sec-title,.pricing .sec-sub{text-align:center}
-.pricing .sec-sub{margin-left:auto;margin-right:auto}
-.price-cards{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
-  max-width:1000px;margin:0 auto;
-}
-.price-card{
-  padding:32px;border-radius:16px;
-  background:var(--bg);border:1px solid var(--border);
-  position:relative;transition:all .3s;
-}
-.price-card:hover{border-color:var(--border-h);transform:translateY(-2px)}
-.price-card.featured{border-color:rgba(16,185,129,0.3)}
-.price-card.featured::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--grad1);
-}
-.price-name{font-size:14px;color:var(--mint);font-weight:600;margin-bottom:8px}
-.price-amount{
-  font-family:'DM Serif Display',serif;font-size:32px;color:var(--white);
-  margin-bottom:4px;
-}
-.price-amount span{font-size:14px;color:var(--text-m);font-weight:400}
-.price-desc{font-size:13px;color:var(--text-m);margin-bottom:20px}
-.price-list{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
-.price-item{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text)}
-.price-item .ck{
-  width:18px;height:18px;border-radius:50%;flex-shrink:0;
-  background:rgba(16,185,129,0.12);display:flex;align-items:center;justify-content:center;
-}
-.price-item .ck svg{width:11px;height:11px;stroke:var(--mint);fill:none;stroke-width:3}
-.price-item.disabled{color:var(--text-m);opacity:0.5}
-.price-item.disabled .ck{background:rgba(107,122,141,0.1)}
-.price-item.disabled .ck svg{stroke:var(--text-m)}
-.soon-badge{
-  display:inline-block;font-size:10px;font-weight:700;
-  padding:4px 10px;border-radius:6px;margin-bottom:16px;
-  background:rgba(254,229,0,0.1);color:var(--kakao);
-}
+    .lang-toggle {
+      display: flex;
+      gap: 4px;
+      background: var(--surface2);
+      border-radius: 6px;
+      padding: 2px
+    }
 
-/* ===== CTA ===== */
-.cta{padding:100px 48px}
-.cta-box{
-  max-width:640px;margin:0 auto;text-align:center;
-  padding:48px;border-radius:20px;
-  background:var(--surface);border:1px solid var(--border);
-  position:relative;overflow:hidden;
-}
-.cta-box::before{
-  content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;
-  background:radial-gradient(circle at center,rgba(16,185,129,0.06),transparent 60%);
-  pointer-events:none;
-}
-.cta-line{
-  width:48px;height:3px;border-radius:2px;
-  background:var(--grad1);margin:0 auto 20px;
-}
-.cta h2{
-  font-family:'DM Serif Display',serif;font-size:28px;
-  color:var(--white);margin-bottom:8px;position:relative;
-}
-.cta .sub{font-size:15px;color:var(--text-m);margin-bottom:28px;position:relative}
-.email-row{
-  display:flex;gap:8px;max-width:440px;margin:0 auto 12px;position:relative;
-}
-.email-row input{
-  flex:1;padding:14px 18px;border:1px solid var(--border);
-  background:var(--bg);color:var(--white);font-size:14px;
-  border-radius:10px;outline:none;font-family:inherit;
-}
-.email-row input:focus{border-color:var(--mint)}
-.email-row button{
-  padding:14px 24px;background:var(--mint);color:var(--bg);
-  font-weight:600;font-size:14px;border:none;border-radius:10px;
-  cursor:pointer;white-space:nowrap;transition:background .2s;
-  font-family:inherit;
-}
-.email-row button:hover{background:var(--mint-l)}
-.cta-note{font-size:12px;color:var(--text-m);position:relative}
+    .lang-btn {
+      padding: 4px 10px;
+      border: none;
+      background: transparent;
+      color: var(--text-m);
+      font-size: 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+    }
 
-/* ===== FOOTER ===== */
-footer{
-  padding:32px 48px;border-top:1px solid var(--border);
-  display:flex;justify-content:space-between;align-items:center;
-}
-.foot-logo{
-  font-family:'DM Serif Display',serif;font-size:18px;color:var(--white);
-}
-.foot-logo span{color:var(--mint)}
-.foot-info{font-size:12px;color:var(--text-m);text-align:right;line-height:1.6}
+    .lang-btn.active {
+      background: var(--border-h);
+      color: var(--white)
+    }
 
-/* ===== SVG GRADIENT DEFS ===== */
-svg.defs{position:absolute;width:0;height:0}
+    /* ===== HERO ===== */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 120px 48px 80px;
+      overflow: hidden;
+    }
 
-/* ===== RESPONSIVE ===== */
-@media(max-width:1024px){
-  .hero-content{flex-direction:column;gap:48px}
-  .hero-left{max-width:100%;text-align:center}
-  .hero-ctas{justify-content:center}
-  .kakao-badge{margin-left:auto;margin-right:auto}
-  .feat-grid{grid-template-columns:repeat(2,1fr)}
-  .steps{grid-template-columns:repeat(2,1fr);gap:32px}
-  .steps::before{display:none}
-  .summary-inner{flex-direction:column}
-  .price-cards{grid-template-columns:1fr}
-}
-@media(max-width:768px){
-  nav{padding:12px 20px}
-  .nav-links{display:none}
-  .hero{padding:100px 20px 60px}
-  .hero h1{font-size:32px}
-  .stats{padding:40px 20px}
-  .stats-grid{grid-template-columns:repeat(2,1fr);gap:20px}
-  .features,.how,.summary-section,.pricing,.cta{padding:60px 20px}
-  .feat-grid{grid-template-columns:1fr}
-  .steps{grid-template-columns:1fr}
-  .price-cards{grid-template-columns:1fr;max-width:400px;margin:0 auto}
-  .phone-mockup{width:280px}
-  footer{flex-direction:column;gap:16px;text-align:center}
-  .foot-info{text-align:center}
-  .email-row{flex-direction:column}
-}
-</style>
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(16, 185, 129, 0.08), transparent 70%),
+        radial-gradient(ellipse 50% 40% at 80% 50%, rgba(254, 229, 0, 0.04), transparent 60%);
+    }
+
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 60px 60px;
+      opacity: 0.3;
+      mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black, transparent);
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.5;
+      pointer-events: none
+    }
+
+    .orb-1 {
+      width: 400px;
+      height: 400px;
+      background: rgba(16, 185, 129, 0.12);
+      top: -100px;
+      left: 10%
+    }
+
+    .orb-2 {
+      width: 300px;
+      height: 300px;
+      background: rgba(254, 229, 0, 0.08);
+      top: 20%;
+      right: 5%
+    }
+
+    .orb-3 {
+      width: 200px;
+      height: 200px;
+      background: rgba(6, 182, 212, 0.1);
+      bottom: 10%;
+      left: 30%
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      gap: 64px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+      align-items: center;
+    }
+
+    .hero-left {
+      flex: 1;
+      max-width: 560px
+    }
+
+    .hero-right {
+      flex: 1;
+      display: flex;
+      justify-content: center
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-m);
+      font-weight: 500;
+      margin-bottom: 24px;
+    }
+
+    .hero-badge .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--mint);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0.4
+      }
+    }
+
+    .hero h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(36px, 4.5vw, 56px);
+      line-height: 1.15;
+      color: var(--white);
+      margin-bottom: 20px;
+      letter-spacing: -1px;
+    }
+
+    .hero h1 .em {
+      background: var(--grad1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-desc {
+      font-size: 17px;
+      line-height: 1.7;
+      color: var(--text);
+      margin-bottom: 20px
+    }
+
+    .hero-desc-sub {
+      font-size: 14px;
+      color: var(--text-m);
+      margin-bottom: 28px
+    }
+
+    .kakao-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      border-radius: 12px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      font-size: 14px;
+      color: var(--mint);
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .kakao-badge svg {
+      width: 18px;
+      height: 18px;
+      stroke: var(--mint);
+      fill: none;
+      stroke-width: 2
+    }
+
+    .hero-ctas {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 14px 28px;
+      background: var(--mint);
+      color: var(--bg);
+      font-weight: 600;
+      font-size: 15px;
+      border-radius: 10px;
+      text-decoration: none;
+      transition: all .2s;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-primary:hover {
+      background: var(--mint-l);
+      transform: translateY(-1px)
+    }
+
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 14px 28px;
+      background: transparent;
+      color: var(--text);
+      font-weight: 500;
+      font-size: 15px;
+      border-radius: 10px;
+      text-decoration: none;
+      border: 1px solid var(--border-h);
+      transition: all .2s;
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--mint);
+      color: var(--mint)
+    }
+
+    /* ===== PHONE MOCKUP ===== */
+    .phone-mockup {
+      width: 320px;
+      background: var(--surface);
+      border: 1px solid var(--border-h);
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 40px 80px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+    }
+
+    .phone-screen {
+      display: flex;
+      flex-direction: column;
+      height: 520px
+    }
+
+    .phone-top {
+      padding: 20px 16px 12px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .phone-icon-wrap {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+
+    .phone-icon-wrap.ki {
+      background: rgba(16, 185, 129, 0.15)
+    }
+
+    .phone-icon-wrap.ki svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--mint);
+      fill: none;
+      stroke-width: 2
+    }
+
+    .phone-top p {
+      font-size: 11px;
+      color: var(--text-m);
+      margin-bottom: 2px
+    }
+
+    .phone-top h3 {
+      font-size: 14px;
+      color: var(--white);
+      font-weight: 600
+    }
+
+    .chat-area {
+      flex: 1;
+      padding: 12px 14px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .msg-label {
+      font-size: 10px;
+      color: var(--text-m);
+      margin-top: 6px
+    }
+
+    .msg-label.r {
+      text-align: right
+    }
+
+    .msg {
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 13px;
+      line-height: 1.5;
+      max-width: 85%;
+      word-break: break-word;
+      animation: msgIn 0.4s ease-out both;
+    }
+
+    @keyframes msgIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    .msg-ai {
+      background: var(--surface2);
+      color: var(--text);
+      border-top-left-radius: 4px;
+      align-self: flex-start
+    }
+
+    .msg-user {
+      background: var(--mint-l);
+      color: #0a1a14;
+      border-top-right-radius: 4px;
+      align-self: flex-end
+    }
+
+    .typing {
+      display: flex;
+      gap: 4px;
+      padding: 10px 14px;
+      background: var(--surface2);
+      border-radius: 14px;
+      border-top-left-radius: 4px;
+      align-self: flex-start;
+      max-width: 60px;
+    }
+
+    .typing .dot {
+      width: 6px;
+      height: 6px;
+      background: var(--text-m);
+      border-radius: 50%;
+      animation: dotBounce 1.2s infinite;
+    }
+
+    .typing .dot:nth-child(2) {
+      animation-delay: 0.2s
+    }
+
+    .typing .dot:nth-child(3) {
+      animation-delay: 0.4s
+    }
+
+    @keyframes dotBounce {
+
+      0%,
+      80%,
+      100% {
+        opacity: 0.3;
+        transform: scale(0.8)
+      }
+
+      40% {
+        opacity: 1;
+        transform: scale(1)
+      }
+    }
+
+    /* ===== NOTIFICATION DEMO ===== */
+    .notif-demo {
+      margin-top: 12px;
+      padding: 12px 14px;
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 12px;
+    }
+
+    .notif-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px
+    }
+
+    .notif-header svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--mint);
+      fill: none;
+      stroke-width: 2
+    }
+
+    .notif-header span {
+      font-size: 10px;
+      color: var(--mint);
+      font-weight: 600;
+      text-transform: uppercase
+    }
+
+    .notif-badge {
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      margin-left: auto;
+    }
+
+    .notif-badge.urgent {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--urgent)
+    }
+
+    .notif-badge.normal {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--mint)
+    }
+
+    .notif-text {
+      font-size: 12px;
+      color: var(--text);
+      line-height: 1.5
+    }
+
+    .notif-text strong {
+      color: var(--white)
+    }
+
+    .notif-meta {
+      font-size: 10px;
+      color: var(--text-m);
+      margin-top: 4px
+    }
+
+    /* ===== STATS ===== */
+    .stats {
+      padding: 60px 48px;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border)
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 32px;
+      max-width: 1000px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .stat h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 40px;
+      background: var(--grad1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+
+    .stat p {
+      font-size: 13px;
+      color: var(--text-m);
+      line-height: 1.5
+    }
+
+    /* ===== SECTIONS ===== */
+    .sec-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--mint);
+      margin-bottom: 12px;
+    }
+
+    .sec-label.c {
+      text-align: center
+    }
+
+    .sec-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(28px, 3vw, 40px);
+      color: var(--white);
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .sec-title.c {
+      text-align: center
+    }
+
+    .sec-sub {
+      font-size: 16px;
+      color: var(--text-m);
+      margin-bottom: 48px;
+      max-width: 560px
+    }
+
+    .sec-sub.c {
+      text-align: center;
+      margin-left: auto;
+      margin-right: auto
+    }
+
+    /* ===== FEATURES ===== */
+    .features {
+      padding: 100px 48px
+    }
+
+    .feat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .feat {
+      padding: 32px;
+      border-radius: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      transition: all .3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feat:hover {
+      border-color: var(--border-h);
+      transform: translateY(-2px)
+    }
+
+    .feat::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--grad1);
+      opacity: 0;
+      transition: opacity .3s;
+    }
+
+    .feat:hover::before {
+      opacity: 1
+    }
+
+    .icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .icon svg {
+      width: 22px;
+      height: 22px;
+      stroke-width: 2;
+      fill: none
+    }
+
+    .icon-kakao {
+      background: rgba(254, 229, 0, 0.12)
+    }
+
+    .icon-kakao svg {
+      stroke: var(--kakao)
+    }
+
+    .icon-mint {
+      background: rgba(16, 185, 129, 0.12)
+    }
+
+    .icon-mint svg {
+      stroke: var(--mint)
+    }
+
+    .icon-grad {
+      background: rgba(16, 185, 129, 0.12)
+    }
+
+    .icon-grad svg {
+      stroke: var(--mint)
+    }
+
+    .feat h3 {
+      font-size: 17px;
+      color: var(--white);
+      font-weight: 600;
+      margin-bottom: 4px
+    }
+
+    .feat .en-sub {
+      font-size: 12px;
+      color: var(--mint);
+      font-weight: 500;
+      margin-bottom: 10px
+    }
+
+    .feat p:last-child {
+      font-size: 14px;
+      color: var(--text-m);
+      line-height: 1.6
+    }
+
+    .phase-tag {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+
+    .phase-tag.now {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--mint)
+    }
+
+    .phase-tag.soon {
+      background: rgba(254, 229, 0, 0.1);
+      color: var(--kakao)
+    }
+
+    /* ===== HOW IT WORKS ===== */
+    .how {
+      padding: 100px 48px;
+      background: var(--surface)
+    }
+
+    .how-inner {
+      max-width: 900px;
+      margin: 0 auto
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      position: relative
+    }
+
+    .steps::before {
+      content: '';
+      position: absolute;
+      top: 48px;
+      left: 12%;
+      right: 12%;
+      height: 2px;
+      background: var(--border);
+      z-index: 0;
+    }
+
+    .step {
+      text-align: center;
+      position: relative;
+      z-index: 1
+    }
+
+    .step-num {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--mint);
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+
+    .step-circle {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      margin: 0 auto 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--border);
+      background: var(--bg);
+      transition: all .3s;
+    }
+
+    .step-circle svg {
+      width: 24px;
+      height: 24px;
+      stroke-width: 2;
+      fill: none
+    }
+
+    .sc-kakao {
+      border-color: rgba(254, 229, 0, 0.3)
+    }
+
+    .sc-kakao svg {
+      stroke: var(--kakao)
+    }
+
+    .sc-mint {
+      border-color: rgba(16, 185, 129, 0.3)
+    }
+
+    .sc-mint svg {
+      stroke: var(--mint)
+    }
+
+    .step:hover .step-circle {
+      transform: scale(1.08);
+      border-color: var(--mint)
+    }
+
+    .step h3 {
+      font-size: 15px;
+      color: var(--white);
+      font-weight: 600;
+      margin-bottom: 4px
+    }
+
+    .step .en {
+      font-size: 11px;
+      color: var(--mint);
+      margin-bottom: 8px
+    }
+
+    .step p:last-child {
+      font-size: 13px;
+      color: var(--text-m);
+      line-height: 1.5
+    }
+
+    /* ===== SUMMARY DEMO ===== */
+    .summary-section {
+      padding: 100px 48px
+    }
+
+    .summary-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      gap: 48px;
+      align-items: center
+    }
+
+    .summary-left {
+      flex: 1
+    }
+
+    .summary-right {
+      flex: 1
+    }
+
+    .summary-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      font-size: 13px;
+    }
+
+    .summary-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .summary-card-header svg {
+      width: 18px;
+      height: 18px;
+      stroke: var(--mint);
+      fill: none;
+      stroke-width: 2
+    }
+
+    .summary-card-header span {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--white)
+    }
+
+    .summary-card-header .badge {
+      margin-left: auto;
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+
+    .badge-urgent {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--urgent)
+    }
+
+    .badge-normal {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--mint)
+    }
+
+    .summary-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      align-items: flex-start
+    }
+
+    .summary-label {
+      min-width: 70px;
+      font-size: 11px;
+      color: var(--text-m);
+      font-weight: 500;
+      padding-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .summary-value {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.5
+    }
+
+    .summary-value strong {
+      color: var(--white)
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-left: 16px;
+      margin-bottom: 10px;
+      border-left: 2px solid var(--border);
+    }
+
+    .timeline-item:last-child {
+      margin-bottom: 0
+    }
+
+    .timeline-date {
+      font-size: 10px;
+      color: var(--mint);
+      font-weight: 600;
+      margin-bottom: 2px
+    }
+
+    .timeline-text {
+      font-size: 12px;
+      color: var(--text);
+      line-height: 1.5
+    }
+
+    .doc-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px
+    }
+
+    .doc-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text);
+    }
+
+    .doc-item svg {
+      width: 12px;
+      height: 12px;
+      stroke: var(--mint);
+      fill: none;
+      stroke-width: 2;
+      flex-shrink: 0
+    }
+
+    /* ===== PRICING ===== */
+    .pricing {
+      padding: 100px 48px;
+      background: var(--surface)
+    }
+
+    .pricing .sec-label,
+    .pricing .sec-title,
+    .pricing .sec-sub {
+      text-align: center
+    }
+
+    .pricing .sec-sub {
+      margin-left: auto;
+      margin-right: auto
+    }
+
+    .price-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .price-card {
+      padding: 32px;
+      border-radius: 16px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      position: relative;
+      transition: all .3s;
+    }
+
+    .price-card:hover {
+      border-color: var(--border-h);
+      transform: translateY(-2px)
+    }
+
+    .price-card.featured {
+      border-color: rgba(16, 185, 129, 0.3)
+    }
+
+    .price-card.featured::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--grad1);
+    }
+
+    .price-name {
+      font-size: 14px;
+      color: var(--mint);
+      font-weight: 600;
+      margin-bottom: 8px
+    }
+
+    .price-amount {
+      font-family: 'DM Serif Display', serif;
+      font-size: 32px;
+      color: var(--white);
+      margin-bottom: 4px;
+    }
+
+    .price-amount span {
+      font-size: 14px;
+      color: var(--text-m);
+      font-weight: 400
+    }
+
+    .price-desc {
+      font-size: 13px;
+      color: var(--text-m);
+      margin-bottom: 20px
+    }
+
+    .price-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 24px
+    }
+
+    .price-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text)
+    }
+
+    .price-item .ck {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: rgba(16, 185, 129, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .price-item .ck svg {
+      width: 11px;
+      height: 11px;
+      stroke: var(--mint);
+      fill: none;
+      stroke-width: 3
+    }
+
+    .price-item.disabled {
+      color: var(--text-m);
+      opacity: 0.5
+    }
+
+    .price-item.disabled .ck {
+      background: rgba(107, 122, 141, 0.1)
+    }
+
+    .price-item.disabled .ck svg {
+      stroke: var(--text-m)
+    }
+
+    .soon-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      background: rgba(254, 229, 0, 0.1);
+      color: var(--kakao);
+    }
+
+    /* ===== CTA ===== */
+    .cta {
+      padding: 100px 48px
+    }
+
+    .cta-box {
+      max-width: 640px;
+      margin: 0 auto;
+      text-align: center;
+      padding: 48px;
+      border-radius: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-box::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at center, rgba(16, 185, 129, 0.06), transparent 60%);
+      pointer-events: none;
+    }
+
+    .cta-line {
+      width: 48px;
+      height: 3px;
+      border-radius: 2px;
+      background: var(--grad1);
+      margin: 0 auto 20px;
+    }
+
+    .cta h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 28px;
+      color: var(--white);
+      margin-bottom: 8px;
+      position: relative;
+    }
+
+    .cta .sub {
+      font-size: 15px;
+      color: var(--text-m);
+      margin-bottom: 28px;
+      position: relative
+    }
+
+    .email-row {
+      display: flex;
+      gap: 8px;
+      max-width: 440px;
+      margin: 0 auto 12px;
+      position: relative;
+    }
+
+    .email-row input {
+      flex: 1;
+      padding: 14px 18px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--white);
+      font-size: 14px;
+      border-radius: 10px;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .email-row input:focus {
+      border-color: var(--mint)
+    }
+
+    .email-row button {
+      padding: 14px 24px;
+      background: var(--mint);
+      color: var(--bg);
+      font-weight: 600;
+      font-size: 14px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .2s;
+      font-family: inherit;
+    }
+
+    .email-row button:hover {
+      background: var(--mint-l)
+    }
+
+    .cta-note {
+      font-size: 12px;
+      color: var(--text-m);
+      position: relative
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      padding: 32px 48px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .foot-logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 18px;
+      color: var(--white);
+    }
+
+    .foot-logo span {
+      color: var(--mint)
+    }
+
+    .foot-info {
+      font-size: 12px;
+      color: var(--text-m);
+      text-align: right;
+      line-height: 1.6
+    }
+
+    /* ===== SVG GRADIENT DEFS ===== */
+    svg.defs {
+      position: absolute;
+      width: 0;
+      height: 0
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media(max-width:1024px) {
+      .hero-content {
+        flex-direction: column;
+        gap: 48px
+      }
+
+      .hero-left {
+        max-width: 100%;
+        text-align: center
+      }
+
+      .hero-ctas {
+        justify-content: center
+      }
+
+      .kakao-badge {
+        margin-left: auto;
+        margin-right: auto
+      }
+
+      .feat-grid {
+        grid-template-columns: repeat(2, 1fr)
+      }
+
+      .steps {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 32px
+      }
+
+      .steps::before {
+        display: none
+      }
+
+      .summary-inner {
+        flex-direction: column
+      }
+
+      .price-cards {
+        grid-template-columns: 1fr
+      }
+    }
+
+    @media(max-width:768px) {
+      nav {
+        padding: 12px 20px
+      }
+
+      .nav-links {
+        display: none
+      }
+
+      .hero {
+        padding: 100px 20px 60px
+      }
+
+      .hero h1 {
+        font-size: 32px
+      }
+
+      .stats {
+        padding: 40px 20px
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px
+      }
+
+      .features,
+      .how,
+      .summary-section,
+      .pricing,
+      .cta {
+        padding: 60px 20px
+      }
+
+      .feat-grid {
+        grid-template-columns: 1fr
+      }
+
+      .steps {
+        grid-template-columns: 1fr
+      }
+
+      .price-cards {
+        grid-template-columns: 1fr;
+        max-width: 400px;
+        margin: 0 auto
+      }
+
+      .phone-mockup {
+        width: 280px
+      }
+
+      footer {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center
+      }
+
+      .foot-info {
+        text-align: center
+      }
+
+      .email-row {
+        flex-direction: column
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<svg class="defs">
-  <defs>
-    <linearGradient id="gradMint" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#10b981"/>
-      <stop offset="100%" stop-color="#06b6d4"/>
-    </linearGradient>
-  </defs>
-</svg>
+  <svg class="defs">
+    <defs>
+      <linearGradient id="gradMint" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#10b981" />
+        <stop offset="100%" stop-color="#06b6d4" />
+      </linearGradient>
+    </defs>
+  </svg>
 
-<!-- NAV -->
-<nav>
-  <a href="#" class="logo">Case<span>Front</span></a>
-  <div class="nav-right">
-    <div class="nav-links">
-      <a href="#features" data-lang="en">Features</a>
-      <a href="#features" data-lang="ko">기능</a>
-      <a href="#how" data-lang="en">How It Works</a>
-      <a href="#how" data-lang="ko">작동방식</a>
-      <a href="#pricing" data-lang="en">Pricing</a>
-      <a href="#pricing" data-lang="ko">가격</a>
-      <a href="#waitlist" class="nav-cta" data-lang="en">Get Early Access</a>
-      <a href="#waitlist" class="nav-cta" data-lang="ko">사전등록</a>
-    </div>
-    <div class="lang-toggle">
-      <button class="lang-btn active" onclick="setLang('en')">EN</button>
-      <button class="lang-btn" onclick="setLang('ko')">한국어</button>
-    </div>
-  </div>
-</nav>
-
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-grid"></div>
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
-  <div class="hero-content">
-    <div class="hero-left">
-      <div class="hero-badge">
-        <span class="dot"></span>
-        <span data-lang="en">Powered by Silicon Valley AI</span>
-        <span data-lang="ko">실리콘밸리 AI 기반</span>
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="logo">Case<span>Front</span></a>
+    <div class="nav-right">
+      <div class="nav-links">
+        <a href="#features" data-lang="en">Features</a>
+        <a href="#features" data-lang="ko">기능</a>
+        <a href="#how" data-lang="en">How It Works</a>
+        <a href="#how" data-lang="ko">작동방식</a>
+        <a href="#pricing" data-lang="en">Pricing</a>
+        <a href="#pricing" data-lang="ko">가격</a>
+        <a href="#waitlist" class="nav-cta" data-lang="en">Get Early Access</a>
+        <a href="#waitlist" class="nav-cta" data-lang="ko">사전등록</a>
       </div>
-
-      <h1 data-lang="en">While you're in court,<br><span class="em">AI takes the case</span></h1>
-      <h1 data-lang="ko">재판 중에도<br><span class="em">AI가 접수</span>합니다</h1>
-
-      <p class="hero-desc" data-lang="en">AI handles your law firm's client inquiries 24/7 — collects case facts, assesses urgency, and delivers structured summaries to you instantly.</p>
-      <p class="hero-desc" data-lang="ko">AI가 법률 사무소의 고객 상담을 24시간 응대하고, 사건 사실관계를 파악해 긴급도와 함께 변호사에게 즉시 전달합니다.</p>
-
-      <div class="kakao-badge">
-        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        <span data-lang="en">AI Legal Intake</span>
-        <span data-lang="ko">AI 법률 접수</span>
-      </div>
-
-      <p class="hero-desc-sub" data-lang="en">Your AI legal receptionist — in court, after hours, always on.</p>
-      <p class="hero-desc-sub" data-lang="ko">AI 법률 접수 비서 — 법정에 있을 때도, 퇴근 후에도, 24시간.</p>
-
-      <div class="hero-ctas">
-        <a href="#waitlist" class="btn-primary" data-lang="en">Get Early Access →</a>
-        <a href="#waitlist" class="btn-primary" data-lang="ko">사전등록 →</a>
-        <a href="#how" class="btn-ghost" data-lang="en">See How It Works</a>
-        <a href="#how" class="btn-ghost" data-lang="ko">작동방식 보기</a>
+      <div class="lang-toggle">
+        <button class="lang-btn active" onclick="setLang('en')">EN</button>
+        <button class="lang-btn" onclick="setLang('ko')">한국어</button>
       </div>
     </div>
-    <div class="hero-right">
-      <div class="phone-mockup">
-        <div class="phone-screen">
-          <div class="phone-top">
-            <div class="phone-icon-wrap ki">
-              <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            </div>
-            <p>CaseFront AI · Chat</p>
-            <h3 data-lang="en">Kim & Associates</h3>
-            <h3 data-lang="ko">김변호사 법률사무소</h3>
-          </div>
-          <div class="chat-area" id="chatDemo">
-            <!-- Messages injected by JS -->
-          </div>
-          <div class="notif-demo" id="notifDemo" style="display:none;margin:0 14px 12px">
-            <div class="notif-header">
-              <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-              <span data-lang="en">Lawyer Alert</span>
-              <span data-lang="ko">변호사 알림</span>
-              <span class="notif-badge normal" data-lang="en">NORMAL</span>
-              <span class="notif-badge normal" data-lang="ko">일반</span>
-            </div>
-            <div class="notif-text">
-              <strong data-lang="en">Civil — Loan Recovery</strong>
-              <strong data-lang="ko">민사 — 대여금 반환</strong><br>
-              <span data-lang="en">Hong Gildong, ₩30M loan unpaid since 2013. Promissory note exists.</span>
-              <span data-lang="ko">홍길동님, 2013년 대여금 3천만원 미반환. 차용증 있음.</span>
-            </div>
-            <div class="notif-meta" data-lang="en">→ Tap to open dashboard</div>
-            <div class="notif-meta" data-lang="ko">→ 탭하여 대시보드 열기</div>
-          </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="hero-content">
+      <div class="hero-left">
+        <div class="hero-badge">
+          <span class="dot"></span>
+          <span data-lang="en">Powered by Silicon Valley AI</span>
+          <span data-lang="ko">실리콘밸리 AI 기반</span>
+        </div>
+
+        <h1 data-lang="en">While you're in court,<br><span class="em">AI takes the case</span></h1>
+        <h1 data-lang="ko">재판 중에도<br><span class="em">AI가 접수</span>합니다</h1>
+
+        <p class="hero-desc" data-lang="en">AI handles your law firm's client inquiries 24/7 via web chat and KakaoTalk
+          — collects case facts, assesses urgency, and delivers structured summaries to you instantly.</p>
+        <p class="hero-desc" data-lang="ko">AI가 웹 채팅과 카카오톡으로 법률 사무소의 고객 상담을 24시간 응대하고, 사건 사실관계를 파악해 긴급도와 함께 변호사에게 즉시
+          전달합니다.</p>
+
+        <div class="kakao-badge">
+          <svg viewBox="0 0 24 24">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
+          <span data-lang="en">AI Legal Intake</span>
+          <span data-lang="ko">AI 법률 접수</span>
+        </div>
+
+        <p class="hero-desc-sub" data-lang="en">Your AI legal receptionist — in court, after hours, always on.</p>
+        <p class="hero-desc-sub" data-lang="ko">AI 법률 접수 비서 — 법정에 있을 때도, 퇴근 후에도, 24시간.</p>
+
+        <div class="hero-ctas">
+          <a href="#waitlist" class="btn-primary" data-lang="en">Get Early Access →</a>
+          <a href="#waitlist" class="btn-primary" data-lang="ko">사전등록 →</a>
+          <a href="#how" class="btn-ghost" data-lang="en">See How It Works</a>
+          <a href="#how" class="btn-ghost" data-lang="ko">작동방식 보기</a>
         </div>
       </div>
-    </div>
-  </div>
-</section>
-
-<!-- STATS -->
-<section class="stats">
-  <div class="stats-grid">
-    <div class="stat">
-      <h3>24/7</h3>
-      <p data-lang="en">Always-on AI<br>legal reception</p>
-      <p data-lang="ko">연중무휴 AI<br>법률 접수</p>
-    </div>
-    <div class="stat">
-      <h3>30s</h3>
-      <p data-lang="en">Case summary<br>delivered instantly</p>
-      <p data-lang="ko">사건 요약 즉시 전달<br>이메일로 수신</p>
-    </div>
-    <div class="stat">
-      <h3>1/10</h3>
-      <p data-lang="en">Cost of a receptionist<br>— AI works for less</p>
-      <p data-lang="ko">접수 직원 인건비의<br>— 1/10 비용</p>
-    </div>
-    <div class="stat">
-      <h3>1/10</h3>
-      <p data-lang="en">Cost vs. hiring<br>a receptionist</p>
-      <p data-lang="ko">접수 직원 대비<br>인건비 절감</p>
-    </div>
-  </div>
-</section>
-
-<!-- FEATURES -->
-<section class="features" id="features">
-  <p class="sec-label c">CORE FEATURES</p>
-  <h2 class="sec-title c" data-lang="en">AI that understands legal intake</h2>
-  <h2 class="sec-title c" data-lang="ko">법률 접수에 특화된 AI</h2>
-  <p class="sec-sub c" data-lang="en">Built specifically for Korean law firms. Not a generic chatbot.</p>
-  <p class="sec-sub c" data-lang="ko">한국 법률사무소를 위해 설계된 전문 AI. 범용 챗봇이 아닙니다.</p>
-
-  <div class="feat-grid">
-    <div class="feat">
-      <div class="icon icon-kakao">
-        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      </div>
-      <h3 data-lang="en">Web Chat AI Intake</h3>
-      <h3 data-lang="ko">웹 채팅 AI 접수</h3>
-      <p class="en-sub">Chat-Based Reception</p>
-      <p data-lang="en">Share your intake link anywhere — blog, SNS, business card. Clients click and start chatting. AI responds instantly, asks the right questions, and collects complete case details.</p>
-      <p data-lang="ko">접수 링크를 블로그, SNS, 명함 어디든 공유하세요. 고객이 클릭하면 바로 상담. AI가 즉시 응답하고, 한 번에 하나씩 질문하며 사건 사실관계를 완벽하게 파악합니다.</p>
-      <span class="phase-tag now" data-lang="en">LIVE</span>
-      <span class="phase-tag now" data-lang="ko">출시</span>
-    </div>
-    <div class="feat">
-      <div class="icon icon-mint">
-        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-      </div>
-      <h3 data-lang="en">Structured Case Summary</h3>
-      <h3 data-lang="ko">구조화된 사건 요약</h3>
-      <p class="en-sub">Event Timeline + Documents</p>
-      <p data-lang="en">AI generates a structured summary with chronological event timeline (who, when, what), urgency assessment, and a list of evidence documents needed.</p>
-      <p data-lang="ko">AI가 시간순 사실관계(주어·시기·행위), 긴급도 판단, 필요 증거자료 목록까지 정리된 요약을 자동 생성합니다.</p>
-      <span class="phase-tag now" data-lang="en">LIVE</span>
-      <span class="phase-tag now" data-lang="ko">출시</span>
-    </div>
-    <div class="feat">
-      <div class="icon icon-mint">
-        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      </div>
-      <h3 data-lang="en">Instant Lawyer Alerts</h3>
-      <h3 data-lang="ko">변호사 즉시 알림</h3>
-      <p class="en-sub">Email + Dashboard</p>
-      <p data-lang="en">New case? You're notified instantly via email with urgency level, case type, and a one-line summary. Click to open the full case in your dashboard.</p>
-      <p data-lang="ko">새 사건 접수 시 이메일로 긴급도·사건유형·요약이 즉시 전달됩니다. 클릭하면 대시보드에서 상세 확인.</p>
-      <span class="phase-tag now" data-lang="en">LIVE</span>
-      <span class="phase-tag now" data-lang="ko">출시</span>
-    </div>
-    <div class="feat">
-      <div class="icon icon-mint">
-        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
-      </div>
-      <h3 data-lang="en">Lawyer Dashboard</h3>
-      <h3 data-lang="ko">변호사 대시보드</h3>
-      <p class="en-sub">Case Management Hub</p>
-      <p data-lang="en">View all cases, event timelines, chat history, urgency levels, and uploaded documents in one responsive web dashboard. Works on mobile too.</p>
-      <p data-lang="ko">모든 사건, 사실관계 타임라인, 대화 내역, 긴급도, 증거자료를 한 곳에서 관리. 모바일 브라우저에서도 완벽 작동.</p>
-      <span class="phase-tag now" data-lang="en">LIVE</span>
-      <span class="phase-tag now" data-lang="ko">출시</span>
-    </div>
-    <div class="feat">
-      <div class="icon icon-mint">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      </div>
-      <h3 data-lang="en">AI Urgency Detection</h3>
-      <h3 data-lang="ko">AI 긴급도 자동 판단</h3>
-      <p class="en-sub">Objective Criteria</p>
-      <p data-lang="en">AI assesses urgency based on legal deadlines, detention status, and court dates — not the client's subjective claims. Prevents alert fatigue.</p>
-      <p data-lang="ko">AI가 법적 기한, 구속 여부, 재판일 등 객관적 기준으로 긴급도를 판단합니다. 고객의 주관적 주장이 아닌 사실 기반.</p>
-      <span class="phase-tag now" data-lang="en">LIVE</span>
-      <span class="phase-tag now" data-lang="ko">출시</span>
-    </div>
-    <div class="feat">
-      <div class="icon icon-kakao">
-        <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-      </div>
-      <h3 data-lang="en">AI Phone Reception</h3>
-      <h3 data-lang="ko">AI 전화 응대</h3>
-      <p class="en-sub">Voice-Based Intake</p>
-      <p data-lang="en">AI answers calls in natural Korean, collects case information by voice, and delivers the same structured summary. Keep your existing number.</p>
-      <p data-lang="ko">AI가 자연스러운 한국어로 전화를 받고, 음성으로 사건을 파악해 동일한 구조화된 요약을 생성합니다. 기존 번호 유지.</p>
-      <span class="phase-tag soon" data-lang="en">COMING SOON</span>
-      <span class="phase-tag soon" data-lang="ko">곧 출시</span>
-    </div>
-  </div>
-</section>
-
-<!-- HOW IT WORKS -->
-<section class="how" id="how">
-  <div class="how-inner">
-    <p class="sec-label c">HOW IT WORKS</p>
-    <h2 class="sec-title c" data-lang="en">Set up in 5 minutes</h2>
-    <h2 class="sec-title c" data-lang="ko">설치 5분. 바로 시작.</h2>
-    <p class="sec-sub c" data-lang="en">Share your intake link and start receiving structured case summaries.</p>
-    <p class="sec-sub c" data-lang="ko">접수 링크를 공유하면, 구조화된 사건 요약을 바로 받기 시작합니다.</p>
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">01</div>
-        <div class="step-circle sc-mint">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        </div>
-        <h3 data-lang="en">Register Your Firm</h3>
-        <h3 data-lang="ko">사무소 정보 등록</h3>
-        <p class="en">Firm Setup</p>
-        <p data-lang="en">Enter firm name, practice areas, and attorney details.</p>
-        <p data-lang="ko">사무소명, 전문 분야, 변호사 정보를 입력합니다.</p>
-      </div>
-      <div class="step">
-        <div class="step-num">02</div>
-        <div class="step-circle sc-kakao">
-          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        </div>
-        <h3 data-lang="en">Share Your Link</h3>
-        <h3 data-lang="ko">링크 공유</h3>
-        <p class="en">Chat Link</p>
-        <p data-lang="en">Share your chat link on blog, SNS, or business cards. Clients click and AI starts handling inquiries.</p>
-        <p data-lang="ko">채팅 링크를 블로그, SNS, 명함에 공유하면 AI가 즉시 상담을 시작합니다.</p>
-      </div>
-      <div class="step">
-        <div class="step-num">03</div>
-        <div class="step-circle sc-mint">
-          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        </div>
-        <h3 data-lang="en">AI Collects & Summarizes</h3>
-        <h3 data-lang="ko">AI가 사건 파악 · 요약</h3>
-        <p class="en">Structured Summary</p>
-        <p data-lang="en">AI asks targeted questions, builds an event timeline, assesses urgency, and lists needed documents.</p>
-        <p data-lang="ko">AI가 맞춤 질문으로 사실관계 타임라인을 구성하고, 긴급도를 판단하고, 필요 증거자료를 정리합니다.</p>
-      </div>
-      <div class="step">
-        <div class="step-num">04</div>
-        <div class="step-circle sc-mint">
-          <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        </div>
-        <h3 data-lang="en">You Get Notified</h3>
-        <h3 data-lang="ko">이메일로 전달</h3>
-        <p class="en">Instant Delivery</p>
-        <p data-lang="en">Receive the case summary via email. Click to view full details in your dashboard.</p>
-        <p data-lang="ko">이메일로 사건 요약을 즉시 수신. 클릭하면 대시보드에서 상세 확인.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- SUMMARY DEMO -->
-<section class="summary-section">
-  <div class="summary-inner">
-    <div class="summary-left">
-      <p class="sec-label">AI CASE SUMMARY</p>
-      <h2 class="sec-title" data-lang="en">Not just text — <br>structured legal intelligence</h2>
-      <h2 class="sec-title" data-lang="ko">단순 텍스트가 아닌<br>구조화된 법률 인텔리전스</h2>
-      <p class="sec-sub" data-lang="en">AI generates a complete case intake with chronological events, urgency assessment, and document checklist — ready for attorney review.</p>
-      <p class="sec-sub" data-lang="ko">AI가 시간순 사건 경위, 긴급도 판단, 증거자료 체크리스트까지 포함한 완전한 접수 요약을 생성합니다. 변호사 검토만 하면 됩니다.</p>
-    </div>
-    <div class="summary-right">
-      <div class="summary-card">
-        <div class="summary-card-header">
-          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          <span data-lang="en">Case Summary</span>
-          <span data-lang="ko">사건 요약</span>
-          <span class="badge badge-normal" data-lang="en">NORMAL</span>
-          <span class="badge badge-normal" data-lang="ko">일반</span>
-        </div>
-        <div class="summary-row">
-          <div class="summary-label" data-lang="en">Client</div>
-          <div class="summary-label" data-lang="ko">의뢰인</div>
-          <div class="summary-value"><strong data-lang="en">Hong Gildong</strong><strong data-lang="ko">홍길동</strong> · 010-1234-5678</div>
-        </div>
-        <div class="summary-row">
-          <div class="summary-label" data-lang="en">Type</div>
-          <div class="summary-label" data-lang="ko">사건유형</div>
-          <div class="summary-value" data-lang="en">Civil — Loan Recovery</div>
-          <div class="summary-value" data-lang="ko">민사 — 대여금 반환</div>
-        </div>
-        <div class="summary-row">
-          <div class="summary-label" data-lang="en">Events</div>
-          <div class="summary-label" data-lang="ko">사건경위</div>
-          <div class="summary-value">
-            <div class="timeline-item">
-              <div class="timeline-date">2013. 06. 06</div>
-              <div class="timeline-text" data-lang="en">Kim XX borrowed ₩30M from Park XX (promissory note signed)</div>
-              <div class="timeline-text" data-lang="ko">김XX는 박XX에게 대여금 3,000만원을 차용 (차용증 작성)</div>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-date">2023. 01. 15</div>
-              <div class="timeline-text" data-lang="en">Park XX demanded repayment via KakaoTalk</div>
-              <div class="timeline-text" data-lang="ko">박XX가 김XX에게 카카오톡으로 변제 독촉</div>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-date">2024. 03. ~</div>
-              <div class="timeline-text" data-lang="en">Kim XX stopped responding to all contact</div>
-              <div class="timeline-text" data-lang="ko">김XX가 모든 연락을 두절</div>
-            </div>
-          </div>
-        </div>
-        <div class="summary-row">
-          <div class="summary-label" data-lang="en">Docs needed</div>
-          <div class="summary-label" data-lang="ko">필요서류</div>
-          <div class="summary-value">
-            <div class="doc-list">
-              <div class="doc-item">
-                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-                <span data-lang="en">Promissory note copy</span>
-                <span data-lang="ko">차용증 사본</span>
+      <div class="hero-right">
+        <div class="phone-mockup">
+          <div class="phone-screen">
+            <div class="phone-top">
+              <div class="phone-icon-wrap ki">
+                <svg viewBox="0 0 24 24">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
               </div>
-              <div class="doc-item">
-                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-                <span data-lang="en">Bank transfer records</span>
-                <span data-lang="ko">계좌이체 내역</span>
+              <p>CaseFront AI · Chat</p>
+              <h3 data-lang="en">Kim & Associates</h3>
+              <h3 data-lang="ko">김변호사 법률사무소</h3>
+            </div>
+            <div class="chat-area" id="chatDemo">
+              <!-- Messages injected by JS -->
+            </div>
+            <div class="notif-demo" id="notifDemo" style="display:none;margin:0 14px 12px">
+              <div class="notif-header">
+                <svg viewBox="0 0 24 24">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg>
+                <span data-lang="en">Lawyer Alert</span>
+                <span data-lang="ko">변호사 알림</span>
+                <span class="notif-badge normal" data-lang="en">NORMAL</span>
+                <span class="notif-badge normal" data-lang="ko">일반</span>
               </div>
-              <div class="doc-item">
-                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-                <span data-lang="en">Demand messages (KakaoTalk)</span>
-                <span data-lang="ko">독촉 문자/카톡 캡처</span>
+              <div class="notif-text">
+                <strong data-lang="en">Civil — Loan Recovery</strong>
+                <strong data-lang="ko">민사 — 대여금 반환</strong><br>
+                <span data-lang="en">Hong Gildong, ₩30M loan unpaid since 2013. Promissory note exists.</span>
+                <span data-lang="ko">홍길동님, 2013년 대여금 3천만원 미반환. 차용증 있음.</span>
+              </div>
+              <div class="notif-meta" data-lang="en">→ Tap to open dashboard</div>
+              <div class="notif-meta" data-lang="ko">→ 탭하여 대시보드 열기</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="stats">
+    <div class="stats-grid">
+      <div class="stat">
+        <h3>24/7</h3>
+        <p data-lang="en">Always-on AI<br>legal reception</p>
+        <p data-lang="ko">연중무휴 AI<br>법률 접수</p>
+      </div>
+      <div class="stat">
+        <h3>30s</h3>
+        <p data-lang="en">Case summary<br>delivered instantly</p>
+        <p data-lang="ko">사건 요약 즉시 전달<br>이메일로 수신</p>
+      </div>
+      <div class="stat">
+        <h3>1/10</h3>
+        <p data-lang="en">Cost of a receptionist<br>— AI works for less</p>
+        <p data-lang="ko">접수 직원 인건비의<br>— 1/10 비용</p>
+      </div>
+      <div class="stat">
+        <h3>94%</h3>
+        <p data-lang="en">Koreans on KakaoTalk<br>— meet clients where they are</p>
+        <p data-lang="ko">카카오톡 보급률<br>— 고객이 있는 곳에서</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features" id="features">
+    <p class="sec-label c">CORE FEATURES</p>
+    <h2 class="sec-title c" data-lang="en">AI that understands legal intake</h2>
+    <h2 class="sec-title c" data-lang="ko">법률 접수에 특화된 AI</h2>
+    <p class="sec-sub c" data-lang="en">Built specifically for Korean law firms. Not a generic chatbot.</p>
+    <p class="sec-sub c" data-lang="ko">한국 법률사무소를 위해 설계된 전문 AI. 범용 챗봇이 아닙니다.</p>
+
+    <div class="feat-grid">
+      <div class="feat">
+        <div class="icon icon-mint">
+          <svg viewBox="0 0 24 24">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
+        </div>
+        <h3 data-lang="en">Web Chat AI Intake</h3>
+        <h3 data-lang="ko">웹 채팅 AI 접수</h3>
+        <p class="en-sub">Chat-Based Reception</p>
+        <p data-lang="en">Share your intake link anywhere — blog, SNS, business card. Clients click and start chatting.
+          AI responds instantly, asks the right questions, and collects complete case details.</p>
+        <p data-lang="ko">접수 링크를 블로그, SNS, 명함 어디든 공유하세요. 고객이 클릭하면 바로 상담. AI가 즉시 응답하고, 한 번에 하나씩 질문하며 사건 사실관계를 완벽하게 파악합니다.
+        </p>
+        <span class="phase-tag now" data-lang="en">LIVE</span>
+        <span class="phase-tag now" data-lang="ko">출시</span>
+      </div>
+      <div class="feat">
+        <div class="icon icon-kakao">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M12 3c-4.97 0-9 3.19-9 7.13 0 2.56 1.68 4.8 4.2 6.07l-1.07 3.96c-.06.22.18.4.38.28L10.8 18c.39.04.79.06 1.2.06 4.97 0 9-3.19 9-7.13S16.97 3 12 3z" />
+          </svg>
+        </div>
+        <h3 data-lang="en">KakaoTalk AI Intake</h3>
+        <h3 data-lang="ko">카카오톡 AI 접수</h3>
+        <p class="en-sub">Korea's #1 Messenger</p>
+        <p data-lang="en">Clients message your KakaoTalk channel anytime. AI responds instantly on Korea's most-used
+          messenger — 94% penetration rate. No app download needed.</p>
+        <p data-lang="ko">고객이 카카오톡 채널로 언제든 문의합니다. 한국인 94%가 사용하는 메신저에서 AI가 즉시 응답. 별도 앱 설치 불필요.</p>
+        <span class="phase-tag now" data-lang="en">LIVE</span>
+        <span class="phase-tag now" data-lang="ko">출시</span>
+      </div>
+      <div class="feat">
+        <div class="icon icon-mint">
+          <svg viewBox="0 0 24 24">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="16" y1="13" x2="8" y2="13" />
+            <line x1="16" y1="17" x2="8" y2="17" />
+          </svg>
+        </div>
+        <h3 data-lang="en">Structured Case Summary</h3>
+        <h3 data-lang="ko">구조화된 사건 요약</h3>
+        <p class="en-sub">Event Timeline + Documents</p>
+        <p data-lang="en">AI generates a structured summary with chronological event timeline (who, when, what), urgency
+          assessment, and a list of evidence documents needed.</p>
+        <p data-lang="ko">AI가 시간순 사실관계(주어·시기·행위), 긴급도 판단, 필요 증거자료 목록까지 정리된 요약을 자동 생성합니다.</p>
+        <span class="phase-tag now" data-lang="en">LIVE</span>
+        <span class="phase-tag now" data-lang="ko">출시</span>
+      </div>
+      <div class="feat">
+        <div class="icon icon-mint">
+          <svg viewBox="0 0 24 24">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+          </svg>
+        </div>
+        <h3 data-lang="en">Instant Lawyer Alerts</h3>
+        <h3 data-lang="ko">변호사 즉시 알림</h3>
+        <p class="en-sub">Alimtalk + Email</p>
+        <p data-lang="en">New case? You're notified instantly via KakaoTalk Alimtalk and email with urgency level, case
+          type, and a one-line summary. Tap to open the full case in your dashboard.</p>
+        <p data-lang="ko">새 사건 접수 시 카카오 알림톡과 이메일로 긴급도·사건유형·요약이 즉시 전달됩니다. 탭하면 대시보드에서 상세 확인.</p>
+        <span class="phase-tag now" data-lang="en">LIVE</span>
+        <span class="phase-tag now" data-lang="ko">출시</span>
+      </div>
+      <div class="feat">
+        <div class="icon icon-mint">
+          <svg viewBox="0 0 24 24">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            <line x1="3" y1="9" x2="21" y2="9" />
+            <line x1="9" y1="21" x2="9" y2="9" />
+          </svg>
+        </div>
+        <h3 data-lang="en">Lawyer Dashboard</h3>
+        <h3 data-lang="ko">변호사 대시보드</h3>
+        <p class="en-sub">Case Management Hub</p>
+        <p data-lang="en">View all cases, event timelines, chat history, urgency levels, and uploaded documents in one
+          responsive web dashboard. Works on mobile too.</p>
+        <p data-lang="ko">모든 사건, 사실관계 타임라인, 대화 내역, 긴급도, 증거자료를 한 곳에서 관리. 모바일 브라우저에서도 완벽 작동.</p>
+        <span class="phase-tag now" data-lang="en">LIVE</span>
+        <span class="phase-tag now" data-lang="ko">출시</span>
+      </div>
+      <div class="feat">
+        <div class="icon icon-mint">
+          <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+        </div>
+        <h3 data-lang="en">AI Urgency Detection</h3>
+        <h3 data-lang="ko">AI 긴급도 자동 판단</h3>
+        <p class="en-sub">Objective Criteria</p>
+        <p data-lang="en">AI assesses urgency based on legal deadlines, detention status, and court dates — not the
+          client's subjective claims. Prevents alert fatigue.</p>
+        <p data-lang="ko">AI가 법적 기한, 구속 여부, 재판일 등 객관적 기준으로 긴급도를 판단합니다. 고객의 주관적 주장이 아닌 사실 기반.</p>
+        <span class="phase-tag now" data-lang="en">LIVE</span>
+        <span class="phase-tag now" data-lang="ko">출시</span>
+      </div>
+      <div class="feat">
+        <div class="icon icon-mint">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+          </svg>
+        </div>
+        <h3 data-lang="en">AI Phone Reception</h3>
+        <h3 data-lang="ko">AI 전화 응대</h3>
+        <p class="en-sub">Voice-Based Intake</p>
+        <p data-lang="en">AI answers calls in natural Korean, collects case information by voice, and delivers the same
+          structured summary. Keep your existing number.</p>
+        <p data-lang="ko">AI가 자연스러운 한국어로 전화를 받고, 음성으로 사건을 파악해 동일한 구조화된 요약을 생성합니다. 기존 번호 유지.</p>
+        <span class="phase-tag soon" data-lang="en">COMING SOON</span>
+        <span class="phase-tag soon" data-lang="ko">곧 출시</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how" id="how">
+    <div class="how-inner">
+      <p class="sec-label c">HOW IT WORKS</p>
+      <h2 class="sec-title c" data-lang="en">Set up in 5 minutes</h2>
+      <h2 class="sec-title c" data-lang="ko">설치 5분. 바로 시작.</h2>
+      <p class="sec-sub c" data-lang="en">Connect web chat and KakaoTalk, then start receiving structured case
+        summaries.</p>
+      <p class="sec-sub c" data-lang="ko">웹 채팅과 카카오톡을 연결하면, 구조화된 사건 요약을 바로 받기 시작합니다.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <div class="step-circle sc-mint">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="3" />
+              <path
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            </svg>
+          </div>
+          <h3 data-lang="en">Register Your Firm</h3>
+          <h3 data-lang="ko">사무소 정보 등록</h3>
+          <p class="en">Firm Setup</p>
+          <p data-lang="en">Enter firm name, practice areas, and attorney details.</p>
+          <p data-lang="ko">사무소명, 전문 분야, 변호사 정보를 입력합니다.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <div class="step-circle sc-mint">
+            <svg viewBox="0 0 24 24">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+          </div>
+          <h3 data-lang="en">Connect Channels</h3>
+          <h3 data-lang="ko">채널 연결</h3>
+          <p class="en">Web Chat + KakaoTalk</p>
+          <p data-lang="en">Get your web chat link and connect your KakaoTalk channel. AI starts handling inquiries on
+            both instantly.</p>
+          <p data-lang="ko">웹 채팅 링크와 카카오톡 채널을 연결하면 AI가 두 채널 모두에서 즉시 상담을 시작합니다.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <div class="step-circle sc-mint">
+            <svg viewBox="0 0 24 24">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+            </svg>
+          </div>
+          <h3 data-lang="en">AI Collects & Summarizes</h3>
+          <h3 data-lang="ko">AI가 사건 파악 · 요약</h3>
+          <p class="en">Structured Summary</p>
+          <p data-lang="en">AI asks targeted questions, builds an event timeline, assesses urgency, and lists needed
+            documents.</p>
+          <p data-lang="ko">AI가 맞춤 질문으로 사실관계 타임라인을 구성하고, 긴급도를 판단하고, 필요 증거자료를 정리합니다.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">04</div>
+          <div class="step-circle sc-mint">
+            <svg viewBox="0 0 24 24">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+          </div>
+          <h3 data-lang="en">You Get Notified</h3>
+          <h3 data-lang="ko">알림톡 & 이메일 전달</h3>
+          <p class="en">Instant Delivery</p>
+          <p data-lang="en">Receive the case summary via KakaoTalk Alimtalk and email. Tap to view full details in your
+            dashboard.</p>
+          <p data-lang="ko">카카오 알림톡과 이메일로 사건 요약을 즉시 수신. 탭하면 대시보드에서 상세 확인.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUMMARY DEMO -->
+  <section class="summary-section">
+    <div class="summary-inner">
+      <div class="summary-left">
+        <p class="sec-label">AI CASE SUMMARY</p>
+        <h2 class="sec-title" data-lang="en">Not just text — <br>structured legal intelligence</h2>
+        <h2 class="sec-title" data-lang="ko">단순 텍스트가 아닌<br>구조화된 법률 인텔리전스</h2>
+        <p class="sec-sub" data-lang="en">AI generates a complete case intake with chronological events, urgency
+          assessment, and document checklist — ready for attorney review.</p>
+        <p class="sec-sub" data-lang="ko">AI가 시간순 사건 경위, 긴급도 판단, 증거자료 체크리스트까지 포함한 완전한 접수 요약을 생성합니다. 변호사 검토만 하면 됩니다.</p>
+      </div>
+      <div class="summary-right">
+        <div class="summary-card">
+          <div class="summary-card-header">
+            <svg viewBox="0 0 24 24">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+            </svg>
+            <span data-lang="en">Case Summary</span>
+            <span data-lang="ko">사건 요약</span>
+            <span class="badge badge-normal" data-lang="en">NORMAL</span>
+            <span class="badge badge-normal" data-lang="ko">일반</span>
+          </div>
+          <div class="summary-row">
+            <div class="summary-label" data-lang="en">Client</div>
+            <div class="summary-label" data-lang="ko">의뢰인</div>
+            <div class="summary-value"><strong data-lang="en">Hong Gildong</strong><strong data-lang="ko">홍길동</strong> ·
+              010-1234-5678</div>
+          </div>
+          <div class="summary-row">
+            <div class="summary-label" data-lang="en">Type</div>
+            <div class="summary-label" data-lang="ko">사건유형</div>
+            <div class="summary-value" data-lang="en">Civil — Loan Recovery</div>
+            <div class="summary-value" data-lang="ko">민사 — 대여금 반환</div>
+          </div>
+          <div class="summary-row">
+            <div class="summary-label" data-lang="en">Events</div>
+            <div class="summary-label" data-lang="ko">사건경위</div>
+            <div class="summary-value">
+              <div class="timeline-item">
+                <div class="timeline-date">2013. 06. 06</div>
+                <div class="timeline-text" data-lang="en">Kim XX borrowed ₩30M from Park XX (promissory note signed)
+                </div>
+                <div class="timeline-text" data-lang="ko">김XX는 박XX에게 대여금 3,000만원을 차용 (차용증 작성)</div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-date">2023. 01. 15</div>
+                <div class="timeline-text" data-lang="en">Park XX demanded repayment via KakaoTalk</div>
+                <div class="timeline-text" data-lang="ko">박XX가 김XX에게 카카오톡으로 변제 독촉</div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-date">2024. 03. ~</div>
+                <div class="timeline-text" data-lang="en">Kim XX stopped responding to all contact</div>
+                <div class="timeline-text" data-lang="ko">김XX가 모든 연락을 두절</div>
+              </div>
+            </div>
+          </div>
+          <div class="summary-row">
+            <div class="summary-label" data-lang="en">Docs needed</div>
+            <div class="summary-label" data-lang="ko">필요서류</div>
+            <div class="summary-value">
+              <div class="doc-list">
+                <div class="doc-item">
+                  <svg viewBox="0 0 24 24">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  <span data-lang="en">Promissory note copy</span>
+                  <span data-lang="ko">차용증 사본</span>
+                </div>
+                <div class="doc-item">
+                  <svg viewBox="0 0 24 24">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  <span data-lang="en">Bank transfer records</span>
+                  <span data-lang="ko">계좌이체 내역</span>
+                </div>
+                <div class="doc-item">
+                  <svg viewBox="0 0 24 24">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  <span data-lang="en">Demand messages (KakaoTalk)</span>
+                  <span data-lang="ko">독촉 문자/카톡 캡처</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- PRICING -->
-<section class="pricing" id="pricing">
-  <p class="sec-label">PRICING</p>
-  <h2 class="sec-title" data-lang="en">1/10th the cost of a receptionist</h2>
-  <h2 class="sec-title" data-lang="ko">접수 직원 인건비의 1/10</h2>
-  <p class="sec-sub" data-lang="en">Plans that grow with your firm. Cancel anytime.</p>
-  <p class="sec-sub" data-lang="ko">사무소 규모에 맞는 요금제. 언제든 해지 가능.</p>
+  <!-- PRICING -->
+  <section class="pricing" id="pricing">
+    <p class="sec-label">PRICING</p>
+    <h2 class="sec-title" data-lang="en">1/10th the cost of a receptionist</h2>
+    <h2 class="sec-title" data-lang="ko">접수 직원 인건비의 1/10</h2>
+    <p class="sec-sub" data-lang="en">Plans that grow with your firm. Cancel anytime.</p>
+    <p class="sec-sub" data-lang="ko">사무소 규모에 맞는 요금제. 언제든 해지 가능.</p>
 
-  <div class="price-cards">
-    <div class="price-card">
-      <div class="price-name" data-lang="en">Basic</div>
-      <div class="price-name" data-lang="ko">베이직</div>
-      <div class="price-amount">₩99,000<span>/mo</span></div>
-      <div class="price-desc" data-lang="en">Web chat AI intake for solo practitioners</div>
-      <div class="price-desc" data-lang="ko">1인 사무소를 위한 웹 채팅 AI 접수</div>
-      <div class="price-list">
-        <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span> <span data-lang="en">Web chat AI intake</span><span data-lang="ko">웹 채팅 AI 접수</span></div>
-        <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span> <span data-lang="en">Structured case summaries</span><span data-lang="ko">구조화된 사건 요약</span></div>
-        <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span> <span data-lang="en">Email notifications</span><span data-lang="ko">이메일 알림</span></div>
-        <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span> <span data-lang="en">Lawyer dashboard</span><span data-lang="ko">변호사 대시보드</span></div>
+    <div class="price-cards">
+      <div class="price-card">
+        <div class="price-name" data-lang="en">Basic</div>
+        <div class="price-name" data-lang="ko">베이직</div>
+        <div class="price-amount">₩99,000<span>/mo</span></div>
+        <div class="price-desc" data-lang="en">Web chat + KakaoTalk AI intake</div>
+        <div class="price-desc" data-lang="ko">웹 채팅 + 카카오톡 AI 접수</div>
+        <div class="price-list">
+          <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24">
+                <polyline points="20 6 9 17 4 12" />
+              </svg></span> <span data-lang="en">Web chat AI intake</span><span data-lang="ko">웹 채팅 AI 접수</span></div>
+          <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24">
+                <polyline points="20 6 9 17 4 12" />
+              </svg></span> <span data-lang="en">KakaoTalk AI intake</span><span data-lang="ko">카카오톡 AI 접수</span></div>
+          <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24">
+                <polyline points="20 6 9 17 4 12" />
+              </svg></span> <span data-lang="en">Structured case summaries</span><span data-lang="ko">구조화된 사건 요약</span>
+          </div>
+          <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24">
+                <polyline points="20 6 9 17 4 12" />
+              </svg></span> <span data-lang="en">Email & Alimtalk notifications</span><span data-lang="ko">이메일 & 알림톡
+              전달</span></div>
+          <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24">
+                <polyline points="20 6 9 17 4 12" />
+              </svg></span> <span data-lang="en">Lawyer dashboard</span><span data-lang="ko">변호사 대시보드</span></div>
+        </div>
+        <a href="#waitlist" class="btn-primary" style="width:100%;justify-content:center;font-size:14px;padding:12px"
+          data-lang="en">Join Waitlist</a>
+        <a href="#waitlist" class="btn-primary" style="width:100%;justify-content:center;font-size:14px;padding:12px"
+          data-lang="ko">사전등록</a>
       </div>
-      <a href="#waitlist" class="btn-primary" style="width:100%;justify-content:center;font-size:14px;padding:12px" data-lang="en">Join Waitlist</a>
-      <a href="#waitlist" class="btn-primary" style="width:100%;justify-content:center;font-size:14px;padding:12px" data-lang="ko">사전등록</a>
-    </div>
 
-    <div class="price-card featured">
-      <div class="soon-badge" data-lang="en">MOST POPULAR</div>
-      <div class="soon-badge" data-lang="ko">인기</div>
-      <div class="price-name" data-lang="en">Pro</div>
-      <div class="price-name" data-lang="ko">프로</div>
-      <div class="price-amount">₩199,000<span>/mo</span></div>
-      <div class="price-desc" data-lang="en">+ Call recording & AI agent summary</div>
-      <div class="price-desc" data-lang="ko">+ 통화 녹음 & AI 에이전트 요약</div>
-      <div class="price-list">
-        <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span> <span data-lang="en">Everything in Basic</span><span data-lang="ko">베이직 전체 포함</span></div>
-        <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span> <span data-lang="en">Call recording app</span><span data-lang="ko">통화 녹음 앱</span></div>
-        <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span> <span data-lang="en">AI call summary</span><span data-lang="ko">AI 통화 요약</span></div>
-        <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span> <span data-lang="en">Push notifications</span><span data-lang="ko">앱 푸시 알림</span></div>
+      <div class="price-card featured">
+        <div class="soon-badge" data-lang="en">MOST POPULAR</div>
+        <div class="soon-badge" data-lang="ko">인기</div>
+        <div class="price-name" data-lang="en">Pro</div>
+        <div class="price-name" data-lang="ko">프로</div>
+        <div class="price-amount">₩199,000<span>/mo</span></div>
+        <div class="price-desc" data-lang="en">+ Call recording & AI agent summary</div>
+        <div class="price-desc" data-lang="ko">+ 통화 녹음 & AI 에이전트 요약</div>
+        <div class="price-list">
+          <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24">
+                <polyline points="20 6 9 17 4 12" />
+              </svg></span> <span data-lang="en">Everything in Basic</span><span data-lang="ko">베이직 전체 포함</span></div>
+          <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24">
+                <polyline points="20 6 9 17 4 12" />
+              </svg></span> <span data-lang="en">Call recording app</span><span data-lang="ko">통화 녹음 앱</span></div>
+          <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24">
+                <polyline points="20 6 9 17 4 12" />
+              </svg></span> <span data-lang="en">AI call summary</span><span data-lang="ko">AI 통화 요약</span></div>
+          <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24">
+                <polyline points="20 6 9 17 4 12" />
+              </svg></span> <span data-lang="en">Push notifications</span><span data-lang="ko">앱 푸시 알림</span></div>
+        </div>
+        <a href="#waitlist" class="btn-primary" style="width:100%;justify-content:center;font-size:14px;padding:12px"
+          data-lang="en">Join Waitlist</a>
+        <a href="#waitlist" class="btn-primary" style="width:100%;justify-content:center;font-size:14px;padding:12px"
+          data-lang="ko">사전등록</a>
       </div>
-      <a href="#waitlist" class="btn-primary" style="width:100%;justify-content:center;font-size:14px;padding:12px" data-lang="en">Join Waitlist</a>
-      <a href="#waitlist" class="btn-primary" style="width:100%;justify-content:center;font-size:14px;padding:12px" data-lang="ko">사전등록</a>
-    </div>
 
-    <div class="price-card">
-      <div class="soon-badge" data-lang="en">COMING SOON</div>
-      <div class="soon-badge" data-lang="ko">곧 출시</div>
-      <div class="price-name" data-lang="en">Premium</div>
-      <div class="price-name" data-lang="ko">프리미엄</div>
-      <div class="price-amount">₩299,000<span>/mo</span></div>
-      <div class="price-desc" data-lang="en">+ KakaoTalk channel & AI phone</div>
-      <div class="price-desc" data-lang="ko">+ 카카오톡 채널 연동 & AI 전화 응대</div>
-      <div class="price-list">
-        <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span> <span data-lang="en">Everything in Pro</span><span data-lang="ko">프로 전체 포함</span></div>
-        <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span> <span data-lang="en">KakaoTalk channel setup & integration</span><span data-lang="ko">카카오톡 채널 세팅 & 연동</span></div>
-        <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span> <span data-lang="en">KakaoTalk Alimtalk notifications</span><span data-lang="ko">카카오 알림톡 전달</span></div>
-        <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span> <span data-lang="en">AI phone reception</span><span data-lang="ko">AI 전화 자동 응대</span></div>
+      <div class="price-card">
+        <div class="soon-badge" data-lang="en">COMING SOON</div>
+        <div class="soon-badge" data-lang="ko">곧 출시</div>
+        <div class="price-name" data-lang="en">Premium</div>
+        <div class="price-name" data-lang="ko">프리미엄</div>
+        <div class="price-amount">₩299,000<span>/mo</span></div>
+        <div class="price-desc" data-lang="en">+ Call recording & AI phone reception</div>
+        <div class="price-desc" data-lang="ko">+ 통화 녹음 & AI 전화 응대</div>
+        <div class="price-list">
+          <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24">
+                <polyline points="20 6 9 17 4 12" />
+              </svg></span> <span data-lang="en">Everything in Pro</span><span data-lang="ko">프로 전체 포함</span></div>
+          <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24">
+                <polyline points="20 6 9 17 4 12" />
+              </svg></span> <span data-lang="en">AI answers phone calls</span><span data-lang="ko">AI 전화 자동 응대</span>
+          </div>
+          <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24">
+                <polyline points="20 6 9 17 4 12" />
+              </svg></span> <span data-lang="en">AI pre-screening & transfer</span><span data-lang="ko">AI 사전 심사 & 변호사
+              연결</span></div>
+          <div class="price-item"><span class="ck"><svg viewBox="0 0 24 24">
+                <polyline points="20 6 9 17 4 12" />
+              </svg></span> <span data-lang="en">Voicemail AI agent</span><span data-lang="ko">부재중 AI 에이전트 응대</span>
+          </div>
+        </div>
+        <a href="#waitlist" class="btn-ghost" style="width:100%;justify-content:center;font-size:14px;padding:12px"
+          data-lang="en">Notify Me</a>
+        <a href="#waitlist" class="btn-ghost" style="width:100%;justify-content:center;font-size:14px;padding:12px"
+          data-lang="ko">출시 알림</a>
       </div>
-      <a href="#waitlist" class="btn-ghost" style="width:100%;justify-content:center;font-size:14px;padding:12px" data-lang="en">Notify Me</a>
-      <a href="#waitlist" class="btn-ghost" style="width:100%;justify-content:center;font-size:14px;padding:12px" data-lang="ko">출시 알림</a>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- CTA -->
-<section class="cta" id="waitlist">
-  <div class="cta-box">
-    <div class="cta-line"></div>
-    <h2 data-lang="en">Be the first to try CaseFront</h2>
-    <h2 data-lang="ko">가장 먼저 시작하세요</h2>
-    <p class="sub" data-lang="en">AI legal intake for Korean law firms — join the waitlist today.</p>
-    <p class="sub" data-lang="ko">AI 법률 접수 비서 — 지금 사전등록하세요.</p>
-    <div class="email-row">
-      <input type="email" id="emailInput" data-lang="en" placeholder="Enter your email address">
-      <input type="email" id="emailInputKo" data-lang="ko" placeholder="이메일 주소를 입력하세요">
-      <button type="submit" data-lang="en" onclick="submitWaitlist()">Join Waitlist</button>
-      <button type="submit" data-lang="ko" onclick="submitWaitlist()">사전등록</button>
+  <!-- CTA -->
+  <section class="cta" id="waitlist">
+    <div class="cta-box">
+      <div class="cta-line"></div>
+      <h2 data-lang="en">Be the first to try CaseFront</h2>
+      <h2 data-lang="ko">가장 먼저 시작하세요</h2>
+      <p class="sub" data-lang="en">AI legal intake via web chat & KakaoTalk — join the waitlist today.</p>
+      <p class="sub" data-lang="ko">웹 채팅 & 카카오톡 AI 법률 접수 — 지금 사전등록하세요.</p>
+      <div class="email-row">
+        <input type="email" id="emailInput" data-lang="en" placeholder="Enter your email address">
+        <input type="email" id="emailInputKo" data-lang="ko" placeholder="이메일 주소를 입력하세요">
+        <button type="submit" data-lang="en" onclick="submitWaitlist()">Join Waitlist</button>
+        <button type="submit" data-lang="ko" onclick="submitWaitlist()">사전등록</button>
+      </div>
+      <p class="cta-note" id="cta-note" data-lang="en">No spam — we'll only notify you at launch.</p>
+      <p class="cta-note" id="cta-note-ko" data-lang="ko">스팸 없음 · 출시 알림만 보내드립니다.</p>
     </div>
-    <p class="cta-note" id="cta-note" data-lang="en">No spam — we'll only notify you at launch.</p>
-    <p class="cta-note" id="cta-note-ko" data-lang="ko">스팸 없음 · 출시 알림만 보내드립니다.</p>
-  </div>
-</section>
+  </section>
 
-<!-- FOOTER -->
-<footer>
-  <div class="foot-logo">Case<span>Front</span></div>
-  <div class="foot-info">
-    © 2026 CaseFront. All rights reserved.<br>
-    Based in California, USA · Built for Korean Law Firms
-  </div>
-</footer>
+  <!-- FOOTER -->
+  <footer>
+    <div class="foot-logo">Case<span>Front</span></div>
+    <div class="foot-info">
+      © 2026 CaseFront. All rights reserved.<br>
+      Based in California, USA · Built for Korean Law Firms
+    </div>
+  </footer>
 
-<script>
-// ===== LANGUAGE TOGGLE =====
-function setLang(lang){
-  document.body.classList.toggle('ko',lang==='ko');
-  document.querySelectorAll('.lang-btn').forEach(b=>{
-    b.classList.toggle('active',b.textContent.trim()===(lang==='ko'?'한국어':'EN'));
-  });
-}
+  <script>
+    // ===== LANGUAGE TOGGLE =====
+    function setLang(lang) {
+      document.body.classList.toggle('ko', lang === 'ko');
+      document.querySelectorAll('.lang-btn').forEach(b => {
+        b.classList.toggle('active', b.textContent.trim() === (lang === 'ko' ? '한국어' : 'EN'));
+      });
+    }
 
-// ===== CHAT DEMO ANIMATION =====
-const chatDemo=document.getElementById('chatDemo');
-const notifDemo=document.getElementById('notifDemo');
+    // ===== CHAT DEMO ANIMATION =====
+    const chatDemo = document.getElementById('chatDemo');
+    const notifDemo = document.getElementById('notifDemo');
 
-const messagesEn=[
-  {role:'ai',text:'Welcome to Kim & Associates. How can we help you today?'},
-  {role:'user',text:'I lent someone 30 million won and they won\'t pay me back'},
-  {role:'ai',text:'I understand. When did you lend the money, and do you have a promissory note?'},
-  {role:'user',text:'June 2013. Yes, I have the note signed'},
-  {role:'ai',text:'Got it. When did you last contact the borrower about repayment?'},
-  {role:'user',text:'I messaged them on KakaoTalk in January 2023, but they stopped replying in March 2024'},
-  {role:'ai',text:'Thank you. I\'ve prepared your case summary and notified the attorney. They\'ll review it shortly.'},
-];
-const messagesKo=[
-  {role:'ai',text:'안녕하세요, 김변호사 법률사무소입니다. 어떤 건으로 문의 주셨나요?'},
-  {role:'user',text:'돈을 빌려줬는데 안 갚아서요. 3천만원이요.'},
-  {role:'ai',text:'네, 대여금 관련 문의시군요. 언제 빌려주셨고, 차용증은 있으신가요?'},
-  {role:'user',text:'2013년 6월에요. 차용증 있어요 서명한 거'},
-  {role:'ai',text:'차용증이 있으시군요. 상대방에게 마지막으로 변제를 요청하신 게 언제인가요?'},
-  {role:'user',text:'23년 1월에 카톡으로 갚으라고 했는데 24년 3월부터 연락 두절이에요'},
-  {role:'ai',text:'감사합니다. 사건 요약을 정리해서 변호사님께 전달드렸습니다. 곧 검토 후 연락드리겠습니다.'},
-];
+    const messagesEn = [
+      { role: 'ai', text: 'Welcome to Kim & Associates. How can we help you today?' },
+      { role: 'user', text: 'I lent someone 30 million won and they won\'t pay me back' },
+      { role: 'ai', text: 'I understand. When did you lend the money, and do you have a promissory note?' },
+      { role: 'user', text: 'June 2013. Yes, I have the note signed' },
+      { role: 'ai', text: 'Got it. When did you last contact the borrower about repayment?' },
+      { role: 'user', text: 'I messaged them on KakaoTalk in January 2023, but they stopped replying in March 2024' },
+      { role: 'ai', text: 'Thank you. I\'ve prepared your case summary and notified the attorney. They\'ll review it shortly.' },
+    ];
+    const messagesKo = [
+      { role: 'ai', text: '안녕하세요, 김변호사 법률사무소입니다. 어떤 건으로 문의 주셨나요?' },
+      { role: 'user', text: '돈을 빌려줬는데 안 갚아서요. 3천만원이요.' },
+      { role: 'ai', text: '네, 대여금 관련 문의시군요. 언제 빌려주셨고, 차용증은 있으신가요?' },
+      { role: 'user', text: '2013년 6월에요. 차용증 있어요 서명한 거' },
+      { role: 'ai', text: '차용증이 있으시군요. 상대방에게 마지막으로 변제를 요청하신 게 언제인가요?' },
+      { role: 'user', text: '23년 1월에 카톡으로 갚으라고 했는데 24년 3월부터 연락 두절이에요' },
+      { role: 'ai', text: '감사합니다. 사건 요약을 정리해서 변호사님께 전달드렸습니다. 곧 검토 후 연락드리겠습니다.' },
+    ];
 
-let msgIndex=0;
-let isAnimating=false;
+    let msgIndex = 0;
+    let isAnimating = false;
 
-function addDemoMsg(role,text){
-  const isKo=document.body.classList.contains('ko');
-  // Label
-  const label=document.createElement('div');
-  label.className='msg-label'+(role==='user'?' r':'');
-  label.textContent=role==='ai'?'CaseFront AI':(isKo?'고객':'Client');
-  chatDemo.appendChild(label);
-  // Bubble
-  const msg=document.createElement('div');
-  msg.className='msg msg-'+(role==='ai'?'ai':'user');
-  msg.textContent=text;
-  chatDemo.appendChild(msg);
-  chatDemo.scrollTop=chatDemo.scrollHeight;
-}
+    function addDemoMsg(role, text) {
+      const isKo = document.body.classList.contains('ko');
+      // Label
+      const label = document.createElement('div');
+      label.className = 'msg-label' + (role === 'user' ? ' r' : '');
+      label.textContent = role === 'ai' ? 'CaseFront AI' : (isKo ? '고객' : 'Client');
+      chatDemo.appendChild(label);
+      // Bubble
+      const msg = document.createElement('div');
+      msg.className = 'msg msg-' + (role === 'ai' ? 'ai' : 'user');
+      msg.textContent = text;
+      chatDemo.appendChild(msg);
+      chatDemo.scrollTop = chatDemo.scrollHeight;
+    }
 
-function showTyping(){
-  const t=document.createElement('div');
-  t.className='typing';t.id='typingDot';
-  t.innerHTML='<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
-  chatDemo.appendChild(t);
-  chatDemo.scrollTop=chatDemo.scrollHeight;
-}
-function hideTyping(){
-  const t=document.getElementById('typingDot');
-  if(t)t.remove();
-}
+    function showTyping() {
+      const t = document.createElement('div');
+      t.className = 'typing'; t.id = 'typingDot';
+      t.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+      chatDemo.appendChild(t);
+      chatDemo.scrollTop = chatDemo.scrollHeight;
+    }
+    function hideTyping() {
+      const t = document.getElementById('typingDot');
+      if (t) t.remove();
+    }
 
-function runDemo(){
-  if(isAnimating)return;
-  isAnimating=true;
-  msgIndex=0;
-  chatDemo.innerHTML='';
-  notifDemo.style.display='none';
-  playNext();
-}
+    function runDemo() {
+      if (isAnimating) return;
+      isAnimating = true;
+      msgIndex = 0;
+      chatDemo.innerHTML = '';
+      notifDemo.style.display = 'none';
+      playNext();
+    }
 
-function playNext(){
-  const isKo=document.body.classList.contains('ko');
-  const msgs=isKo?messagesKo:messagesEn;
-  if(msgIndex>=msgs.length){
-    // Show notification
-    setTimeout(()=>{
-      notifDemo.style.display='block';
-      notifDemo.style.animation='msgIn 0.4s ease-out';
-      chatDemo.scrollTop=chatDemo.scrollHeight;
-    },800);
-    setTimeout(()=>{isAnimating=false},6000);
-    setTimeout(()=>{runDemo()},10000);
-    return;
-  }
-  const m=msgs[msgIndex];
-  if(m.role==='ai'){
-    showTyping();
-    setTimeout(()=>{
-      hideTyping();
-      addDemoMsg(m.role,m.text);
-      msgIndex++;
-      setTimeout(playNext,1200);
-    },1000+Math.random()*800);
-  }else{
-    setTimeout(()=>{
-      addDemoMsg(m.role,m.text);
-      msgIndex++;
-      setTimeout(playNext,600);
-    },800+Math.random()*600);
-  }
-}
+    function playNext() {
+      const isKo = document.body.classList.contains('ko');
+      const msgs = isKo ? messagesKo : messagesEn;
+      if (msgIndex >= msgs.length) {
+        // Show notification
+        setTimeout(() => {
+          notifDemo.style.display = 'block';
+          notifDemo.style.animation = 'msgIn 0.4s ease-out';
+          chatDemo.scrollTop = chatDemo.scrollHeight;
+        }, 800);
+        setTimeout(() => { isAnimating = false }, 6000);
+        setTimeout(() => { runDemo() }, 10000);
+        return;
+      }
+      const m = msgs[msgIndex];
+      if (m.role === 'ai') {
+        showTyping();
+        setTimeout(() => {
+          hideTyping();
+          addDemoMsg(m.role, m.text);
+          msgIndex++;
+          setTimeout(playNext, 1200);
+        }, 1000 + Math.random() * 800);
+      } else {
+        setTimeout(() => {
+          addDemoMsg(m.role, m.text);
+          msgIndex++;
+          setTimeout(playNext, 600);
+        }, 800 + Math.random() * 600);
+      }
+    }
 
-// Start demo on load
-setTimeout(runDemo,1000);
+    // Start demo on load
+    setTimeout(runDemo, 1000);
 
-// ===== WAITLIST =====
-function submitWaitlist(){
-  const isKo=document.body.classList.contains('ko');
-  const input=isKo?document.getElementById('emailInputKo'):document.getElementById('emailInput');
-  const email=input.value.trim();
-  if(!email||!email.includes('@')){
-    input.style.borderColor='var(--urgent)';
-    setTimeout(()=>{input.style.borderColor=''},2000);
-    return;
-  }
-  // TODO: connect to /api/waitlist
-  input.value='';
-  const noteEl=isKo?document.getElementById('cta-note-ko'):document.getElementById('cta-note');
-  noteEl.textContent=isKo?'✓ 등록 완료! 출시 시 알려드리겠습니다.':'✓ You\'re on the list! We\'ll notify you at launch.';
-  noteEl.style.color='var(--mint)';
-}
-</script>
+    // ===== WAITLIST =====
+    function submitWaitlist() {
+      const isKo = document.body.classList.contains('ko');
+      const input = isKo ? document.getElementById('emailInputKo') : document.getElementById('emailInput');
+      const email = input.value.trim();
+      if (!email || !email.includes('@')) {
+        input.style.borderColor = 'var(--urgent)';
+        setTimeout(() => { input.style.borderColor = '' }, 2000);
+        return;
+      }
+      // TODO: connect to /api/waitlist
+      input.value = '';
+      const noteEl = isKo ? document.getElementById('cta-note-ko') : document.getElementById('cta-note');
+      noteEl.textContent = isKo ? '✓ 등록 완료! 출시 시 알려드리겠습니다.' : '✓ You\'re on the list! We\'ll notify you at launch.';
+      noteEl.style.color = 'var(--mint)';
+    }
+  </script>
 </body>
+
 </html>
