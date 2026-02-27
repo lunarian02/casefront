@@ -7,522 +7,425 @@
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #fafbfd;
-  --bg-alt: #f3f5fa;
-  --surface: #ffffff;
-  --surface-dark: #0f1629;
-  --navy: #1a2b5a;
-  --navy-light: #2d4a8a;
-  --blue: #4a7aef;
-  --blue-light: #6b94f5;
-  --blue-bg: rgba(74,122,239,0.06);
-  --blue-bg2: rgba(74,122,239,0.1);
-  --border: #e4e8f1;
-  --border-dark: #cdd3e0;
-  --text: #1a1f36;
-  --text-secondary: #525a76;
-  --text-light: #8b93ab;
-  --green: #22c55e;
-  --amber: #f59e0b;
+  --bg: #fafbfd; --bg-alt: #f3f5fa; --surface: #ffffff; --surface-dark: #0f1629;
+  --navy: #1a2b5a; --navy-light: #2d4a8a; --blue: #4a7aef; --blue-light: #6b94f5;
+  --blue-bg: rgba(74,122,239,0.06); --border: #e4e8f1; --border-dark: #cdd3e0;
+  --text: #1a1f36; --text-secondary: #525a76; --text-light: #8b93ab; --green: #22c55e; --amber: #f59e0b;
 }
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { background: var(--bg); color: var(--text); font-family: 'DM Sans', -apple-system, sans-serif; line-height: 1.7; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
-.container { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',-apple-system,sans-serif;line-height:1.7;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.container{max-width:1120px;margin:0 auto;padding:0 24px}
 
-/* NAV */
-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(250,251,253,0.92); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
-nav.scrolled { box-shadow: 0 1px 20px rgba(0,0,0,0.04); }
-.nav-inner { max-width: 1120px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 64px; }
-.nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-.nav-logo-text { font-family: 'Source Serif 4', serif; font-size: 20px; font-weight: 600; color: var(--text); }
-.nav-links { display: flex; gap: 28px; align-items: center; }
-.nav-links a { font-size: 14px; color: var(--text-secondary); text-decoration: none; transition: color 0.2s; }
-.nav-links a:hover { color: var(--text); }
-.nav-cta { background: var(--navy); color: #fff !important; padding: 8px 20px; border-radius: 8px; font-weight: 500; transition: transform 0.2s, box-shadow 0.2s; }
-.nav-cta:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(26,43,90,0.18); }
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(250,251,253,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+nav.scrolled{box-shadow:0 1px 20px rgba(0,0,0,0.04)}
+.nav-inner{max-width:1120px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-logo-text{font-family:'Source Serif 4',serif;font-size:20px;font-weight:600;color:var(--text)}
+.nav-links{display:flex;gap:28px;align-items:center}
+.nav-links a{font-size:14px;color:var(--text-secondary);text-decoration:none;transition:color 0.2s}
+.nav-links a:hover{color:var(--text)}
+.nav-cta{background:var(--navy);color:#fff!important;padding:8px 20px;border-radius:8px;font-weight:500;transition:transform 0.2s,box-shadow 0.2s}
+.nav-cta:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(26,43,90,0.18)}
 
-/* HERO */
-.hero { padding: 140px 0 80px; text-align: center; position: relative; }
-.hero::before { content: ''; position: absolute; top: 40px; left: 50%; transform: translateX(-50%); width: 800px; height: 500px; background: radial-gradient(ellipse, rgba(74,122,239,0.05) 0%, transparent 70%); pointer-events: none; }
-.hero-badge { display: inline-flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.5px; color: var(--blue); background: var(--blue-bg); padding: 6px 16px; border-radius: 100px; margin-bottom: 28px; animation: fadeUp 0.6s ease-out both; }
-.hero-badge .pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
-.hero h1 { font-family: 'Source Serif 4', serif; font-size: clamp(34px, 5vw, 54px); font-weight: 700; line-height: 1.2; letter-spacing: -1px; color: var(--navy); margin-bottom: 20px; animation: fadeUp 0.6s ease-out 0.1s both; }
-.hero-sub { font-size: 17px; color: var(--text-secondary); max-width: 520px; margin: 0 auto 36px; font-weight: 400; line-height: 1.8; animation: fadeUp 0.6s ease-out 0.2s both; }
-.hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; animation: fadeUp 0.6s ease-out 0.3s both; }
-.btn-primary { background: var(--navy); color: #fff; padding: 14px 32px; border-radius: 10px; border: none; font-size: 15px; font-weight: 500; cursor: pointer; font-family: inherit; transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; }
-.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(26,43,90,0.16); }
-.btn-secondary { background: transparent; color: var(--text); padding: 14px 32px; border-radius: 10px; border: 1px solid var(--border-dark); font-size: 15px; cursor: pointer; font-family: inherit; text-decoration: none; transition: background 0.2s; }
-.btn-secondary:hover { background: var(--bg-alt); }
+.hero{padding:130px 0 60px;text-align:center;position:relative}
+.hero::before{content:'';position:absolute;top:40px;left:50%;transform:translateX(-50%);width:900px;height:500px;background:radial-gradient(ellipse,rgba(74,122,239,0.04) 0%,transparent 70%);pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.5px;color:var(--blue);background:var(--blue-bg);padding:6px 16px;border-radius:100px;margin-bottom:24px;animation:fadeUp .6s ease-out both}
+.hero-badge .pulse{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+.hero h1{font-family:'Source Serif 4',serif;font-size:clamp(32px,5vw,50px);font-weight:700;line-height:1.2;letter-spacing:-1px;color:var(--navy);margin-bottom:16px;animation:fadeUp .6s ease-out .1s both}
+.hero-sub{font-size:16px;color:var(--text-secondary);max-width:480px;margin:0 auto 40px;line-height:1.8;animation:fadeUp .6s ease-out .2s both}
 
-/* PROOF */
-.proof { text-align: center; padding: 40px 0 60px; }
-.proof p { font-size: 13px; color: var(--text-light); font-family: 'JetBrains Mono', monospace; letter-spacing: 0.5px; }
-.proof-nums { display: flex; justify-content: center; gap: 48px; margin-top: 16px; flex-wrap: wrap; }
-.proof-num strong { display: block; font-family: 'Source Serif 4', serif; font-size: 32px; font-weight: 700; color: var(--navy); }
-.proof-num span { font-size: 12px; color: var(--text-light); }
+.hub-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;max-width:900px;margin:0 auto 40px;animation:fadeUp .6s ease-out .3s both}
+.hub-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px 20px 24px;text-align:center;cursor:pointer;transition:all .3s;text-decoration:none;color:inherit}
+.hub-card:hover{border-color:var(--blue);transform:translateY(-4px);box-shadow:0 12px 32px rgba(74,122,239,0.08)}
+.hub-icon{width:48px;height:48px;border-radius:12px;background:var(--blue-bg);display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+.hub-card h3{font-size:14px;font-weight:600;margin-bottom:6px}
+.hub-card p{font-size:12px;color:var(--text-light);line-height:1.6}
+.hub-tag{display:inline-block;margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 8px;border-radius:4px;background:var(--blue-bg);color:var(--blue)}
 
-/* VALUE PROP (replaced problem/fear) */
-.value { padding: 80px 0; background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-.value-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
-.val-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--blue); margin-bottom: 16px; }
-.value h2 { font-family: 'Source Serif 4', serif; font-size: 34px; font-weight: 700; line-height: 1.3; color: var(--navy); margin-bottom: 20px; }
-.value p { font-size: 15px; color: var(--text-secondary); line-height: 1.8; }
-.val-cards { display: flex; flex-direction: column; gap: 12px; }
-.val-card { background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 20px 24px; display: flex; gap: 16px; align-items: flex-start; }
-.val-icon { width: 40px; height: 40px; border-radius: 10px; background: var(--blue-bg); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.val-card h4 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
-.val-card p { font-size: 13px; color: var(--text-light); line-height: 1.6; }
+.hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;animation:fadeUp .6s ease-out .4s both}
+.btn-primary{background:var(--navy);color:#fff;padding:14px 32px;border-radius:10px;border:none;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit;transition:transform .2s,box-shadow .2s;text-decoration:none;display:inline-block}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(26,43,90,0.16)}
+.btn-secondary{background:transparent;color:var(--text);padding:14px 32px;border-radius:10px;border:1px solid var(--border-dark);font-size:15px;cursor:pointer;font-family:inherit;text-decoration:none;transition:background .2s;display:inline-block}
+.btn-secondary:hover{background:var(--bg-alt)}
 
-/* SECTIONS */
-.section-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--blue); margin-bottom: 12px; text-align: center; }
-.section-title { font-family: 'Source Serif 4', serif; font-size: 38px; font-weight: 700; line-height: 1.25; color: var(--navy); text-align: center; margin-bottom: 56px; }
+.proof{text-align:center;padding:32px 0 48px}
+.proof-nums{display:flex;justify-content:center;gap:48px;flex-wrap:wrap}
+.proof-num strong{display:block;font-family:'Source Serif 4',serif;font-size:28px;font-weight:700;color:var(--navy)}
+.proof-num span{font-size:11px;color:var(--text-light)}
 
-/* FEATURES */
-.features { padding: 100px 0; }
-.feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-.feature-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px 28px; transition: border-color 0.3s, transform 0.3s; }
-.feature-card:hover { border-color: var(--border-dark); transform: translateY(-3px); }
-.f-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; background: var(--blue-bg); }
-.feature-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
-.feature-card p { font-size: 13px; color: var(--text-secondary); line-height: 1.7; }
-.f-tag { display: inline-block; margin-top: 14px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--blue); background: var(--blue-bg); padding: 3px 10px; border-radius: 6px; }
+.section-label{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--blue);margin-bottom:12px}
+.section-title{font-family:'Source Serif 4',serif;font-size:34px;font-weight:700;line-height:1.3;color:var(--navy);margin-bottom:16px}
+.section-desc{font-size:15px;color:var(--text-secondary);line-height:1.8;max-width:480px}
 
-/* SUMMARY PREVIEW */
-.summary-section { padding: 80px 0; background: var(--bg-alt); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-.summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 40px; align-items: start; }
-.chat-preview { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; }
-.chat-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
-.chat-avatar { width: 32px; height: 32px; background: var(--navy); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
-.chat-header-text { font-size: 13px; font-weight: 600; }
-.chat-header-sub { font-size: 11px; color: var(--text-light); }
+.svc{padding:80px 0;border-top:1px solid var(--border)}
+.svc:nth-child(even){background:var(--surface)}
+.svc-inner{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start}
+.svc-inner.reverse{direction:rtl}
+.svc-inner.reverse>*{direction:ltr}
 
-/* Demo tabs */
-.demo-tab {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border);
-  background: var(--surface); color: var(--text-secondary);
-  font-size: 14px; font-weight: 500; font-family: inherit;
-  cursor: pointer; transition: all 0.2s;
-}
-.demo-tab:hover { border-color: var(--border-dark); }
-.demo-tab-active { background: var(--navy); color: #fff; border-color: var(--navy); }
-.demo-panel { animation: fadeUp 0.3s ease-out; }
-.chat-bubbles { display: flex; flex-direction: column; gap: 10px; }
-.b-ai { background: var(--blue-bg); padding: 10px 14px; border-radius: 12px 12px 12px 4px; font-size: 13px; max-width: 85%; display: flex; gap: 8px; align-items: flex-start; }
-.b-ai-avatar { width: 20px; height: 20px; background: var(--navy); border-radius: 5px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
-.b-user { background: var(--bg-alt); padding: 10px 14px; border-radius: 12px 12px 4px 12px; font-size: 13px; max-width: 85%; align-self: flex-end; }
+.chat-preview{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px}
+.chat-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.chat-avatar{width:32px;height:32px;background:var(--navy);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.chat-header-text{font-size:13px;font-weight:600}
+.chat-header-sub{font-size:11px;color:var(--text-light)}
+.chat-bubbles{display:flex;flex-direction:column;gap:8px}
+.b-ai{background:var(--blue-bg);padding:10px 14px;border-radius:12px 12px 12px 4px;font-size:13px;max-width:88%;display:flex;gap:8px;align-items:flex-start}
+.b-ai-avatar{width:20px;height:20px;background:var(--navy);border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.b-user{background:var(--bg-alt);padding:10px 14px;border-radius:12px 12px 4px 12px;font-size:13px;max-width:85%;align-self:flex-end}
+.bracket-mini svg{display:block}
 
-.sc { background: var(--surface-dark); color: #fff; border-radius: 16px; padding: 28px; font-size: 13px; }
-.sc-label { font-size: 12px; color: rgba(138,164,204,0.7); font-family: 'JetBrains Mono', monospace; margin-bottom: 20px; }
-.sc-s { margin-bottom: 16px; }
-.sc-k { color: rgba(255,255,255,0.35); font-size: 11px; margin-bottom: 4px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.5px; }
-.sc-tag { display: inline-block; background: rgba(74,122,239,0.15); color: var(--blue-light); padding: 2px 10px; border-radius: 6px; font-size: 12px; margin-right: 4px; }
-.sc-req { display: flex; align-items: center; gap: 8px; padding: 5px 0; color: rgba(255,255,255,0.7); font-size: 12.5px; }
-.sc-chk { width: 18px; height: 18px; border-radius: 5px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; background: rgba(34,197,94,0.15); color: #34d399; }
+.sc{background:var(--surface-dark);color:#fff;border-radius:16px;padding:24px;font-size:13px}
+.sc-label{font-size:11px;color:rgba(138,164,204,0.6);font-family:'JetBrains Mono',monospace;margin-bottom:16px}
+.sc-s{margin-bottom:14px}
+.sc-k{color:rgba(255,255,255,0.3);font-size:10px;margin-bottom:3px;font-family:'JetBrains Mono',monospace;letter-spacing:0.5px}
+.sc-tag{display:inline-block;background:rgba(74,122,239,0.15);color:var(--blue-light);padding:2px 10px;border-radius:6px;font-size:12px;margin-right:4px}
+.sc-req{display:flex;align-items:center;gap:8px;padding:4px 0;color:rgba(255,255,255,0.7);font-size:12px}
+.sc-chk{width:18px;height:18px;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;background:rgba(34,197,94,0.15);color:#34d399}
 
-/* HOW */
-.how { padding: 100px 0; background: var(--surface-dark); color: #fff; }
-.how .section-label { color: rgba(107,148,245,0.5); }
-.how .section-title { color: #fff; }
-.steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
-.step { text-align: center; padding: 32px 20px; }
-.step-num { font-family: 'Source Serif 4', serif; font-size: 48px; font-weight: 700; color: rgba(255,255,255,0.06); line-height: 1; margin-bottom: 16px; }
-.step h4 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
-.step p { font-size: 13px; color: rgba(255,255,255,0.4); line-height: 1.7; }
+.phone-flow{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px}
+.pf-step{display:flex;gap:14px;align-items:flex-start;padding:12px 0}
+.pf-step+.pf-step{border-top:1px solid var(--border)}
+.pf-num{width:28px;height:28px;border-radius:8px;background:var(--blue-bg);color:var(--blue);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'JetBrains Mono',monospace}
+.pf-step h4{font-size:13px;font-weight:600;margin-bottom:2px}
+.pf-step p{font-size:12px;color:var(--text-light);line-height:1.6}
 
-/* PRICING */
-.pricing { padding: 100px 0; background: var(--bg-alt); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-.pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 960px; margin: 0 auto; }
-.price-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 36px 28px; text-align: center; transition: transform 0.3s; }
-.price-card:hover { transform: translateY(-3px); }
-.price-card.featured { border-color: var(--blue); box-shadow: 0 0 0 1px var(--blue), 0 12px 40px rgba(74,122,239,0.08); position: relative; }
-.price-card.featured::before { content: '추천'; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--blue); color: #fff; font-size: 11px; font-weight: 600; padding: 3px 14px; border-radius: 100px; }
-.price-name { font-size: 14px; font-weight: 500; color: var(--text-secondary); margin-bottom: 8px; }
-.price-amount { font-family: 'Source Serif 4', serif; font-size: 40px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
-.price-amount span { font-size: 16px; color: var(--text-light); font-family: 'DM Sans', sans-serif; }
-.price-features { text-align: left; list-style: none; margin: 20px 0 28px; }
-.price-features li { font-size: 13px; color: var(--text-secondary); padding: 6px 0; display: flex; gap: 8px; align-items: center; }
-.price-features li::before { content: '✓'; color: var(--blue); font-weight: 700; font-size: 12px; }
-.price-btn { display: block; width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border-dark); background: transparent; color: var(--text); font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all 0.2s; }
-.price-btn:hover { background: var(--bg-alt); }
-.price-card.featured .price-btn { background: var(--navy); color: #fff; border-color: var(--navy); }
-.price-card.featured .price-btn:hover { background: var(--navy-light); }
+.kakao-mock{background:#FEE500;border-radius:16px;padding:24px}
+.kakao-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.kakao-header span{font-size:14px;font-weight:600;color:#3C1E1E}
+.kakao-msgs{display:flex;flex-direction:column;gap:8px}
+.k-bot{background:#fff;padding:10px 14px;border-radius:12px 12px 12px 4px;font-size:12.5px;color:#333;max-width:85%;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.k-user{background:rgba(255,255,255,0.7);padding:10px 14px;border-radius:12px 12px 4px 12px;font-size:12.5px;color:#333;max-width:80%;align-self:flex-end}
 
-/* CTA */
-.final-cta { padding: 100px 0; text-align: center; }
-.final-cta h2 { font-family: 'Source Serif 4', serif; font-size: 38px; font-weight: 700; line-height: 1.3; color: var(--navy); margin-bottom: 16px; }
-.final-cta p { font-size: 15px; color: var(--text-secondary); max-width: 440px; margin: 0 auto 32px; }
+.how{padding:80px 0;background:var(--surface-dark);color:#fff}
+.how .section-label{color:rgba(107,148,245,0.5);text-align:center}
+.how .section-title{color:#fff;text-align:center;margin-bottom:48px}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+.step{text-align:center;padding:24px 16px}
+.step-num{font-family:'Source Serif 4',serif;font-size:42px;font-weight:700;color:rgba(255,255,255,0.05);line-height:1;margin-bottom:12px}
+.step h4{font-size:14px;font-weight:600;margin-bottom:6px}
+.step p{font-size:12px;color:rgba(255,255,255,0.35);line-height:1.7}
 
-footer { padding: 40px 0; border-top: 1px solid var(--border); text-align: center; }
-footer p { font-size: 12px; color: var(--text-light); font-family: 'JetBrains Mono', monospace; }
+.pricing{padding:80px 0;background:var(--bg-alt);border-top:1px solid var(--border)}
+.pricing .section-label,.pricing .section-title{text-align:center}
+.pricing .section-title{margin-bottom:40px}
+.pricing-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;max-width:640px;margin:0 auto}
+.price-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px 24px;text-align:center;transition:transform .3s}
+.price-card:hover{transform:translateY(-3px)}
+.price-card.featured{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue),0 12px 40px rgba(74,122,239,0.08);position:relative}
+.price-card.featured::before{content:'추천';position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--blue);color:#fff;font-size:11px;font-weight:600;padding:3px 14px;border-radius:100px}
+.price-name{font-size:14px;font-weight:500;color:var(--text-secondary);margin-bottom:6px}
+.price-amount{font-family:'Source Serif 4',serif;font-size:36px;font-weight:700;color:var(--navy);margin-bottom:4px}
+.price-amount span{font-size:15px;color:var(--text-light);font-family:'DM Sans',sans-serif}
+.price-features{text-align:left;list-style:none;margin:16px 0 24px}
+.price-features li{font-size:13px;color:var(--text-secondary);padding:5px 0;display:flex;gap:8px;align-items:center}
+.price-features li::before{content:'✓';color:var(--blue);font-weight:700;font-size:12px}
+.price-btn{display:block;width:100%;padding:12px;border-radius:10px;border:1px solid var(--border-dark);background:transparent;color:var(--text);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .2s}
+.price-btn:hover{background:var(--bg-alt)}
+.price-card.featured .price-btn{background:var(--navy);color:#fff;border-color:var(--navy)}
+.price-card.featured .price-btn:hover{background:var(--navy-light)}
 
-@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.5); } }
+footer{padding:32px 0;border-top:1px solid var(--border);text-align:center}
+footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',monospace}
 
-@media (max-width: 900px) {
-  .feature-grid { grid-template-columns: 1fr; }
-  .steps { grid-template-columns: 1fr 1fr; }
-  .pricing-grid { grid-template-columns: 1fr; max-width: 400px; }
-  .value-inner, .summary-grid { grid-template-columns: 1fr; gap: 40px; }
-}
-@media (max-width: 640px) { .steps { grid-template-columns: 1fr; } .nav-links a:not(.nav-cta) { display: none; } }
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.5)}}
+@media(max-width:900px){.hub-grid{grid-template-columns:repeat(2,1fr)}.svc-inner,.svc-inner.reverse{grid-template-columns:1fr;direction:ltr}.steps{grid-template-columns:1fr 1fr}.pricing-grid{grid-template-columns:1fr;max-width:360px}}
+@media(max-width:640px){.hub-grid{grid-template-columns:1fr 1fr}.steps{grid-template-columns:1fr}.nav-links a:not(.nav-cta){display:none}}
 </style>
 </head>
 <body>
 
-<!-- NAV -->
-<nav id="nav">
-  <div class="nav-inner">
-    <a href="#" class="nav-logo">
-      <svg width="22" height="24" viewBox="0 0 44 48" fill="none">
-        <path d="M13 4H7C5.34 4 4 5.34 4 7V41C4 42.66 5.34 44 7 44H13" stroke="#1a2b5a" stroke-width="3" stroke-linecap="round"/>
-        <path d="M31 4H37C38.66 4 40 5.34 40 7V41C40 42.66 38.66 44 37 44H31" stroke="#1a2b5a" stroke-width="3" stroke-linecap="round"/>
-        <line x1="14" y1="17" x2="30" y2="17" stroke="#1a2b5a" stroke-width="2" stroke-linecap="round"/>
-        <line x1="14" y1="24" x2="26" y2="24" stroke="#4a7aef" stroke-width="1.5" stroke-linecap="round" opacity="0.45"/>
-      </svg>
-      <span class="nav-logo-text">CaseFront</span>
-    </a>
-    <div class="nav-links">
-      <a href="#features">기능</a>
-      <a href="#how">작동 방식</a>
-      <a href="#pricing">요금</a>
-      <a href="#start" class="nav-cta">도입 문의</a>
-    </div>
+<nav id="nav"><div class="nav-inner">
+  <a href="#" class="nav-logo">
+    <svg width="22" height="24" viewBox="0 0 44 48" fill="none"><path d="M13 4H7C5.34 4 4 5.34 4 7V41C4 42.66 5.34 44 7 44H13" stroke="#1a2b5a" stroke-width="3" stroke-linecap="round"/><path d="M31 4H37C38.66 4 40 5.34 40 7V41C40 42.66 38.66 44 37 44H31" stroke="#1a2b5a" stroke-width="3" stroke-linecap="round"/><line x1="14" y1="17" x2="30" y2="17" stroke="#1a2b5a" stroke-width="2" stroke-linecap="round"/><line x1="14" y1="24" x2="26" y2="24" stroke="#4a7aef" stroke-width="1.5" stroke-linecap="round" opacity="0.45"/></svg>
+    <span class="nav-logo-text">CaseFront</span>
+  </a>
+  <div class="nav-links">
+    <a href="#services">Services</a>
+    <a href="#how">How it works</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#pricing" class="nav-cta">도입 문의</a>
   </div>
-</nav>
+</div></nav>
 
-<!-- HERO — 긍정적 프레이밍 -->
+<!-- ========== HERO ========== -->
 <section class="hero">
   <div class="container">
     <div class="hero-badge"><span class="pulse"></span>법률사무소 전용 AI</div>
     <h1>모든 상담, 빠짐없이.<br>AI가 정리하고 변호사가 판단합니다.</h1>
-    <p class="hero-sub">24시간 AI가 고객과 대화하고, 요건사실 기준으로 정리된 접수 리포트를 변호사에게 전달합니다.</p>
+    <p class="hero-sub">웹채팅, 전화, 통화녹음, 카카오톡 — 어떤 채널이든 AI가 접수하고 요건사실 기준으로 정리합니다.</p>
+    <div class="hub-grid">
+      <a href="#svc-chat" class="hub-card">
+        <div class="hub-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4a7aef" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        <h3>AI 웹챗 접수</h3>
+        <p>링크 하나로 24시간 접수</p>
+        <span class="hub-tag">웹사이트</span>
+      </a>
+      <a href="#svc-phone" class="hub-card">
+        <div class="hub-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4a7aef" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+        <h3>부재중 전화 AI</h3>
+        <p>못 받은 전화, AI가 대신</p>
+        <span class="hub-tag">전화</span>
+      </a>
+      <a href="#svc-call" class="hub-card">
+        <div class="hub-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4a7aef" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16" fill="#4a7aef" stroke="none"/></svg></div>
+        <h3>통화 녹음 요약</h3>
+        <p>녹음을 법률 리포트로</p>
+        <span class="hub-tag">녹음</span>
+      </a>
+      <a href="#svc-kakao" class="hub-card">
+        <div class="hub-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4a7aef" stroke-width="2" stroke-linecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
+        <h3>카카오톡 채널</h3>
+        <p>카톡으로 접수 · 안내</p>
+        <span class="hub-tag">카톡</span>
+      </a>
+    </div>
     <div class="hero-actions">
-      <a href="#start" class="btn-primary">도입 문의</a>
-      <a href="#how" class="btn-secondary">작동 방식 보기</a>
+      <a href="#pricing" class="btn-primary">도입 문의</a>
+      <a href="#svc-chat" class="btn-secondary">데모 보기 ↓</a>
     </div>
   </div>
 </section>
 
-<!-- PROOF -->
-<div class="proof">
-  <div class="container">
-    <p>숫자로 보는 CaseFront</p>
-    <div class="proof-nums">
-      <div class="proof-num"><strong>12</strong><span>사건유형 커버</span></div>
-      <div class="proof-num"><strong>24/7</strong><span>무중단 접수</span></div>
-      <div class="proof-num"><strong>3분</strong><span>평균 접수 완료</span></div>
-      <div class="proof-num"><strong>10분</strong><span>도입 소요시간</span></div>
-    </div>
-  </div>
-</div>
+<div class="proof"><div class="container"><div class="proof-nums">
+  <div class="proof-num"><strong>24/7</strong><span>무중단 접수</span></div>
+  <div class="proof-num"><strong>3분</strong><span>평균 접수</span></div>
+  <div class="proof-num"><strong>4채널</strong><span>통합 접수</span></div>
+</div></div></div>
 
-<!-- VALUE (replaced fear-based problem section) -->
-<section class="value">
-  <div class="container">
-    <div class="value-inner">
-      <div>
-        <div class="val-label">왜 CaseFront인가</div>
-        <h2>접수가 잘 정리되면<br>수임이 빨라집니다</h2>
-        <p>고객이 처음 연락하는 순간부터 사건 정보가 체계적으로 정리됩니다. 변호사는 리포트만 보고 바로 상담에 들어갈 수 있습니다.</p>
+<!-- ========== SVC 1: 웹챗 (긴 대화) ========== -->
+<section class="svc" id="svc-chat">
+  <div class="container"><div class="svc-inner">
+    <div>
+      <div class="section-label">Service 01 — Webchat</div>
+      <h2 class="section-title">AI 웹챗 접수</h2>
+      <p class="section-desc">웹사이트에 접수 링크 하나만 추가하세요. AI가 고객과 자연스럽게 대화하며 사건 내용을 파악하고 요건사실 기준으로 정리합니다.</p>
+      <div style="margin-top:20px;display:flex;gap:8px;flex-wrap:wrap;">
+        <span class="hub-tag">24시간 무중단</span>
+        <span class="hub-tag">링크 하나로 설치</span>
+        <span class="hub-tag">사건유형 자동 분류</span>
       </div>
-      <div class="val-cards">
-        <div class="val-card">
-          <div class="val-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4a7aef" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+      <!-- Report under description -->
+      <div class="sc" style="margin-top:24px;">
+        <div class="sc-label">접수 요약 → 변호사 전달</div>
+        <div class="sc-s"><div class="sc-k">고객 정보</div><div>홍○○ · 010-XXXX-5678</div></div>
+        <div class="sc-s"><div class="sc-k">사건 유형</div><span class="sc-tag">민사</span><span class="sc-tag">대여금</span></div>
+        <div class="sc-s">
+          <div class="sc-k">주요 사건 (시간순)</div>
+          <div style="color:rgba(255,255,255,0.6);line-height:1.8;font-size:12.5px;">
+            ① 홍○○은 2022. 1. 15. 김XX에게 5,000만 원을 계좌이체로 대여하였다<br>
+            ② 김XX는 같은 날 차용증을 작성하여 교부하였다 (변제기 2024. 1. 15.)<br>
+            ③ 김XX는 2023. 6. 15. 500만 원을 변제하였다<br>
+            ④ 2024. 1. 15. 변제기 도래, 잔금 4,500만 원 미변제<br>
+            ⑤ 홍○○은 2024. 3. 카톡으로 변제를 최고하였으나 김XX 무응답
           </div>
-          <div><h4>24시간 접수, 고객을 기다리게 하지 않습니다</h4><p>야간, 주말, 재판 중에도 AI가 응대합니다. 고객은 편한 시간에 접수하고, 변호사는 정리된 리포트를 받습니다.</p></div>
         </div>
-        <div class="val-card">
-          <div class="val-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4a7aef" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          </div>
-          <div><h4>요건사실 기준으로 자동 정리</h4><p>일반 챗봇처럼 이름/연락처만 받는 게 아닙니다. 사건유형별 요건사실을 대조하며 빠진 정보를 능동적으로 파악합니다.</p></div>
+        <div class="sc-s">
+          <div class="sc-k">요건사실 충족 여부</div>
+          <div class="sc-req"><span class="sc-chk">✓</span> 금전교부 — 5,000만 원 계좌이체</div>
+          <div class="sc-req"><span class="sc-chk">✓</span> 반환약정 — 차용증 있음, 변제기 2024.01.15</div>
+          <div class="sc-req"><span class="sc-chk">✓</span> 변제기 도래 — 1년 초과 경과</div>
         </div>
-        <div class="val-card">
-          <div class="val-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4a7aef" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/></svg>
+        <div class="sc-s"><div class="sc-k">증빙자료 요청</div><div style="color:rgba(255,255,255,0.6);font-size:12.5px;">차용증 사본 · 계좌이체 내역 · 변제 관련 카톡 · 최고 카톡 캡처</div></div>
+        <div class="sc-s" style="margin-bottom:0"><div class="sc-k">AI 메모</div><div style="color:rgba(255,255,255,0.35);font-style:italic;font-size:12px;">소멸시효 여유 (개인 간 10년). 일부변제로 시효중단 가능성. 최고 내역 있어 내용증명 없이 지급명령 검토 가능. 잔금 4,500만 원 기준 소가 산정.</div></div>
+      </div>
+    </div>
+    <!-- Long chat demo -->
+    <div>
+      <div class="chat-preview">
+        <div class="chat-header">
+          <div class="chat-avatar">
+            <svg width="22" height="22" viewBox="0 0 120 120" fill="none"><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="6" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="6" stroke-linecap="round"/><circle cx="46" cy="50" r="5.5" fill="#fff"/><circle cx="74" cy="50" r="5.5" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="3.5" stroke-linecap="round" fill="none"/></svg>
           </div>
-          <div><h4>변호사가 바로 검토할 수 있는 리포트</h4><p>시간순 사실관계, 요건사실 체크리스트, 증빙자료 요청까지. 사무장이 정리한 것처럼 깔끔하게 전달됩니다.</p></div>
+          <div><div class="chat-header-text">CaseFront AI</div><div class="chat-header-sub">웹챗 접수 · 대여금</div></div>
+        </div>
+        <div class="chat-bubbles">
+          <div class="b-ai"><div class="b-ai-avatar"><svg width="16" height="16" viewBox="0 0 120 120" fill="none"><rect width="120" height="120" rx="28" fill="#1a2b5a"/><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><circle cx="46" cy="50" r="6" fill="#fff"/><circle cx="74" cy="50" r="6" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="4" stroke-linecap="round" fill="none"/></svg></div><span>안녕하세요, 법률 상담 접수를 도와드릴게요. 어떤 일로 연락 주셨나요?</span></div>
+          <div class="b-user">지인한테 5천만 원 빌려줬는데 1년이 넘도록 안 갚아요.</div>
+          <div class="b-ai"><div class="b-ai-avatar"><svg width="16" height="16" viewBox="0 0 120 120" fill="none"><rect width="120" height="120" rx="28" fill="#1a2b5a"/><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><circle cx="46" cy="50" r="6" fill="#fff"/><circle cx="74" cy="50" r="6" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="4" stroke-linecap="round" fill="none"/></svg></div><span>많이 답답하시겠어요. 빌려주신 게 정확히 언제쯤이었나요?</span></div>
+          <div class="b-user">2022년 1월에 계좌이체로 보냈어요.</div>
+          <div class="b-ai"><div class="b-ai-avatar"><svg width="16" height="16" viewBox="0 0 120 120" fill="none"><rect width="120" height="120" rx="28" fill="#1a2b5a"/><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><circle cx="46" cy="50" r="6" fill="#fff"/><circle cx="74" cy="50" r="6" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="4" stroke-linecap="round" fill="none"/></svg></div><span>갚기로 한 약속이 있었나요? 차용증이나 문자 같은 게 있으신가요?</span></div>
+          <div class="b-user">네, 차용증 썼고 2024년 1월까지 갚기로 했어요.</div>
+          <div class="b-ai"><div class="b-ai-avatar"><svg width="16" height="16" viewBox="0 0 120 120" fill="none"><rect width="120" height="120" rx="28" fill="#1a2b5a"/><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><circle cx="46" cy="50" r="6" fill="#fff"/><circle cx="74" cy="50" r="6" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="4" stroke-linecap="round" fill="none"/></svg></div><span>2024년 1월 이후에 일부라도 갚은 적이 있나요?</span></div>
+          <div class="b-user">중간에 500만 원만 갚고 연락이 끊겼어요. 카톡으로 갚으라고 했는데 읽씹이에요.</div>
+          <div class="b-ai"><div class="b-ai-avatar"><svg width="16" height="16" viewBox="0 0 120 120" fill="none"><rect width="120" height="120" rx="28" fill="#1a2b5a"/><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><circle cx="46" cy="50" r="6" fill="#fff"/><circle cx="74" cy="50" r="6" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="4" stroke-linecap="round" fill="none"/></svg></div><span>카톡으로 갚으라고 보내신 내용도 캡처해두셨나요?</span></div>
+          <div class="b-user">네, 캡처해뒀어요.</div>
+          <div class="b-ai"><div class="b-ai-avatar"><svg width="16" height="16" viewBox="0 0 120 120" fill="none"><rect width="120" height="120" rx="28" fill="#1a2b5a"/><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><circle cx="46" cy="50" r="6" fill="#fff"/><circle cx="74" cy="50" r="6" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="4" stroke-linecap="round" fill="none"/></svg></div><span>감사합니다. 접수 내용을 변호사님에게 전달드리겠습니다. 차용증 사본, 계좌이체 내역, 카톡 캡처를 상담 시 준비해주시면 됩니다.</span></div>
         </div>
       </div>
     </div>
-  </div>
+  </div></div>
 </section>
 
-<!-- FEATURES -->
-<section class="features" id="features">
-  <div class="container">
-    <div class="section-label">핵심 기능</div>
-    <h2 class="section-title">접수부터 정리까지,<br>사람이 할 일을 AI가</h2>
-    <div class="feature-grid">
-      <div class="feature-card">
-        <div class="f-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4a7aef" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        </div>
-        <h3>AI 채팅 접수</h3>
-        <p>웹사이트에 접수 링크 하나만 추가하세요. AI가 자연스러운 대화로 사건 내용을 파악하고 필요한 정보를 빠짐없이 수집합니다.</p>
-        <span class="f-tag">웹채팅</span>
-      </div>
-      <div class="feature-card">
-        <div class="f-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4a7aef" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-        </div>
-        <h3>부재중 전화 AI 응대</h3>
-        <p>변호사가 전화를 받지 못하면 AI가 대신 응대합니다. 사건 내용을 파악하고 정리한 뒤 변호사에게 리포트를 전달합니다.</p>
-        <span class="f-tag">전화 연동</span>
-      </div>
-      <div class="feature-card">
-        <div class="f-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4a7aef" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        </div>
-        <h3>요건사실론 기반 정리</h3>
-        <p>수집한 사실관계를 법적 요건사실 기준으로 구조화합니다. 변호사가 바로 검토할 수 있는 체크리스트 형태로 정리합니다.</p>
-        <span class="f-tag">자동 분류</span>
-      </div>
-      <div class="feature-card">
-        <div class="f-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4a7aef" stroke-width="2" stroke-linecap="round"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
-        </div>
-        <h3>사건 시간순 정리</h3>
-        <p>주어 · 시기 · 상대방 · 행위로 구성된 문장을 시간순으로 자동 배열합니다. 변호사가 선호하는 사실관계 정리 포맷 그대로.</p>
-        <span class="f-tag">요약 리포트</span>
-      </div>
-      <div class="feature-card">
-        <div class="f-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4a7aef" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-        </div>
-        <h3>통화 녹음 → 법률 요약</h3>
-        <p>상담 통화를 녹음하면 AI가 요건사실 기준으로 자동 요약합니다. 일반 통화앱과 달리 법률 구조에 맞게 정리합니다.</p>
-        <span class="f-tag">통화 요약</span>
-      </div>
-      <div class="feature-card">
-        <div class="f-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4a7aef" stroke-width="2" stroke-linecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-        </div>
-        <h3>카카오톡 채널 연결</h3>
-        <p>카카오톡 채널로 접수 안내, 서류 요청, 상담 알림을 보냅니다. 고객이 가장 편한 채널에서 소통합니다.</p>
-        <span class="f-tag">카톡 채널</span>
+<!-- ========== SVC 2: 부재중 전화 ========== -->
+<section class="svc" id="svc-phone">
+  <div class="container"><div class="svc-inner reverse">
+    <div>
+      <div class="section-label">Service 02 — Phone</div>
+      <h2 class="section-title">부재중 전화 AI 응대</h2>
+      <p class="section-desc">재판 중, 상담 중, 퇴근 후 — 변호사가 전화를 받지 못하면 AI가 대신 응대합니다. 사건 내용을 파악하고 정리된 리포트를 전달합니다.</p>
+      <div style="margin-top:20px;display:flex;gap:8px;flex-wrap:wrap;">
+        <span class="hub-tag">부재중 자동 전환</span>
+        <span class="hub-tag">AI 음성 응대</span>
+        <span class="hub-tag">리포트 즉시 전달</span>
       </div>
     </div>
-  </div>
+    <div class="phone-flow">
+      <div style="font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',monospace;margin-bottom:16px;">부재중 전화 처리 흐름</div>
+      <div class="pf-step"><div class="pf-num">1</div><div><h4>고객이 사무소에 전화</h4><p>변호사가 부재중 — 3회 벨 후 자동 전환</p></div></div>
+      <div class="pf-step"><div class="pf-num">2</div><div><h4>AI가 접수 시작</h4><p>"안녕하세요, ○○법률사무소입니다. 상담 내용을 미리 접수해드릴게요."</p></div></div>
+      <div class="pf-step"><div class="pf-num">3</div><div><h4>사건 정보 수집</h4><p>사건유형 파악 · 긴급도 판단 · 연락처 확인 · 핵심 사실관계 질문</p></div></div>
+      <div class="pf-step"><div class="pf-num">4</div><div><h4>요약 리포트 전달</h4><p>요건사실 기준으로 정리된 접수 요약이 이메일/푸시로 즉시 전달</p></div></div>
+    </div>
+  </div></div>
 </section>
 
-<!-- DEMO PREVIEW — Tabbed: Webchat + Call Summary -->
-<section class="summary-section">
-  <div class="container">
-    <div class="section-label">데모 미리보기</div>
-    <h2 class="section-title" style="display:flex;align-items:center;justify-content:center;gap:14px;">
-      <svg width="32" height="36" viewBox="0 0 44 48" fill="none">
-        <path d="M13 4H7C5.34 4 4 5.34 4 7V41C4 42.66 5.34 44 7 44H13" stroke="#1a2b5a" stroke-width="3" stroke-linecap="round"/>
-        <path d="M31 4H37C38.66 4 40 5.34 40 7V41C40 42.66 38.66 44 37 44H31" stroke="#1a2b5a" stroke-width="3" stroke-linecap="round"/>
-        <line x1="14" y1="17" x2="30" y2="17" stroke="#1a2b5a" stroke-width="2" stroke-linecap="round"/>
-        <line x1="14" y1="24" x2="26" y2="24" stroke="#4a7aef" stroke-width="1.5" stroke-linecap="round" opacity="0.45"/>
-        <line x1="14" y1="31" x2="28" y2="31" stroke="#4a7aef" stroke-width="1.5" stroke-linecap="round" opacity="0.25"/>
-      </svg>
-      변호사에게 이렇게 전달됩니다
-    </h2>
-
-    <!-- Tab switcher -->
-    <div style="display:flex;justify-content:center;gap:4px;margin-bottom:32px;">
-      <button onclick="showTab('chat')" id="tab-chat" class="demo-tab demo-tab-active">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        웹챗 접수
-      </button>
-      <button onclick="showTab('call')" id="tab-call" class="demo-tab">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-        통화 요약
-      </button>
-    </div>
-
-    <!-- TAB 1: Webchat Demo -->
-    <div id="panel-chat" class="demo-panel">
-      <div class="summary-grid">
-        <div class="chat-preview">
-          <div class="chat-header">
-            <div class="chat-avatar">
-              <svg width="18" height="20" viewBox="0 0 44 48" fill="none"><path d="M13 4H7C5.34 4 4 5.34 4 7V41C4 42.66 5.34 44 7 44H13" stroke="#fff" stroke-width="3" stroke-linecap="round"/><path d="M31 4H37C38.66 4 40 5.34 40 7V41C40 42.66 38.66 44 37 44H31" stroke="#fff" stroke-width="3" stroke-linecap="round"/><line x1="14" y1="17" x2="30" y2="17" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><line x1="14" y1="24" x2="26" y2="24" stroke="rgba(255,255,255,0.5)" stroke-width="2" stroke-linecap="round"/></svg>
-            </div>
-            <div><div class="chat-header-text">CaseFront AI</div><div class="chat-header-sub">웹챗 접수 · 대여금</div></div>
-          </div>
-          <div class="chat-bubbles">
-            <div class="b-ai"><div class="b-ai-avatar"><svg width="12" height="12" viewBox="0 0 44 48" fill="none"><path d="M13 4H7C5.34 4 4 5.34 4 7V41C4 42.66 5.34 44 7 44H13" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path d="M31 4H37C38.66 4 40 5.34 40 7V41C40 42.66 38.66 44 37 44H31" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg></div><span>안녕하세요, 법률 상담 접수를 도와드릴게요. 어떤 일로 연락 주셨나요?</span></div>
-            <div class="b-user">지인한테 5천만 원 빌려줬는데 1년이 넘도록 안 갚아요.</div>
-            <div class="b-ai"><div class="b-ai-avatar"><svg width="12" height="12" viewBox="0 0 44 48" fill="none"><path d="M13 4H7C5.34 4 4 5.34 4 7V41C4 42.66 5.34 44 7 44H13" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path d="M31 4H37C38.66 4 40 5.34 40 7V41C40 42.66 38.66 44 37 44H31" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg></div><span>많이 답답하시겠어요. 빌려주신 게 정확히 언제쯤이었나요?</span></div>
-            <div class="b-user">2022년 1월에 계좌이체로 보냈어요.</div>
-            <div class="b-ai"><div class="b-ai-avatar"><svg width="12" height="12" viewBox="0 0 44 48" fill="none"><path d="M13 4H7C5.34 4 4 5.34 4 7V41C4 42.66 5.34 44 7 44H13" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path d="M31 4H37C38.66 4 40 5.34 40 7V41C40 42.66 38.66 44 37 44H31" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg></div><span>갚기로 한 약속이 있었나요? 차용증이나 문자 같은 게 있나요?</span></div>
-            <div class="b-user">네, 차용증 썼고 2024년 1월까지 갚기로 했어요. 중간에 500만 원만 갚고 연락 끊겼어요.</div>
+<!-- ========== SVC 3: 통화 녹음 (통매음 → 인터넷 욕설) ========== -->
+<section class="svc" id="svc-call">
+  <div class="container"><div class="svc-inner">
+    <div>
+      <div class="section-label">Service 03 — Call Summary</div>
+      <h2 class="section-title">통화 녹음 → 법률 요약</h2>
+      <p class="section-desc">상담 통화를 녹음하면 AI가 요건사실 기준으로 자동 요약합니다. 일반 통화앱은 대화를 나열하지만, CaseFront는 법률 구조에 맞춰 정리합니다.</p>
+      <div style="margin-top:20px;display:flex;gap:8px;flex-wrap:wrap;">
+        <span class="hub-tag">녹음 업로드</span>
+        <span class="hub-tag">자동 텍스트 변환</span>
+        <span class="hub-tag">요건사실 체크</span>
+      </div>
+      <!-- Report -->
+      <div class="sc" style="margin-top:24px;">
+        <div class="sc-label">통화 요약 리포트</div>
+        <div class="sc-s"><div class="sc-k">고객 정보</div><div>이○○ · 010-XXXX-3456</div></div>
+        <div class="sc-s"><div class="sc-k">사건 유형</div><span class="sc-tag">형사</span><span class="sc-tag">모욕</span><span class="sc-tag">사이버</span></div>
+        <div class="sc-s">
+          <div class="sc-k">주요 사건 (시간순)</div>
+          <div style="color:rgba(255,255,255,0.6);line-height:1.8;font-size:12.5px;">
+            ① 2026. 1. 10. 피의자 "닉네임A"가 네이버 카페 게시글 댓글에 피해자를 특정하여 욕설을 게시하였다<br>
+            ② 2026. 1. 12. 동일인이 같은 게시글에 2차 욕설 댓글을 추가하였다<br>
+            ③ 2026. 1. 20. 피의자가 피해자의 블로그에 욕설 포함 댓글을 작성하였다<br>
+            ④ 피해자는 모든 댓글을 캡처하고 URL을 보존하였다
           </div>
         </div>
-        <div class="sc">
-          <div class="sc-label">접수 요약 리포트 — 웹챗</div>
-          <div class="sc-s"><div class="sc-k">고객 정보</div><div>홍○○ · 010-XXXX-5678</div></div>
-          <div class="sc-s"><div class="sc-k">사건 유형</div><div><span class="sc-tag">민사</span><span class="sc-tag">대여금</span></div></div>
-          <div class="sc-s">
-            <div class="sc-k">주요 사건 (시간순)</div>
-            <div style="color:rgba(255,255,255,0.6);line-height:1.8;font-size:12.5px;">
-              ① 홍○○은 2022. 1. 15. 김XX에게 5,000만 원을 대여하였다<br>
-              ② 김XX는 같은 날 차용증을 작성하여 교부하였다<br>
-              ③ 김XX는 2023. 6. 15. 500만 원을 변제하였다<br>
-              ④ 2024. 1. 15. 변제기 도래, 잔금 4,500만 원 미변제
-            </div>
+        <div class="sc-s">
+          <div class="sc-k">요건사실 충족 여부 (형법 제311조 모욕)</div>
+          <div class="sc-req"><span class="sc-chk">✓</span> 공연성 — 네이버 카페/블로그 (불특정 다수 열람 가능)</div>
+          <div class="sc-req"><span class="sc-chk">✓</span> 특정인 지목 — 피해자 닉네임/실명 언급</div>
+          <div class="sc-req"><span class="sc-chk">✓</span> 모욕적 표현 — 구체적 욕설 기재 (3건)</div>
+        </div>
+        <div class="sc-s"><div class="sc-k">증빙자료 요청</div><div style="color:rgba(255,255,255,0.6);font-size:12.5px;">댓글 캡처 (3건) · URL · 카페/블로그 회원 정보 · 게시글 원문 캡처</div></div>
+        <div class="sc-s" style="margin-bottom:0"><div class="sc-k">AI 메모</div><div style="color:rgba(255,255,255,0.35);font-style:italic;font-size:12px;">공연성 요건 충족 가능성 높음. 반복 3회로 양형 가중 사유. 사이버수사대 고소장 접수 또는 내용증명 후 합의 검토. 피의자 특정을 위해 정보통신서비스 제공자에 대한 자료보전 요청 필요.</div></div>
+      </div>
+    </div>
+    <!-- Long call transcript -->
+    <div>
+      <div class="chat-preview">
+        <div class="chat-header">
+          <div class="chat-avatar" style="background:var(--blue);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16" fill="#fff" stroke="none"/></svg>
           </div>
-          <div class="sc-s">
-            <div class="sc-k">요건사실 충족 여부</div>
-            <div class="sc-req"><span class="sc-chk">✓</span> 금전교부 — 5,000만 원 계좌이체</div>
-            <div class="sc-req"><span class="sc-chk">✓</span> 반환약정 — 차용증 있음, 변제기 2024.01.15</div>
-            <div class="sc-req"><span class="sc-chk">✓</span> 변제기 도래 — 1년 초과 경과</div>
-          </div>
-          <div class="sc-s"><div class="sc-k">증빙자료 요청</div><div style="color:rgba(255,255,255,0.6);font-size:12.5px;">차용증 사본 · 계좌이체 내역 · 변제 관련 카톡</div></div>
-          <div class="sc-s" style="margin-bottom:0;"><div class="sc-k">AI 메모</div><div style="color:rgba(255,255,255,0.35);font-style:italic;font-size:12px;">소멸시효 여유 (개인 간 10년). 일부변제로 시효중단 가능성. 지급명령 검토 가능.</div></div>
+          <div><div class="chat-header-text">통화 녹음 텍스트</div><div class="chat-header-sub">2026. 2. 20. · 4분 15초 · 인터넷 모욕 상담</div></div>
+        </div>
+        <div style="font-size:12.5px;line-height:1.9;color:var(--text-secondary);padding:4px 0;">
+          <p style="margin-bottom:8px;"><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 변호사님, 인터넷에서 욕을 너무 심하게 당하고 있어서 고소하고 싶어요.</p>
+          <p style="margin-bottom:8px;"><span style="color:var(--navy);font-weight:600;font-size:11px;">변호사</span> 어떤 플랫폼에서 어떤 식으로 당하셨나요?</p>
+          <p style="margin-bottom:8px;"><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 네이버 카페에 제가 글을 올렸는데 댓글로 심한 욕이 달렸어요. "XX" 이런 수준이 아니라 진짜 심한 인신공격이요.</p>
+          <p style="margin-bottom:8px;"><span style="color:var(--navy);font-weight:600;font-size:11px;">변호사</span> 댓글이 한 번만 달린 건가요?</p>
+          <p style="margin-bottom:8px;"><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 아니요, 같은 사람이 세 번이나 썼어요. 1월 10일이랑 12일에 카페에, 그리고 20일에는 제 블로그까지 찾아와서 또 욕했어요.</p>
+          <p style="margin-bottom:8px;"><span style="color:var(--navy);font-weight:600;font-size:11px;">변호사</span> 그 사람이 본인을 특정해서 쓴 건가요? 닉네임이나 실명 언급이 있었나요?</p>
+          <p style="margin-bottom:8px;"><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 네, 제 닉네임 직접 언급하면서 욕했고, 블로그에는 제 실명까지 썼어요.</p>
+          <p style="margin-bottom:8px;"><span style="color:var(--navy);font-weight:600;font-size:11px;">변호사</span> 캡처는 해두셨나요?</p>
+          <p><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 네, 댓글 캡처랑 URL 다 저장해뒀어요. 상대 닉네임도 알고 있어요.</p>
         </div>
       </div>
     </div>
-
-    <!-- TAB 2: Call Summary Demo -->
-    <div id="panel-call" class="demo-panel" style="display:none;">
-      <div class="summary-grid">
-        <!-- Call transcript side -->
-        <div class="chat-preview">
-          <div class="chat-header">
-            <div class="chat-avatar" style="background:var(--blue);">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-            </div>
-            <div>
-              <div class="chat-header-text">통화 녹음 → AI 요약</div>
-              <div class="chat-header-sub">2026. 2. 20. 오후 6:15 · 3분 52초</div>
-            </div>
-          </div>
-          <div style="font-size:12.5px;line-height:1.9;color:var(--text-secondary);">
-            <div style="margin-bottom:12px;padding:8px 12px;background:var(--blue-bg);border-radius:8px;">
-              <div style="font-size:10px;color:var(--blue);font-family:'JetBrains Mono',monospace;margin-bottom:4px;">🔴 통화 녹음 텍스트</div>
-            </div>
-            <div style="padding:0 4px;">
-              <p style="margin-bottom:8px;"><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 변호사님, 모르는 사람한테 카톡으로 이상한 사진을 받았어요. 신고하려고요.</p>
-              <p style="margin-bottom:8px;"><span style="color:var(--navy);font-weight:600;font-size:11px;">변호사</span> 네, 어떤 내용의 사진이었나요?</p>
-              <p style="margin-bottom:8px;"><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 성적인 사진이요. 1월 초에 갑자기 친구 추가가 왔는데 수락하니까 바로 보내더라고요. 그 뒤로 2주 동안 같은 사람이 세 번 더 보냈어요.</p>
-              <p style="margin-bottom:8px;"><span style="color:var(--navy);font-weight:600;font-size:11px;">변호사</span> 상대방이 누군지 아시나요?</p>
-              <p style="margin-bottom:8px;"><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 프로필에 이름이 "민수"라고만 되어 있고 번호는 모르겠어요. 카톡 아이디는 있어요. 캡처는 다 해뒀어요.</p>
-              <p style="margin-bottom:8px;"><span style="color:var(--navy);font-weight:600;font-size:11px;">변호사</span> 차단은 하셨나요?</p>
-              <p><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 세 번째 이후에 차단했는데, 다른 계정으로 또 연락 왔어요. 그것도 캡처했어요.</p>
-            </div>
-          </div>
-        </div>
-        <!-- Call summary report -->
-        <div class="sc">
-          <div class="sc-label">통화 요약 리포트</div>
-          <div class="sc-s"><div class="sc-k">고객 정보</div><div>이○○ · 010-XXXX-3456</div></div>
-          <div class="sc-s"><div class="sc-k">사건 유형</div><div><span class="sc-tag">형사</span><span class="sc-tag">통신매체이용음란</span></div></div>
-          <div class="sc-s">
-            <div class="sc-k">주요 사건 (시간순)</div>
-            <div style="color:rgba(255,255,255,0.6);line-height:1.8;font-size:12.5px;">
-              ① 2026. 1. 초 피의자 "민수"가 카카오톡으로 피해자에게 친구 추가 요청<br>
-              ② 수락 직후 성적 수치심을 유발하는 사진을 전송하였다<br>
-              ③ 이후 약 2주간 동일인이 3회 추가 전송하였다<br>
-              ④ 피해자가 차단하자 다른 계정으로 재접촉하였다
-            </div>
-          </div>
-          <div class="sc-s">
-            <div class="sc-k">요건사실 충족 여부 (형법 제13조의2)</div>
-            <div class="sc-req"><span class="sc-chk">✓</span> 통신매체 이용 — 카카오톡 (메신저)</div>
-            <div class="sc-req"><span class="sc-chk">✓</span> 성적 수치심 유발 — 성적 사진 전송</div>
-            <div class="sc-req"><span class="sc-chk">✓</span> 상대방에 도달 — 피해자 수신 확인, 캡처 보유</div>
-            <div class="sc-req"><span class="sc-chk">✓</span> 반복성 — 4회 전송 + 차단 후 우회 접촉</div>
-          </div>
-          <div class="sc-s">
-            <div class="sc-k">피의자 정보</div>
-            <div style="color:rgba(255,255,255,0.6);font-size:12.5px;">카카오톡 프로필명 "민수" · 카톡 아이디 보유 · 실명/전화번호 미확인</div>
-          </div>
-          <div class="sc-s"><div class="sc-k">증빙자료 요청</div><div style="color:rgba(255,255,255,0.6);font-size:12.5px;">카톡 대화 캡처 (전송 사진 포함) · 차단 기록 · 우회 계정 캡처 · 카톡 아이디</div></div>
-          <div class="sc-s" style="margin-bottom:0;"><div class="sc-k">AI 메모</div><div style="color:rgba(255,255,255,0.35);font-style:italic;font-size:12px;">성폭력처벌법 제13조 적용 가능 (2년 이하 징역 또는 500만 원 이하 벌금). 차단 후 우회 접촉은 스토킹처벌법 병합 검토 필요. 피의자 특정을 위해 카톡 아이디 기반 수사 의뢰 가능.</div></div>
-        </div>
-      </div>
-    </div>
-
-    <p style="text-align:center;margin-top:24px;font-size:13px;color:var(--text-light);">AI가 요건사실론에 따라 자동으로 추출 · 정리한 리포트입니다.</p>
-  </div>
+  </div></div>
 </section>
 
-<!-- HOW -->
+<!-- ========== SVC 4: 카카오톡 ========== -->
+<section class="svc" id="svc-kakao">
+  <div class="container"><div class="svc-inner reverse">
+    <div>
+      <div class="section-label">Service 04 — KakaoTalk</div>
+      <h2 class="section-title">카카오톡 채널 연결</h2>
+      <p class="section-desc">카카오톡 채널로 접수 안내, 서류 요청, 상담 일정 알림을 보냅니다. 고객이 가장 편한 채널에서 소통합니다.</p>
+      <div style="margin-top:20px;display:flex;gap:8px;flex-wrap:wrap;">
+        <span class="hub-tag">접수 알림</span>
+        <span class="hub-tag">서류 요청</span>
+        <span class="hub-tag">상담 리마인더</span>
+      </div>
+    </div>
+    <div class="kakao-mock">
+      <div class="kakao-header">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="#3C1E1E"><path d="M12 3C6.48 3 2 6.58 2 10.94c0 2.8 1.86 5.27 4.66 6.67-.15.56-.96 3.56-.99 3.79 0 0-.02.17.09.24.1.06.23.03.23.03.31-.04 3.6-2.36 4.17-2.77.6.08 1.21.13 1.84.13 5.52 0 10-3.58 10-7.97C22 6.58 17.52 3 12 3z"/></svg>
+        <span>○○법률사무소</span>
+      </div>
+      <div class="kakao-msgs">
+        <div class="k-bot">안녕하세요, ○○법률사무소입니다. 접수해주신 상담 건이 변호사님에게 전달되었습니다.</div>
+        <div class="k-bot">📋 상담 전 준비 서류<br><br>① 차용증 사본<br>② 계좌이체 내역<br>③ 관련 카톡 대화 캡처<br><br>위 서류를 상담일 전까지 보내주세요.</div>
+        <div class="k-user">네 알겠습니다!</div>
+        <div class="k-bot">📅 상담 일정 안내<br><br>2026. 3. 5. (목) 오후 2시<br>○○법률사무소 3층<br><br>변경이 필요하시면 말씀해주세요.</div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ========== HOW ========== -->
 <section class="how" id="how">
   <div class="container">
-    <div class="section-label">작동 방식</div>
+    <div class="section-label">How it works</div>
     <h2 class="section-title">10분이면 시작합니다</h2>
     <div class="steps">
-      <div class="step"><div class="step-num">01</div><h4>가입</h4><p>사무소 정보와 취급 분야를 입력하세요. 별도 서류나 심사 없이 바로 시작.</p></div>
-      <div class="step"><div class="step-num">02</div><h4>접수 링크 설치</h4><p>홈페이지, 블로그, 네이버 플레이스에 접수 링크를 추가하세요.</p></div>
-      <div class="step"><div class="step-num">03</div><h4>AI가 접수 시작</h4><p>고객이 접속하면 AI가 대화를 시작합니다. 사건유형 파악, 정보 수집, 긴급도 판단까지.</p></div>
-      <div class="step"><div class="step-num">04</div><h4>요약 리포트 수신</h4><p>요건사실 기준으로 정리된 접수 요약이 전달됩니다. 긴급 사건은 실시간 알림.</p></div>
+      <div class="step"><div class="step-num">01</div><h4>가입</h4><p>사무소 정보와 취급 분야 입력</p></div>
+      <div class="step"><div class="step-num">02</div><h4>채널 연결</h4><p>웹챗 링크, 전화번호, 카톡 채널 설정</p></div>
+      <div class="step"><div class="step-num">03</div><h4>AI가 접수</h4><p>고객이 연락하면 AI가 사건 정보 수집</p></div>
+      <div class="step"><div class="step-num">04</div><h4>리포트 수신</h4><p>요건사실 기준 접수 요약 전달</p></div>
     </div>
   </div>
 </section>
 
-<!-- PRICING -->
+<!-- ========== PRICING ========== -->
 <section class="pricing" id="pricing">
   <div class="container">
-    <div class="section-label">요금제</div>
+    <div class="section-label">Pricing</div>
     <h2 class="section-title">사무소 규모에 맞게 선택하세요</h2>
-    <div class="pricing-grid" style="grid-template-columns: repeat(2, 1fr); max-width: 700px;">
+    <div class="pricing-grid">
       <div class="price-card">
-        <div class="price-name">기본</div>
+        <div class="price-name">Basic</div>
         <div class="price-amount">₩149,000<span>/월</span></div>
         <ul class="price-features">
           <li>월 100건 AI 접수</li>
-          <li>12가지 사건유형 분류</li>
+          <li>사건유형 자동 분류</li>
           <li>웹 채팅 접수</li>
           <li>재방문 고객 자동 인식</li>
           <li>이메일 알림</li>
           <li>접수 요약 대시보드</li>
         </ul>
-        <button class="price-btn">시작하기</button>
+        <button class="price-btn">Get started</button>
       </div>
       <div class="price-card featured">
-        <div class="price-name">프로</div>
+        <div class="price-name">Pro</div>
         <div class="price-amount">₩249,000<span>/월</span></div>
         <ul class="price-features">
           <li>월 300건 AI 접수</li>
-          <li>12가지 사건유형 분류</li>
+          <li>사건유형 자동 분류</li>
           <li>부재중 전화 AI 응대</li>
           <li>통화 녹음 → 법률 요약</li>
           <li>카카오톡 채널 연결</li>
           <li>재방문 고객 자동 인식</li>
           <li>접수 요약 대시보드</li>
         </ul>
-        <button class="price-btn">시작하기</button>
+        <button class="price-btn">Get started</button>
       </div>
     </div>
   </div>
 </section>
 
-<!-- CTA -->
-<section class="final-cta" id="start">
-  <div class="container">
-    <h2>접수부터 달라지면<br>수임까지 달라집니다</h2>
-    <p>가입 후 10분이면 AI 접수가 시작됩니다.</p>
-    <a href="#" class="btn-primary">도입 문의</a>
-  </div>
-</section>
-
-<footer>
-  <div class="container">
-    <p>© 2026 CaseFront · 법률사무소 AI 고객 접수</p>
-  </div>
-</footer>
+<footer><div class="container"><p>© 2026 CaseFront</p></div></footer>
 
 <script>
-const nav = document.getElementById('nav');
-window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 10));
-document.querySelectorAll('a[href^="#"]').forEach(a => {
-  a.addEventListener('click', e => { e.preventDefault(); const t = document.querySelector(a.getAttribute('href')); if (t) t.scrollIntoView({ behavior: 'smooth' }); });
-});
-
-function showTab(id) {
-  document.querySelectorAll('.demo-panel').forEach(p => p.style.display = 'none');
-  document.querySelectorAll('.demo-tab').forEach(t => t.classList.remove('demo-tab-active'));
-  document.getElementById('panel-' + id).style.display = 'block';
-  document.getElementById('tab-' + id).classList.add('demo-tab-active');
-}
+const nav=document.getElementById('nav');
+window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',window.scrollY>10));
+document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(a.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth'})})});
 </script>
-
 </body>
 </html>
