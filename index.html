@@ -60,8 +60,6 @@ nav.scrolled{box-shadow:0 1px 20px rgba(0,0,0,0.04)}
 .svc{padding:80px 0;border-top:1px solid var(--border)}
 .svc:nth-child(even){background:var(--surface)}
 .svc-inner{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start}
-.svc-inner.reverse{direction:rtl}
-.svc-inner.reverse>*{direction:ltr}
 
 .chat-preview{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px}
 .chat-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
@@ -129,7 +127,7 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.5)}}
-@media(max-width:900px){.hub-grid{grid-template-columns:repeat(2,1fr)}.svc-inner,.svc-inner.reverse{grid-template-columns:1fr;direction:ltr}.steps{grid-template-columns:1fr 1fr}.pricing-grid{grid-template-columns:1fr;max-width:360px}}
+@media(max-width:900px){.hub-grid{grid-template-columns:repeat(2,1fr)}.svc-inner{grid-template-columns:1fr}.steps{grid-template-columns:1fr 1fr}.pricing-grid{grid-template-columns:1fr;max-width:360px}}
 @media(max-width:640px){.hub-grid{grid-template-columns:1fr 1fr}.steps{grid-template-columns:1fr}.nav-links a:not(.nav-cta){display:none}}
 </style>
 </head>
@@ -196,6 +194,7 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
 <!-- ========== SVC 1: 웹챗 (긴 대화) ========== -->
 <section class="svc" id="svc-chat">
   <div class="container"><div class="svc-inner">
+    <!-- LEFT: title + chat -->
     <div>
       <div class="section-label">Service 01 — Webchat</div>
       <h2 class="section-title">AI 웹챗 접수</h2>
@@ -205,10 +204,35 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
         <span class="hub-tag">링크 하나로 설치</span>
         <span class="hub-tag">사건유형 자동 분류</span>
       </div>
-      <!-- Report under description -->
-      <div class="sc" style="margin-top:24px;">
+      <div class="chat-preview" style="margin-top:24px;">
+        <div class="chat-header">
+          <div class="chat-avatar">
+            <svg width="22" height="22" viewBox="0 0 120 120" fill="none"><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="6" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="6" stroke-linecap="round"/><circle cx="46" cy="50" r="5.5" fill="#fff"/><circle cx="74" cy="50" r="5.5" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="3.5" stroke-linecap="round" fill="none"/></svg>
+          </div>
+          <div><div class="chat-header-text">CaseFront AI</div><div class="chat-header-sub">웹챗 접수 · 대여금</div></div>
+        </div>
+        <div class="chat-bubbles">
+          <div class="b-ai"><div class="b-ai-avatar"><svg width="16" height="16" viewBox="0 0 120 120" fill="none"><rect width="120" height="120" rx="28" fill="#1a2b5a"/><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><circle cx="46" cy="50" r="6" fill="#fff"/><circle cx="74" cy="50" r="6" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="4" stroke-linecap="round" fill="none"/></svg></div><span>안녕하세요, ○○법률사무소 AI 접수 도우미입니다. 어떤 일로 연락 주셨나요?</span></div>
+          <div class="b-user">지인한테 돈을 빌려줬는데 안 갚아서요.</div>
+          <div class="b-ai"><div class="b-ai-avatar"><svg width="16" height="16" viewBox="0 0 120 120" fill="none"><rect width="120" height="120" rx="28" fill="#1a2b5a"/><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><circle cx="46" cy="50" r="6" fill="#fff"/><circle cx="74" cy="50" r="6" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="4" stroke-linecap="round" fill="none"/></svg></div><span>많이 속상하시겠어요. 변호사님께 잘 전달드릴게요. 먼저 성함을 알려주시겠어요?</span></div>
+          <div class="b-user">홍길동이요.</div>
+          <div class="b-ai"><div class="b-ai-avatar"><svg width="16" height="16" viewBox="0 0 120 120" fill="none"><rect width="120" height="120" rx="28" fill="#1a2b5a"/><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><circle cx="46" cy="50" r="6" fill="#fff"/><circle cx="74" cy="50" r="6" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="4" stroke-linecap="round" fill="none"/></svg></div><span>감사합니다, 홍길동 님. 연락 가능한 전화번호와 이메일도 부탁드려요.</span></div>
+          <div class="b-user">010-1234-5678, hong@email.com이요.</div>
+          <div class="b-ai"><div class="b-ai-avatar"><svg width="16" height="16" viewBox="0 0 120 120" fill="none"><rect width="120" height="120" rx="28" fill="#1a2b5a"/><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><circle cx="46" cy="50" r="6" fill="#fff"/><circle cx="74" cy="50" r="6" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="4" stroke-linecap="round" fill="none"/></svg></div><span>확인했습니다. 이제 사건에 대해 좀 더 여쭤볼게요. 얼마를 빌려주셨나요?</span></div>
+          <div class="b-user">5천만 원이요. 2022년 1월에 계좌이체로 보냈어요.</div>
+          <div class="b-ai"><div class="b-ai-avatar"><svg width="16" height="16" viewBox="0 0 120 120" fill="none"><rect width="120" height="120" rx="28" fill="#1a2b5a"/><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><circle cx="46" cy="50" r="6" fill="#fff"/><circle cx="74" cy="50" r="6" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="4" stroke-linecap="round" fill="none"/></svg></div><span>차용증이나 갚겠다는 약속이 있었나요?</span></div>
+          <div class="b-user">네, 차용증 쓰고 2024년 1월까지 갚기로 했어요. 중간에 500만 원만 갚고 연락이 끊겼어요.</div>
+          <div class="b-ai"><div class="b-ai-avatar"><svg width="16" height="16" viewBox="0 0 120 120" fill="none"><rect width="120" height="120" rx="28" fill="#1a2b5a"/><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><circle cx="46" cy="50" r="6" fill="#fff"/><circle cx="74" cy="50" r="6" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="4" stroke-linecap="round" fill="none"/></svg></div><span>혹시 갚으라고 연락하신 기록이 있으신가요? 카톡이나 문자 등이요.</span></div>
+          <div class="b-user">카톡으로 보냈는데 읽고 답이 없어요. 캡처해뒀어요.</div>
+          <div class="b-ai"><div class="b-ai-avatar"><svg width="16" height="16" viewBox="0 0 120 120" fill="none"><rect width="120" height="120" rx="28" fill="#1a2b5a"/><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><circle cx="46" cy="50" r="6" fill="#fff"/><circle cx="74" cy="50" r="6" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="4" stroke-linecap="round" fill="none"/></svg></div><span>접수가 완료되었습니다. 변호사님께 내용을 전달드릴게요. 상담 시 차용증 사본, 계좌이체 내역, 카톡 캡처를 준비해주시면 됩니다.</span></div>
+        </div>
+      </div>
+    </div>
+    <!-- RIGHT: report -->
+    <div>
+      <div class="sc">
         <div class="sc-label">접수 요약 → 변호사 전달</div>
-        <div class="sc-s"><div class="sc-k">고객 정보</div><div>홍○○ · 010-XXXX-5678</div></div>
+        <div class="sc-s"><div class="sc-k">고객 정보</div><div>홍길동 · 010-1234-5678 · hong@email.com</div></div>
         <div class="sc-s"><div class="sc-k">사건 유형</div><span class="sc-tag">민사</span><span class="sc-tag">대여금</span></div>
         <div class="sc-s">
           <div class="sc-k">주요 사건 (시간순)</div>
@@ -230,36 +254,12 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
         <div class="sc-s" style="margin-bottom:0"><div class="sc-k">AI 메모</div><div style="color:rgba(255,255,255,0.35);font-style:italic;font-size:12px;">소멸시효 여유 (개인 간 10년). 일부변제로 시효중단 가능성. 최고 내역 있어 내용증명 없이 지급명령 검토 가능. 잔금 4,500만 원 기준 소가 산정.</div></div>
       </div>
     </div>
-    <!-- Long chat demo -->
-    <div>
-      <div class="chat-preview">
-        <div class="chat-header">
-          <div class="chat-avatar">
-            <svg width="22" height="22" viewBox="0 0 120 120" fill="none"><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="6" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="6" stroke-linecap="round"/><circle cx="46" cy="50" r="5.5" fill="#fff"/><circle cx="74" cy="50" r="5.5" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="3.5" stroke-linecap="round" fill="none"/></svg>
-          </div>
-          <div><div class="chat-header-text">CaseFront AI</div><div class="chat-header-sub">웹챗 접수 · 대여금</div></div>
-        </div>
-        <div class="chat-bubbles">
-          <div class="b-ai"><div class="b-ai-avatar"><svg width="16" height="16" viewBox="0 0 120 120" fill="none"><rect width="120" height="120" rx="28" fill="#1a2b5a"/><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><circle cx="46" cy="50" r="6" fill="#fff"/><circle cx="74" cy="50" r="6" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="4" stroke-linecap="round" fill="none"/></svg></div><span>안녕하세요, 법률 상담 접수를 도와드릴게요. 어떤 일로 연락 주셨나요?</span></div>
-          <div class="b-user">지인한테 5천만 원 빌려줬는데 1년이 넘도록 안 갚아요.</div>
-          <div class="b-ai"><div class="b-ai-avatar"><svg width="16" height="16" viewBox="0 0 120 120" fill="none"><rect width="120" height="120" rx="28" fill="#1a2b5a"/><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><circle cx="46" cy="50" r="6" fill="#fff"/><circle cx="74" cy="50" r="6" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="4" stroke-linecap="round" fill="none"/></svg></div><span>많이 답답하시겠어요. 빌려주신 게 정확히 언제쯤이었나요?</span></div>
-          <div class="b-user">2022년 1월에 계좌이체로 보냈어요.</div>
-          <div class="b-ai"><div class="b-ai-avatar"><svg width="16" height="16" viewBox="0 0 120 120" fill="none"><rect width="120" height="120" rx="28" fill="#1a2b5a"/><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><circle cx="46" cy="50" r="6" fill="#fff"/><circle cx="74" cy="50" r="6" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="4" stroke-linecap="round" fill="none"/></svg></div><span>갚기로 한 약속이 있었나요? 차용증이나 문자 같은 게 있으신가요?</span></div>
-          <div class="b-user">네, 차용증 썼고 2024년 1월까지 갚기로 했어요.</div>
-          <div class="b-ai"><div class="b-ai-avatar"><svg width="16" height="16" viewBox="0 0 120 120" fill="none"><rect width="120" height="120" rx="28" fill="#1a2b5a"/><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><circle cx="46" cy="50" r="6" fill="#fff"/><circle cx="74" cy="50" r="6" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="4" stroke-linecap="round" fill="none"/></svg></div><span>2024년 1월 이후에 일부라도 갚은 적이 있나요?</span></div>
-          <div class="b-user">중간에 500만 원만 갚고 연락이 끊겼어요. 카톡으로 갚으라고 했는데 읽씹이에요.</div>
-          <div class="b-ai"><div class="b-ai-avatar"><svg width="16" height="16" viewBox="0 0 120 120" fill="none"><rect width="120" height="120" rx="28" fill="#1a2b5a"/><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><circle cx="46" cy="50" r="6" fill="#fff"/><circle cx="74" cy="50" r="6" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="4" stroke-linecap="round" fill="none"/></svg></div><span>카톡으로 갚으라고 보내신 내용도 캡처해두셨나요?</span></div>
-          <div class="b-user">네, 캡처해뒀어요.</div>
-          <div class="b-ai"><div class="b-ai-avatar"><svg width="16" height="16" viewBox="0 0 120 120" fill="none"><rect width="120" height="120" rx="28" fill="#1a2b5a"/><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><circle cx="46" cy="50" r="6" fill="#fff"/><circle cx="74" cy="50" r="6" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="4" stroke-linecap="round" fill="none"/></svg></div><span>감사합니다. 접수 내용을 변호사님에게 전달드리겠습니다. 차용증 사본, 계좌이체 내역, 카톡 캡처를 상담 시 준비해주시면 됩니다.</span></div>
-        </div>
-      </div>
-    </div>
   </div></div>
 </section>
 
 <!-- ========== SVC 2: 부재중 전화 ========== -->
 <section class="svc" id="svc-phone">
-  <div class="container"><div class="svc-inner reverse">
+  <div class="container"><div class="svc-inner">
     <div>
       <div class="section-label">Service 02 — Phone</div>
       <h2 class="section-title">부재중 전화 AI 응대</h2>
@@ -280,9 +280,10 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
   </div></div>
 </section>
 
-<!-- ========== SVC 3: 통화 녹음 (통매음 → 인터넷 욕설) ========== -->
+<!-- ========== SVC 3: 통화 녹음 (인터넷 욕설) ========== -->
 <section class="svc" id="svc-call">
   <div class="container"><div class="svc-inner">
+    <!-- LEFT: title + transcript -->
     <div>
       <div class="section-label">Service 03 — Call Summary</div>
       <h2 class="section-title">통화 녹음 → 법률 요약</h2>
@@ -292,8 +293,30 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
         <span class="hub-tag">자동 텍스트 변환</span>
         <span class="hub-tag">요건사실 체크</span>
       </div>
-      <!-- Report -->
-      <div class="sc" style="margin-top:24px;">
+      <!-- Call transcript -->
+      <div class="chat-preview" style="margin-top:24px;">
+        <div class="chat-header">
+          <div class="chat-avatar" style="background:var(--blue);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16" fill="#fff" stroke="none"/></svg>
+          </div>
+          <div><div class="chat-header-text">통화 녹음 텍스트</div><div class="chat-header-sub">2026. 2. 20. · 4분 15초 · 인터넷 모욕 상담</div></div>
+        </div>
+        <div style="font-size:12.5px;line-height:1.9;color:var(--text-secondary);padding:4px 0;">
+          <p style="margin-bottom:8px;"><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 변호사님, 인터넷에서 욕을 너무 심하게 당하고 있어서 고소하고 싶어요.</p>
+          <p style="margin-bottom:8px;"><span style="color:var(--navy);font-weight:600;font-size:11px;">변호사</span> 어떤 플랫폼에서 어떤 식으로 당하셨나요?</p>
+          <p style="margin-bottom:8px;"><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 네이버 카페에 제가 글을 올렸는데 댓글로 심한 욕이 달렸어요. "XX" 이런 수준이 아니라 진짜 심한 인신공격이요.</p>
+          <p style="margin-bottom:8px;"><span style="color:var(--navy);font-weight:600;font-size:11px;">변호사</span> 댓글이 한 번만 달린 건가요?</p>
+          <p style="margin-bottom:8px;"><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 아니요, 같은 사람이 세 번이나 썼어요. 1월 10일이랑 12일에 카페에, 그리고 20일에는 제 블로그까지 찾아와서 또 욕했어요.</p>
+          <p style="margin-bottom:8px;"><span style="color:var(--navy);font-weight:600;font-size:11px;">변호사</span> 그 사람이 본인을 특정해서 쓴 건가요? 닉네임이나 실명 언급이 있었나요?</p>
+          <p style="margin-bottom:8px;"><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 네, 제 닉네임 직접 언급하면서 욕했고, 블로그에는 제 실명까지 썼어요.</p>
+          <p style="margin-bottom:8px;"><span style="color:var(--navy);font-weight:600;font-size:11px;">변호사</span> 캡처는 해두셨나요?</p>
+          <p><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 네, 댓글 캡처랑 URL 다 저장해뒀어요. 상대 닉네임도 알고 있어요.</p>
+        </div>
+      </div>
+    </div>
+    <!-- RIGHT: report -->
+    <div>
+      <div class="sc">
         <div class="sc-label">통화 요약 리포트</div>
         <div class="sc-s"><div class="sc-k">고객 정보</div><div>이○○ · 010-XXXX-3456</div></div>
         <div class="sc-s"><div class="sc-k">사건 유형</div><span class="sc-tag">형사</span><span class="sc-tag">모욕</span><span class="sc-tag">사이버</span></div>
@@ -316,34 +339,12 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
         <div class="sc-s" style="margin-bottom:0"><div class="sc-k">AI 메모</div><div style="color:rgba(255,255,255,0.35);font-style:italic;font-size:12px;">공연성 요건 충족 가능성 높음. 반복 3회로 양형 가중 사유. 사이버수사대 고소장 접수 또는 내용증명 후 합의 검토. 피의자 특정을 위해 정보통신서비스 제공자에 대한 자료보전 요청 필요.</div></div>
       </div>
     </div>
-    <!-- Long call transcript -->
-    <div>
-      <div class="chat-preview">
-        <div class="chat-header">
-          <div class="chat-avatar" style="background:var(--blue);">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16" fill="#fff" stroke="none"/></svg>
-          </div>
-          <div><div class="chat-header-text">통화 녹음 텍스트</div><div class="chat-header-sub">2026. 2. 20. · 4분 15초 · 인터넷 모욕 상담</div></div>
-        </div>
-        <div style="font-size:12.5px;line-height:1.9;color:var(--text-secondary);padding:4px 0;">
-          <p style="margin-bottom:8px;"><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 변호사님, 인터넷에서 욕을 너무 심하게 당하고 있어서 고소하고 싶어요.</p>
-          <p style="margin-bottom:8px;"><span style="color:var(--navy);font-weight:600;font-size:11px;">변호사</span> 어떤 플랫폼에서 어떤 식으로 당하셨나요?</p>
-          <p style="margin-bottom:8px;"><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 네이버 카페에 제가 글을 올렸는데 댓글로 심한 욕이 달렸어요. "XX" 이런 수준이 아니라 진짜 심한 인신공격이요.</p>
-          <p style="margin-bottom:8px;"><span style="color:var(--navy);font-weight:600;font-size:11px;">변호사</span> 댓글이 한 번만 달린 건가요?</p>
-          <p style="margin-bottom:8px;"><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 아니요, 같은 사람이 세 번이나 썼어요. 1월 10일이랑 12일에 카페에, 그리고 20일에는 제 블로그까지 찾아와서 또 욕했어요.</p>
-          <p style="margin-bottom:8px;"><span style="color:var(--navy);font-weight:600;font-size:11px;">변호사</span> 그 사람이 본인을 특정해서 쓴 건가요? 닉네임이나 실명 언급이 있었나요?</p>
-          <p style="margin-bottom:8px;"><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 네, 제 닉네임 직접 언급하면서 욕했고, 블로그에는 제 실명까지 썼어요.</p>
-          <p style="margin-bottom:8px;"><span style="color:var(--navy);font-weight:600;font-size:11px;">변호사</span> 캡처는 해두셨나요?</p>
-          <p><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 네, 댓글 캡처랑 URL 다 저장해뒀어요. 상대 닉네임도 알고 있어요.</p>
-        </div>
-      </div>
-    </div>
   </div></div>
 </section>
 
 <!-- ========== SVC 4: 카카오톡 ========== -->
 <section class="svc" id="svc-kakao">
-  <div class="container"><div class="svc-inner reverse">
+  <div class="container"><div class="svc-inner">
     <div>
       <div class="section-label">Service 04 — KakaoTalk</div>
       <h2 class="section-title">카카오톡 채널 연결</h2>
@@ -387,11 +388,10 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
 <section class="pricing" id="pricing">
   <div class="container">
     <div class="section-label">Pricing</div>
-    <h2 class="section-title">사무소 규모에 맞게 선택하세요</h2>
-    <div class="pricing-grid">
+    <div class="pricing-grid" style="margin-top:20px;">
       <div class="price-card">
         <div class="price-name">Basic</div>
-        <div class="price-amount">₩149,000<span>/월</span></div>
+        <div class="price-amount">₩99,000<span>/월</span></div>
         <ul class="price-features">
           <li>월 100건 AI 접수</li>
           <li>사건유형 자동 분류</li>
@@ -404,7 +404,7 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
       </div>
       <div class="price-card featured">
         <div class="price-name">Pro</div>
-        <div class="price-amount">₩249,000<span>/월</span></div>
+        <div class="price-amount">₩199,000<span>/월</span></div>
         <ul class="price-features">
           <li>월 300건 AI 접수</li>
           <li>사건유형 자동 분류</li>
