@@ -16,129 +16,134 @@ type FirmSettings = {
   notification_urgent_only: boolean
 }
 
-type Period = '오전' | '오후'
 type DayKey = '평일' | '토요일' | '일요일'
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const SPECIALTY_OPTIONS = ['민사', '형사', '가사', '교통사고', '행정', '노동', '부동산', '상속', '기업']
-const HOURS_12 = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
-const MINUTES = ['00', '10', '20', '30', '40', '50']
 const DAY_OPTIONS: DayKey[] = ['평일', '토요일', '일요일']
 
 const INPUT_CLASS =
   'w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 placeholder-slate-400 outline-none focus:ring-2 focus:ring-[#4a7aef] focus:border-transparent transition-shadow'
 
+// 30분 단위 시간 옵션 (00:00 ~ 23:30)
+const TIME_OPTIONS: { value: string; label: string }[] = Array.from({ length: 48 }, (_, i) => {
+  const h = Math.floor(i / 2)
+  const m = i % 2 === 0 ? '00' : '30'
+  const value = `${String(h).padStart(2, '0')}:${m}`
+  const period = h >= 12 ? '오후' : '오전'
+  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h
+  const label = `${period} ${String(h12).padStart(2, '0')}:${m}`
+  return { value, label }
+})
+
+const ITEM_H = 36 // px — 드롭다운 각 항목 높이
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function to24(period: Period, h: string, m: string) {
-  let n = parseInt(h)
-  if (period === '오전' && n === 12) n = 0
-  if (period === '오후' && n !== 12) n += 12
-  return `${String(n).padStart(2, '0')}:${m}`
+function timeLabel(value: string): string {
+  const opt = TIME_OPTIONS.find((o) => o.value === value)
+  if (opt) return opt.label
+  // 30분 단위 아닌 값이면 근사치로 표시
+  const [h, m] = value.split(':').map(Number)
+  const period = h >= 12 ? '오후' : '오전'
+  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h
+  return `${period} ${String(h12).padStart(2, '0')}:${String(m).padStart(2, '0')}`
 }
 
-function from24(time: string): { period: Period; h: string; m: string } {
-  const [hStr, mStr] = (time || '09:00').split(':')
-  let n = parseInt(hStr) || 9
-  const period: Period = n >= 12 ? '오후' : '오전'
-  if (n > 12) n -= 12
-  if (n === 0) n = 12
-  const rawMin = parseInt(mStr) || 0
-  const snapped = MINUTES.reduce((prev, cur) =>
-    Math.abs(parseInt(cur) - rawMin) < Math.abs(parseInt(prev) - rawMin) ? cur : prev
-  )
-  return { period, h: String(n).padStart(2, '0'), m: snapped }
+function snapTime(t: string): string {
+  // 30분 단위로 근사
+  const opt = TIME_OPTIONS.reduce((best, cur) => {
+    const diff = (v: string) => {
+      const [h, m] = v.split(':').map(Number)
+      const [th, tm] = t.split(':').map(Number)
+      return Math.abs(h * 60 + m - (th * 60 + tm))
+    }
+    return diff(cur.value) < diff(best.value) ? cur : best
+  })
+  return opt.value
 }
 
 function parseHours(s: string) {
-  const def = {
-    days: ['평일'] as DayKey[],
-    startP: '오전' as Period, startH: '09', startM: '00',
-    endP: '오후' as Period, endH: '06', endM: '00',
-  }
+  const def = { days: ['평일'] as DayKey[], start: '09:00', end: '18:00' }
   if (!s) return def
   const spaceIdx = s.indexOf(' ')
   if (spaceIdx === -1) return def
   const daysPart = s.slice(0, spaceIdx)
   const timePart = s.slice(spaceIdx + 1)
-  const days = daysPart.split('·').filter((d): d is DayKey => DAY_OPTIONS.includes(d as DayKey))
+  const days = daysPart === '매일'
+    ? DAY_OPTIONS.slice()
+    : daysPart.split('·').filter((d): d is DayKey => DAY_OPTIONS.includes(d as DayKey))
   const dashIdx = timePart.indexOf('-')
   if (dashIdx === -1) return { ...def, days: days.length ? days : def.days }
-  const { period: startP, h: startH, m: startM } = from24(timePart.slice(0, dashIdx))
-  const { period: endP, h: endH, m: endM } = from24(timePart.slice(dashIdx + 1))
-  return { days: days.length ? days : def.days, startP, startH, startM, endP, endH, endM }
-}
-
-function formatHours(days: DayKey[], startP: Period, startH: string, startM: string, endP: Period, endH: string, endM: string) {
-  const daysStr = days.length === 3 ? '매일' : days.join('·')
-  return `${daysStr} ${to24(startP, startH, startM)}-${to24(endP, endH, endM)}`
-}
-
-// ─── DrumPicker ───────────────────────────────────────────────────────────────
-
-const ITEM_H = 44
-
-function DrumPicker({ items, value, onChange }: { items: string[]; value: string; onChange: (v: string) => void }) {
-  const idx = Math.max(0, items.indexOf(value))
-  const lastY = useRef<number | null>(null)
-
-  function go(delta: number) {
-    const next = Math.max(0, Math.min(items.length - 1, idx + delta))
-    if (next !== idx) onChange(items[next])
+  return {
+    days: days.length ? days : def.days,
+    start: snapTime(timePart.slice(0, dashIdx)),
+    end: snapTime(timePart.slice(dashIdx + 1)),
   }
+}
 
-  const slots = [-2, -1, 0, 1, 2].map((d) => {
-    const i = idx + d
-    return i >= 0 && i < items.length ? items[i] : ''
-  })
+function formatHours(days: DayKey[], start: string, end: string) {
+  const daysStr = days.length === 3 ? '매일' : days.join('·')
+  return `${daysStr} ${start}-${end}`
+}
+
+// ─── TimeInput (Google Calendar 스타일 드롭다운) ──────────────────────────────
+
+function TimeInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false)
+  const listRef = useRef<HTMLDivElement>(null)
+  const btnRef = useRef<HTMLButtonElement>(null)
+
+  // 드롭다운 열릴 때 현재 선택 항목으로 스크롤
+  useEffect(() => {
+    if (!open || !listRef.current) return
+    const idx = TIME_OPTIONS.findIndex((o) => o.value === value)
+    if (idx >= 0) {
+      listRef.current.scrollTop = Math.max(0, idx * ITEM_H - ITEM_H * 2)
+    }
+  }, [open, value])
 
   return (
-    <div
-      className="relative select-none"
-      style={{ width: 56, height: 5 * ITEM_H }}
-      onWheel={(e) => { e.preventDefault(); go(e.deltaY > 0 ? 1 : -1) }}
-      onPointerDown={(e) => { lastY.current = e.clientY; (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId) }}
-      onPointerMove={(e) => {
-        if (lastY.current === null) return
-        const diff = lastY.current - e.clientY
-        if (Math.abs(diff) >= ITEM_H * 0.5) {
-          go(diff > 0 ? 1 : -1)
-          lastY.current = e.clientY
-        }
-      }}
-      onPointerUp={() => { lastY.current = null }}
-    >
-      {/* highlight strip */}
-      <div
-        className="absolute inset-x-0 rounded-lg pointer-events-none"
-        style={{ top: 2 * ITEM_H, height: ITEM_H, background: '#eef2ff', border: '1px solid rgba(74,122,239,0.3)' }}
-      />
-      {/* fades */}
-      <div className="absolute inset-x-0 top-0 pointer-events-none z-10" style={{ height: 2 * ITEM_H, background: 'linear-gradient(to bottom, white 30%, transparent)' }} />
-      <div className="absolute inset-x-0 bottom-0 pointer-events-none z-10" style={{ height: 2 * ITEM_H, background: 'linear-gradient(to top, white 30%, transparent)' }} />
-      {/* items */}
-      {slots.map((label, i) => {
-        const dist = Math.abs(i - 2)
-        return (
+    <div className="relative">
+      <button
+        ref={btnRef}
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-800 hover:border-slate-300 transition-colors select-none"
+      >
+        <span className="tabular-nums">{timeLabel(value)}</span>
+        <svg className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {open && (
+        <>
+          {/* 바깥 클릭 시 닫기 */}
+          <div className="fixed inset-0 z-10" onMouseDown={() => setOpen(false)} />
           <div
-            key={i}
-            className="absolute inset-x-0 flex items-center justify-center font-medium transition-all"
-            style={{
-              top: i * ITEM_H,
-              height: ITEM_H,
-              fontSize: dist === 0 ? 18 : dist === 1 ? 14 : 11,
-              color: dist === 0 ? '#1a2b5a' : dist === 1 ? '#64748b' : '#cbd5e1',
-              opacity: dist === 0 ? 1 : dist === 1 ? 0.7 : 0.35,
-            }}
+            ref={listRef}
+            className="absolute left-0 z-20 mt-1 w-36 bg-white rounded-xl border border-slate-200 shadow-lg overflow-y-auto"
+            style={{ maxHeight: ITEM_H * 7 }}
           >
-            {label}
+            {TIME_OPTIONS.map((opt) => {
+              const selected = opt.value === value
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onMouseDown={(e) => { e.preventDefault(); onChange(opt.value); setOpen(false) }}
+                  className={`w-full text-left px-3 text-sm transition-colors ${selected ? 'font-semibold text-white' : 'text-slate-700 hover:bg-slate-50'}`}
+                  style={{ height: ITEM_H, background: selected ? '#1a2b5a' : undefined }}
+                >
+                  {opt.label}
+                </button>
+              )
+            })}
           </div>
-        )
-      })}
-      {/* click zones */}
-      <button type="button" className="absolute inset-x-0 z-20 cursor-pointer" style={{ top: 0, height: 2 * ITEM_H }} onClick={() => go(-1)} />
-      <button type="button" className="absolute inset-x-0 z-20 cursor-pointer" style={{ bottom: 0, height: 2 * ITEM_H }} onClick={() => go(1)} />
+        </>
+      )}
     </div>
   )
 }
@@ -148,18 +153,14 @@ function DrumPicker({ items, value, onChange }: { items: string[]; value: string
 function HoursPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const parsed = parseHours(value)
   const [days, setDays] = useState<DayKey[]>(parsed.days)
-  const [startP, setStartP] = useState<Period>(parsed.startP)
-  const [startH, setStartH] = useState(parsed.startH)
-  const [startM, setStartM] = useState(parsed.startM)
-  const [endP, setEndP] = useState<Period>(parsed.endP)
-  const [endH, setEndH] = useState(parsed.endH)
-  const [endM, setEndM] = useState(parsed.endM)
+  const [start, setStart] = useState(parsed.start)
+  const [end, setEnd] = useState(parsed.end)
 
   const mounted = useRef(false)
   useEffect(() => {
     if (!mounted.current) { mounted.current = true; return }
-    if (days.length > 0) onChange(formatHours(days, startP, startH, startM, endP, endH, endM))
-  }, [days, startP, startH, startM, endP, endH, endM]) // eslint-disable-line
+    if (days.length > 0) onChange(formatHours(days, start, end))
+  }, [days, start, end]) // eslint-disable-line
 
   function toggleDay(d: DayKey) {
     setDays((prev) =>
@@ -167,34 +168,16 @@ function HoursPicker({ value, onChange }: { value: string; onChange: (v: string)
     )
   }
 
-  function PeriodBtn({ period, set }: { period: Period; set: (p: Period) => void }) {
-    return (
-      <div className="flex rounded-lg border border-slate-200 overflow-hidden text-xs font-medium">
-        {(['오전', '오후'] as Period[]).map((p) => (
-          <button
-            key={p}
-            type="button"
-            onClick={() => set(p)}
-            className={`px-2.5 py-1 transition-colors ${period === p ? 'text-white' : 'bg-white text-slate-500 hover:bg-slate-50'}`}
-            style={period === p ? { background: '#1a2b5a' } : {}}
-          >
-            {p}
-          </button>
-        ))}
-      </div>
-    )
-  }
-
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Day toggles */}
-      <div className="flex gap-2">
+      <div className="flex gap-1.5">
         {DAY_OPTIONS.map((d) => (
           <button
             key={d}
             type="button"
             onClick={() => toggleDay(d)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
+            className={`px-2.5 py-1 rounded-md text-xs font-medium border transition-colors ${
               days.includes(d) ? 'text-white' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
             }`}
             style={days.includes(d) ? { background: '#1a2b5a', borderColor: '#1a2b5a' } : {}}
@@ -204,40 +187,25 @@ function HoursPicker({ value, onChange }: { value: string; onChange: (v: string)
         ))}
       </div>
 
-      {/* Time pickers */}
-      <div className="flex items-center gap-3 flex-wrap">
-        {/* Start */}
-        <div className="flex flex-col items-center gap-2">
-          <span className="text-xs text-slate-400">시작</span>
-          <PeriodBtn period={startP} set={setStartP} />
-          <div className="flex gap-1 items-center">
-            <DrumPicker items={HOURS_12} value={startH} onChange={setStartH} />
-            <span className="text-slate-400 text-lg font-light">:</span>
-            <DrumPicker items={MINUTES} value={startM} onChange={setStartM} />
-          </div>
+      {/* Time row */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <div>
+          <p className="text-xs text-slate-400 mb-1">시작</p>
+          <TimeInput value={start} onChange={setStart} />
         </div>
-
-        <span className="text-slate-300 text-2xl font-light mt-4">—</span>
-
-        {/* End */}
-        <div className="flex flex-col items-center gap-2">
-          <span className="text-xs text-slate-400">종료</span>
-          <PeriodBtn period={endP} set={setEndP} />
-          <div className="flex gap-1 items-center">
-            <DrumPicker items={HOURS_12} value={endH} onChange={setEndH} />
-            <span className="text-slate-400 text-lg font-light">:</span>
-            <DrumPicker items={MINUTES} value={endM} onChange={setEndM} />
-          </div>
+        <span className="text-slate-300 text-lg font-light mt-4">—</span>
+        <div>
+          <p className="text-xs text-slate-400 mb-1">종료</p>
+          <TimeInput value={end} onChange={setEnd} />
         </div>
       </div>
 
       {/* Preview */}
-      <p className="text-xs text-slate-500">
-        영업시간:{' '}
-        <span className="font-medium text-slate-700">
-          {days.length > 0 ? formatHours(days, startP, startH, startM, endP, endH, endM) : '–'}
-        </span>
-      </p>
+      {days.length > 0 && (
+        <p className="text-xs text-slate-500">
+          영업시간: <span className="font-medium text-slate-700">{formatHours(days, start, end)}</span>
+        </p>
+      )}
     </div>
   )
 }
@@ -310,7 +278,11 @@ export default function SettingsPage() {
   }
 
   if (loading || fetching) {
-    return <div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#1a2b5a', borderTopColor: 'transparent' }} /></div>
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#1a2b5a', borderTopColor: 'transparent' }} />
+      </div>
+    )
   }
   if (fetchError) return <div className="p-6"><p className="text-red-600 text-sm">{fetchError}</p></div>
 
@@ -425,17 +397,20 @@ function Toggle({ checked, onChange, label, desc, disabled = false }: {
   disabled?: boolean
 }) {
   return (
-    <div className={`flex items-start gap-3 ${disabled ? 'opacity-40' : ''}`}>
+    <div className={`flex items-center gap-3 ${disabled ? 'opacity-40' : ''}`}>
       <button
         type="button"
         role="switch"
         aria-checked={checked}
         disabled={disabled}
         onClick={() => !disabled && onChange(!checked)}
-        className={`relative mt-0.5 w-10 h-6 rounded-full transition-colors flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-[#4a7aef] focus:ring-offset-1 ${checked ? '' : 'bg-slate-200'}`}
-        style={checked ? { background: '#1a2b5a' } : {}}
+        className="relative flex-shrink-0 w-11 h-6 rounded-full overflow-hidden transition-colors duration-200 focus:outline-none"
+        style={{ background: checked ? '#2d4a8a' : '#cbd5e1' }}
       >
-        <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${checked ? 'translate-x-5' : 'translate-x-1'}`} />
+        <span
+          className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200"
+          style={{ transform: checked ? 'translateX(22px)' : 'translateX(2px)' }}
+        />
       </button>
       <div>
         <p className="text-sm font-medium text-slate-700">{label}</p>

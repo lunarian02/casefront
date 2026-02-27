@@ -155,6 +155,38 @@ export default function CaseDetailPage() {
             )}
           </div>
 
+          {/* Requirements — 요건사실론 */}
+          {summary?.requirements?.length > 0 && (
+            <div className="bg-white rounded-xl border border-slate-200 p-4">
+              <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
+                요건사실 체크리스트
+              </h2>
+              <div className="space-y-2">
+                {summary.requirements.map((req, i) => {
+                  const cfg = {
+                    confirmed: { icon: '✓', bg: '#f0fdf4', border: '#bbf7d0', text: '#15803d', label: '충족' },
+                    denied:    { icon: '✗', bg: '#fef2f2', border: '#fecaca', text: '#dc2626', label: '불충족' },
+                    unknown:   { icon: '?', bg: '#f8fafc', border: '#e2e8f0', text: '#64748b', label: '미확인' },
+                  }[req.status]
+                  return (
+                    <div key={i} className="flex items-start gap-2.5 p-2.5 rounded-lg border" style={{ background: cfg.bg, borderColor: cfg.border }}>
+                      <span className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold mt-0.5" style={{ background: cfg.text, color: '#fff' }}>
+                        {cfg.icon}
+                      </span>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-sm font-semibold text-slate-800">{req.element}</span>
+                          <span className="text-xs font-medium" style={{ color: cfg.text }}>{cfg.label}</span>
+                        </div>
+                        <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{req.detail}</p>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Events timeline */}
           {summary?.events?.length > 0 && (
             <div className="bg-white rounded-xl border border-slate-200 p-4">

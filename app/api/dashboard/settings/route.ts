@@ -33,10 +33,13 @@ export async function PATCH(request: Request) {
 
   const body = await request.json()
 
-  // Only allow safe fields to be updated
-  const allowed = ['name', 'lawyer_name', 'phone', 'hours', 'specialties', 'greeting', 'notification_email', 'notification_new_case', 'notification_urgent_only']
+  // Columns confirmed to exist in DB
+  const existingCols = ['name', 'lawyer_name', 'phone', 'hours', 'specialties', 'notification_email']
+  // Columns added via migration (gracefully skipped if not yet applied)
+  const migrationCols = ['greeting', 'notification_new_case', 'notification_urgent_only']
+
   const updates: Record<string, unknown> = {}
-  for (const key of allowed) {
+  for (const key of [...existingCols, ...migrationCols]) {
     if (key in body) updates[key] = body[key]
   }
 
@@ -44,12 +47,28 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: '수정할 항목이 없습니다.' }, { status: 400 })
   }
 
-  const { data, error } = await supabaseAdmin
+  // Try full update first; if migration columns missing, retry with only existing cols
+  let { data, error } = await supabaseAdmin
     .from('firms')
     .update(updates)
     .eq('id', firm.id)
     .select()
     .single()
+
+  if (error?.message?.includes('column') && error.message.includes('schema cache')) {
+    const safeUpdates: Record<string, unknown> = {}
+    for (const key of existingCols) {
+      if (key in updates) safeUpdates[key] = updates[key]
+    }
+    const retry = await supabaseAdmin
+      .from('firms')
+      .update(safeUpdates)
+      .eq('id', firm.id)
+      .select()
+      .single()
+    data = retry.data
+    error = retry.error
+  }
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
