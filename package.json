@@ -1,13 +1,12 @@
 {
-  "name": "mvp",
+  "name": "casefront-chat",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "seed": "tsx --env-file=.env.local scripts/seed.ts"
+    "lint": "eslint"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
