@@ -160,6 +160,15 @@ export async function POST() {
     return NextResponse.json({ error: 'Not available in production' }, { status: 403 })
   }
 
+  // Cleanup existing mock data before re-seeding
+  await supabaseAdmin.from('case_summaries').delete().like('kakao_user_id', 'mock_%')
+  const mockSessions = await supabaseAdmin.from('sessions').select('id').like('kakao_user_id', 'mock_%')
+  if (mockSessions.data?.length) {
+    const ids = mockSessions.data.map((s) => s.id)
+    await supabaseAdmin.from('messages').delete().in('session_id', ids)
+    await supabaseAdmin.from('sessions').delete().like('kakao_user_id', 'mock_%')
+  }
+
   const results: string[] = []
 
   for (const mock of MOCK_CASES) {
