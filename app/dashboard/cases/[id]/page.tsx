@@ -7,13 +7,22 @@ import type { CaseSummary } from '@/types'
 type CaseDetail = {
   id: string
   session_id: string
+  client_id: string | null
   client_name: string
   client_phone: string
+  client_email?: string
   case_type: string
   urgency: 'urgent' | 'normal' | 'low'
   urgency_reason?: string
+  status: 'new' | 'reviewing' | 'completed' | null
   summary: CaseSummary
   created_at: string
+}
+
+const STATUS_CONFIG = {
+  new:       { label: '신규',  style: 'text-yellow-700 bg-yellow-50 border-yellow-200', next: 'reviewing' as const, nextLabel: '검토 시작' },
+  reviewing: { label: '검토중', style: 'text-blue-700 bg-blue-50 border-blue-200',     next: 'completed' as const, nextLabel: '완료 처리' },
+  completed: { label: '완료',  style: 'text-green-700 bg-green-50 border-green-200',   next: null,                  nextLabel: null },
 }
 
 type Message = {
@@ -37,6 +46,7 @@ export default function CaseDetailPage() {
   const [showChat, setShowChat] = useState(false)
   const [fetching, setFetching] = useState(true)
   const [notFound, setNotFound] = useState(false)
+  const [statusUpdating, setStatusUpdating] = useState(false)
 
   const sessionId = params?.id as string
 
@@ -62,6 +72,26 @@ export default function CaseDetailPage() {
       .catch(() => setFetching(false))
   }, [session, sessionId])
 
+  async function handleStatusChange(nextStatus: 'reviewing' | 'completed') {
+    if (!session || !sessionId || statusUpdating) return
+    setStatusUpdating(true)
+    try {
+      const res = await fetch(`/api/dashboard/cases/${sessionId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ status: nextStatus }),
+      })
+      if (res.ok) {
+        setCaseData((prev) => prev ? { ...prev, status: nextStatus } : prev)
+      }
+    } finally {
+      setStatusUpdating(false)
+    }
+  }
+
   if (loading || fetching) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -85,25 +115,44 @@ export default function CaseDetailPage() {
   }
 
   const urgency = URGENCY_CONFIG[caseData.urgency]
+  const status = STATUS_CONFIG[caseData.status ?? 'new']
   const summary = caseData.summary
   const urgencyReason = caseData.urgency_reason ?? summary?.urgency_reason
 
   return (
     <div className="p-6 max-w-5xl">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <button
-          onClick={() => router.back()}
-          className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        <span className={`px-2.5 py-1 rounded-lg text-sm font-medium border ${urgency.style}`}>
-          {urgency.label}
-        </span>
-        <h1 className="text-xl font-bold text-slate-900">{caseData.case_type} 사건</h1>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => router.back()}
+            className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <span className={`px-2.5 py-1 rounded-lg text-sm font-medium border ${urgency.style}`}>
+            {urgency.label}
+          </span>
+          <h1 className="text-xl font-bold text-slate-900">{caseData.case_type} 사건</h1>
+        </div>
+        {/* Status + action button */}
+        <div className="flex items-center gap-2">
+          <span className={`px-2.5 py-1 rounded-lg text-sm font-medium border ${status.style}`}>
+            {status.label}
+          </span>
+          {status.next && (
+            <button
+              onClick={() => handleStatusChange(status.next!)}
+              disabled={statusUpdating}
+              className="px-3 py-1.5 text-sm font-medium text-white rounded-lg disabled:opacity-50 transition-colors"
+              style={{ background: '#1a2b5a' }}
+            >
+              {statusUpdating ? '처리 중...' : status.nextLabel}
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -111,9 +160,21 @@ export default function CaseDetailPage() {
         <div className="lg:col-span-2 space-y-4">
           {/* Client info */}
           <div className="bg-white rounded-xl border border-slate-200 p-4">
-            <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
-              고객 정보
-            </h2>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">고객 정보</h2>
+              {caseData.client_id && (
+                <button
+                  onClick={() => router.push(`/dashboard/clients/${caseData.client_id}`)}
+                  className="text-xs font-medium hover:underline flex items-center gap-1"
+                  style={{ color: '#4a7aef' }}
+                >
+                  고객 상세 보기
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              )}
+            </div>
             <div className="space-y-2.5">
               <div className="flex items-center gap-3">
                 <span className="text-slate-400 text-sm w-14 flex-shrink-0">이름</span>
@@ -125,6 +186,12 @@ export default function CaseDetailPage() {
                   {caseData.client_phone}
                 </a>
               </div>
+              {caseData.client_email && (
+                <div className="flex items-center gap-3">
+                  <span className="text-slate-400 text-sm w-14 flex-shrink-0">이메일</span>
+                  <span className="text-slate-600 text-sm">{caseData.client_email}</span>
+                </div>
+              )}
               <div className="flex items-center gap-3">
                 <span className="text-slate-400 text-sm w-14 flex-shrink-0">접수일</span>
                 <span className="text-slate-600 text-sm">
