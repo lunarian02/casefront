@@ -93,8 +93,15 @@ export async function saveCaseSummary(
       client_id: clientId ?? null,
       client_name: summary.client_name,
       client_phone: summary.client_phone,
+      client_email: summary.client_email ?? null,
+      is_proxy: summary.is_proxy ?? false,
+      contact_name: summary.contact_name ?? null,
+      contact_phone: summary.contact_phone ?? null,
+      contact_email: summary.contact_email ?? null,
+      contact_relation: summary.contact_relation ?? null,
       case_type: summary.case_type,
-      summary: summary, // JSONB — stores entire CaseSummary including events[], document_request, urgency_reason
+      status: 'new',
+      summary: summary, // JSONB — stores entire CaseSummary including events[], requirements, etc.
       urgency: summary.urgency,
       urgency_reason: summary.urgency_reason ?? null,
     })

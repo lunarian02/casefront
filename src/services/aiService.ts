@@ -19,7 +19,7 @@ export async function generateResponse(
       model: 'gemini-2.5-flash',
       systemInstruction: systemPrompt,
       generationConfig: {
-        maxOutputTokens: 1024,
+        maxOutputTokens: 2048,
         temperature: 0.7,
       },
     })

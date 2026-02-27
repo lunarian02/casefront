@@ -4,18 +4,15 @@ export interface Firm {
   slug: string | null
   lawyer_name: string
   lawyer_email: string | null
-  kakao_channel_id: string | null
-  kakao_search_id: string | null
+  logo_url: string | null
   phone: string | null
-  email: string | null
   hours: string | null
   specialties: string[] | string
   greeting: string | null
-  status: string | null
   created_at: string
-  notification_kakao: boolean
   notification_email: boolean
-  lawyer_kakao_id: string | null
+  notification_new_case: boolean
+  notification_urgent_only: boolean
 }
 
 export interface Client {
@@ -65,16 +62,30 @@ export interface CaseRequirement {
 export interface CaseSummary {
   client_name: string
   client_phone: string
-  client_email: string
+  client_email: string | null
+  is_proxy: boolean
+  contact_name: string | null
+  contact_phone: string | null
+  contact_email: string | null
+  contact_relation: string | null
   is_returning: boolean
 
-  case_type: '민사' | '형사' | '가사' | '교통사고' | '기타'
+  case_type: string                  // 민사/형사/가사/도산/노동
+  case_subtype: string               // 12개 유형 중 하나
+  case_sub_tag: string | null        // 하위 태그 (손해배상: 교통사고/의료사고 등)
+  position: string | null            // 피해자/피의자/원고/피고
 
   events: CaseEvent[]
-  requirements: CaseRequirement[]         // 요건사실 체크리스트
+  requirements: CaseRequirement[]
+  evidence: string[]
+  unconfirmed: string[]
   document_request: string[]
+  client_request: string
+  ai_notes: string
 
   urgency: 'urgent' | 'normal' | 'low'
   urgency_reason: string
   summary_text: string
+  conversation_turns: number
+  timestamp: string
 }

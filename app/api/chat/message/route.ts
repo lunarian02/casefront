@@ -34,11 +34,11 @@ export async function POST(request: Request) {
     // 3. Save user message
     await saveMessage(session.id, 'user', content)
 
-    // 4. Try to identify client from message (name + phone)
-    const clientContext = await identifyClient(content, firm.id, session)
-
-    // 5. Get conversation history
+    // 4. Get conversation history (needed for multi-message identity extraction)
     const history = await getHistory(session.id)
+
+    // 5. Try to identify client from message + history (name/phone/email in separate messages)
+    const clientContext = await identifyClient(content, history, firm.id, session)
 
     // 6. Generate AI response (with client context for returning customer hint)
     const { reply, caseSummary } = await generateResponse(history, firm, clientContext)
