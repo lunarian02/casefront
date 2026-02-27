@@ -55,7 +55,7 @@ export default function DashboardPage() {
   if (loading || fetching) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#1a2b5a', borderTopColor: 'transparent' }} />
       </div>
     )
   }
@@ -86,9 +86,10 @@ export default function DashboardPage() {
             onClick={() => setFilter(f)}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
               filter === f
-                ? 'bg-indigo-600 text-white'
+                ? 'text-white border border-transparent'
                 : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'
             }`}
+            style={filter === f ? { background: '#1a2b5a' } : {}}
           >
             {f === 'all' ? '전체' : URGENCY_CONFIG[f].label}
             {f !== 'all' && (

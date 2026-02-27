@@ -65,7 +65,7 @@ export default function CaseDetailPage() {
   if (loading || fetching) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#1a2b5a', borderTopColor: 'transparent' }} />
       </div>
     )
   }
@@ -76,7 +76,7 @@ export default function CaseDetailPage() {
         <p className="text-slate-500">사건을 찾을 수 없습니다.</p>
         <button
           onClick={() => router.push('/dashboard')}
-          className="mt-3 text-indigo-600 text-sm hover:underline"
+          className="mt-3 text-sm hover:underline" style={{ color: '#4a7aef' }}
         >
           목록으로 돌아가기
         </button>
@@ -121,7 +121,7 @@ export default function CaseDetailPage() {
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-slate-400 text-sm w-14 flex-shrink-0">연락처</span>
-                <a href={`tel:${caseData.client_phone}`} className="text-indigo-600 text-sm hover:underline">
+                <a href={`tel:${caseData.client_phone}`} className="text-sm hover:underline" style={{ color: '#4a7aef' }}>
                   {caseData.client_phone}
                 </a>
               </div>
@@ -165,7 +165,7 @@ export default function CaseDetailPage() {
                 {summary.events.map((event, i) => (
                   <div key={i} className="flex gap-3">
                     <div className="flex flex-col items-center">
-                      <div className="w-2 h-2 rounded-full bg-indigo-400 mt-1 flex-shrink-0" />
+                      <div className="w-2 h-2 rounded-full mt-1 flex-shrink-0" style={{ background: '#4a7aef' }} />
                       {i < summary.events.length - 1 && (
                         <div className="w-px flex-1 bg-slate-200 my-1" />
                       )}
@@ -192,7 +192,7 @@ export default function CaseDetailPage() {
               <ul className="space-y-2">
                 {summary.document_request.map((doc, i) => (
                   <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
-                    <span className="text-indigo-400 flex-shrink-0 mt-0.5">•</span>
+                    <span className="flex-shrink-0 mt-0.5" style={{ color: '#4a7aef' }}>•</span>
                     {doc}
                   </li>
                 ))}
@@ -224,9 +224,10 @@ export default function CaseDetailPage() {
                     <div
                       className={`max-w-[85%] px-3 py-2 rounded-xl text-sm ${
                         msg.role === 'user'
-                          ? 'bg-indigo-600 text-white rounded-br-sm'
+                          ? 'text-white rounded-br-sm'
                           : 'bg-white text-slate-800 border border-slate-200 rounded-bl-sm'
                       }`}
+                      style={msg.role === 'user' ? { background: '#1a2b5a' } : {}}
                     >
                       {msg.content}
                     </div>

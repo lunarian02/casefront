@@ -27,7 +27,7 @@ const MINUTES = ['00', '10', '20', '30', '40', '50']
 const DAY_OPTIONS: DayKey[] = ['평일', '토요일', '일요일']
 
 const INPUT_CLASS =
-  'w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 placeholder-slate-400 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-shadow'
+  'w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-900 placeholder-slate-400 outline-none focus:ring-2 focus:ring-[#4a7aef] focus:border-transparent transition-shadow'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -111,8 +111,8 @@ function DrumPicker({ items, value, onChange }: { items: string[]; value: string
     >
       {/* highlight strip */}
       <div
-        className="absolute inset-x-0 rounded-lg bg-indigo-50 border border-indigo-200 pointer-events-none"
-        style={{ top: 2 * ITEM_H, height: ITEM_H }}
+        className="absolute inset-x-0 rounded-lg pointer-events-none"
+        style={{ top: 2 * ITEM_H, height: ITEM_H, background: '#eef2ff', border: '1px solid rgba(74,122,239,0.3)' }}
       />
       {/* fades */}
       <div className="absolute inset-x-0 top-0 pointer-events-none z-10" style={{ height: 2 * ITEM_H, background: 'linear-gradient(to bottom, white 30%, transparent)' }} />
@@ -128,7 +128,7 @@ function DrumPicker({ items, value, onChange }: { items: string[]; value: string
               top: i * ITEM_H,
               height: ITEM_H,
               fontSize: dist === 0 ? 18 : dist === 1 ? 14 : 11,
-              color: dist === 0 ? '#4338ca' : dist === 1 ? '#64748b' : '#cbd5e1',
+              color: dist === 0 ? '#1a2b5a' : dist === 1 ? '#64748b' : '#cbd5e1',
               opacity: dist === 0 ? 1 : dist === 1 ? 0.7 : 0.35,
             }}
           >
@@ -175,7 +175,8 @@ function HoursPicker({ value, onChange }: { value: string; onChange: (v: string)
             key={p}
             type="button"
             onClick={() => set(p)}
-            className={`px-2.5 py-1 transition-colors ${period === p ? 'bg-indigo-600 text-white' : 'bg-white text-slate-500 hover:bg-slate-50'}`}
+            className={`px-2.5 py-1 transition-colors ${period === p ? 'text-white' : 'bg-white text-slate-500 hover:bg-slate-50'}`}
+            style={period === p ? { background: '#1a2b5a' } : {}}
           >
             {p}
           </button>
@@ -194,8 +195,9 @@ function HoursPicker({ value, onChange }: { value: string; onChange: (v: string)
             type="button"
             onClick={() => toggleDay(d)}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
-              days.includes(d) ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
+              days.includes(d) ? 'text-white' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
             }`}
+            style={days.includes(d) ? { background: '#1a2b5a', borderColor: '#1a2b5a' } : {}}
           >
             {d}
           </button>
@@ -308,7 +310,7 @@ export default function SettingsPage() {
   }
 
   if (loading || fetching) {
-    return <div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" /></div>
+    return <div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#1a2b5a', borderTopColor: 'transparent' }} /></div>
   }
   if (fetchError) return <div className="p-6"><p className="text-red-600 text-sm">{fetchError}</p></div>
 
@@ -346,7 +348,8 @@ export default function SettingsPage() {
           <div className="flex flex-wrap gap-2">
             {SPECIALTY_OPTIONS.map((s) => (
               <button key={s} type="button" onClick={() => toggleSpecialty(s)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${form.specialties.includes(s) ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'}`}>
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${form.specialties.includes(s) ? 'text-white' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'}`}
+                style={form.specialties.includes(s) ? { background: '#1a2b5a', borderColor: '#1a2b5a' } : {}}>
                 {s}
               </button>
             ))}
@@ -392,7 +395,8 @@ export default function SettingsPage() {
         {error && <p className="text-sm text-red-600">{error}</p>}
         <div className="flex items-center gap-3">
           <button onClick={handleSave} disabled={saving}
-            className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors">
+            className="px-5 py-2.5 text-white text-sm font-medium rounded-lg disabled:opacity-50 transition-colors"
+            style={{ background: '#1a2b5a' }}>
             {saving ? '저장 중...' : '저장'}
           </button>
           {saved && <span className="text-sm text-green-600 font-medium">저장됐습니다.</span>}
@@ -428,7 +432,8 @@ function Toggle({ checked, onChange, label, desc, disabled = false }: {
         aria-checked={checked}
         disabled={disabled}
         onClick={() => !disabled && onChange(!checked)}
-        className={`relative mt-0.5 w-10 h-6 rounded-full transition-colors flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 ${checked ? 'bg-indigo-600' : 'bg-slate-200'}`}
+        className={`relative mt-0.5 w-10 h-6 rounded-full transition-colors flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-[#4a7aef] focus:ring-offset-1 ${checked ? '' : 'bg-slate-200'}`}
+        style={checked ? { background: '#1a2b5a' } : {}}
       >
         <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${checked ? 'translate-x-5' : 'translate-x-1'}`} />
       </button>

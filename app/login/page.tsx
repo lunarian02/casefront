@@ -27,11 +27,24 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: '#f3f5fa' }}>
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-slate-900">CaseFront</h1>
-          <p className="text-slate-500 text-sm mt-1">변호사 대시보드</p>
+          {/* CaseFront logo */}
+          <div className="flex items-center justify-center gap-2.5 mb-3">
+            <svg width="32" height="32" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="64" height="64" rx="14" fill="#1a2b5a"/>
+              <path d="M23 14H17.5C15.57 14 14 15.57 14 17.5V46.5C14 48.43 15.57 50 17.5 50H23" stroke="#e8ecf4" strokeWidth="3.5" strokeLinecap="round"/>
+              <path d="M41 14H46.5C48.43 14 50 15.57 50 17.5V46.5C50 48.43 48.43 50 46.5 50H41" stroke="#e8ecf4" strokeWidth="3.5" strokeLinecap="round"/>
+              <line x1="24" y1="26" x2="40" y2="26" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round"/>
+              <line x1="24" y1="33" x2="36" y2="33" stroke="#8aa4cc" strokeWidth="2" strokeLinecap="round" opacity="0.6"/>
+              <line x1="24" y1="40" x2="38" y2="40" stroke="#8aa4cc" strokeWidth="2" strokeLinecap="round" opacity="0.35"/>
+            </svg>
+            <span style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: 22, fontWeight: 600, color: '#1a1f36', letterSpacing: '-0.3px' }}>
+              CaseFront
+            </span>
+          </div>
+          <p className="text-slate-500 text-sm">변호사 대시보드</p>
         </div>
 
         <form
@@ -44,7 +57,8 @@ export default function LoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:border-transparent transition-shadow"
+              style={{ '--tw-ring-color': '#4a7aef' } as React.CSSProperties}
               placeholder="lawyer@example.com"
               required
             />
@@ -56,7 +70,8 @@ export default function LoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:border-transparent transition-shadow"
+              style={{ '--tw-ring-color': '#4a7aef' } as React.CSSProperties}
               placeholder="••••••••"
               required
             />
@@ -67,7 +82,8 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-indigo-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+            className="w-full text-white py-2.5 rounded-lg text-sm font-medium disabled:opacity-50 transition-colors"
+            style={{ background: loading ? '#1a2b5a99' : '#1a2b5a' }}
           >
             {loading ? '로그인 중...' : '로그인'}
           </button>
