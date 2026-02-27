@@ -15,12 +15,25 @@ export default function LoginPage() {
     setLoading(true)
     setError('')
 
-    const { error } = await supabaseBrowser.auth.signInWithPassword({ email, password })
+    const { data, error } = await supabaseBrowser.auth.signInWithPassword({ email, password })
 
     if (error) {
       setError('이메일 또는 비밀번호가 올바르지 않습니다.')
       setLoading(false)
       return
+    }
+
+    // Check if onboarding is done (firm exists)
+    const token = data.session?.access_token
+    if (token) {
+      const res = await fetch('/api/dashboard/onboarding', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const result = await res.json()
+      if (!result.firm) {
+        router.push('/onboarding')
+        return
+      }
     }
 
     router.push('/dashboard')

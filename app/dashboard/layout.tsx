@@ -17,15 +17,28 @@ function SidebarIcon() {
 }
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth()
+  const { user, session, loading } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (loading) return
+    if (!user) {
       router.push('/login')
+      return
     }
-  }, [user, loading, router])
+    // Check if onboarding is done
+    const token = session?.access_token
+    if (!token) return
+    fetch('/api/dashboard/onboarding', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (!data.firm) router.push('/onboarding')
+      })
+      .catch(() => {})
+  }, [user, session, loading, router])
 
   async function handleLogout() {
     await supabaseBrowser.auth.signOut()

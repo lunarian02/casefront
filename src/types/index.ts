@@ -4,18 +4,15 @@ export interface Firm {
   slug: string | null
   lawyer_name: string
   lawyer_email: string | null
-  kakao_channel_id: string | null
-  kakao_search_id: string | null
+  logo_url: string | null
   phone: string | null
-  email: string | null
   hours: string | null
   specialties: string[] | string
   greeting: string | null
-  status: string | null
   created_at: string
-  notification_kakao: boolean
   notification_email: boolean
-  lawyer_kakao_id: string | null
+  notification_new_case: boolean
+  notification_urgent_only: boolean
 }
 
 export interface Client {
@@ -23,16 +20,16 @@ export interface Client {
   firm_id: string
   name: string
   phone: string
+  email: string | null
   created_at: string
   last_contact_at: string
 }
 
 export interface Session {
   id: string
-  kakao_user_id: string
   firm_id: string
   client_id: string | null
-  status: 'active' | 'completed' | 'expired'
+  status: 'active' | 'completed'
   case_type: string | null
   channel: string
   created_at: string
@@ -57,24 +54,38 @@ export interface CaseEvent {
 }
 
 export interface CaseRequirement {
-  element: string                          // 요건사실 명칭 (예: "금전교부")
-  status: 'confirmed' | 'denied' | 'unknown'  // 충족 여부
-  detail: string                           // 구체적 내용
+  element: string
+  status: 'confirmed' | 'denied' | 'unknown'
+  detail: string
 }
 
 export interface CaseSummary {
   client_name: string
   client_phone: string
-  client_email: string
+  client_email: string | null
+  is_proxy: boolean
+  contact_name: string | null
+  contact_phone: string | null
+  contact_email: string | null
+  contact_relation: string | null
   is_returning: boolean
 
-  case_type: '민사' | '형사' | '가사' | '교통사고' | '기타'
+  case_type: string
+  case_subtype: string
+  case_sub_tag: string | null
+  position: string | null
 
   events: CaseEvent[]
-  requirements: CaseRequirement[]         // 요건사실 체크리스트
+  requirements: CaseRequirement[]
+  evidence: string[]
+  unconfirmed: string[]
   document_request: string[]
+  client_request: string
+  ai_notes: string
 
   urgency: 'urgent' | 'normal' | 'low'
   urgency_reason: string
   summary_text: string
+  conversation_turns: number
+  timestamp: string
 }

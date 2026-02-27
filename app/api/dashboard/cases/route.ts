@@ -30,7 +30,7 @@ export async function GET(request: Request) {
 
   const { data: cases, error } = await supabaseAdmin
     .from('case_summaries')
-    .select('id, session_id, client_name, client_phone, case_type, urgency, urgency_reason, created_at')
+    .select('id, session_id, client_name, client_phone, client_email, case_type, urgency, urgency_reason, status, is_proxy, contact_name, contact_relation, created_at')
     .eq('firm_id', firm.id)
     .order('created_at', { ascending: false })
     .limit(100)
