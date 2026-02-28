@@ -66,11 +66,15 @@ describe('메시지 정렬', () => {
 })
 
 describe('채널 값 검증', () => {
-  const validChannels = ['web', 'kakao', 'ai_phone', 'recording']
+  const validChannels = ['web', 'kakao', 'ai_phone']
 
   it('유효한 채널 값을 확인한다', () => {
     expect(validChannels).toContain('web')
-    expect(validChannels).toContain('recording')
+    expect(validChannels).toContain('ai_phone')
+  })
+
+  it('recording 채널은 지원하지 않는다', () => {
+    expect(validChannels).not.toContain('recording')
   })
 
   it('잘못된 채널 값은 포함되지 않는다', () => {
