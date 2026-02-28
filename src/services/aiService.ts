@@ -13,8 +13,7 @@ export async function generateResponse(
   clientContext?: ClientContext | null
 ): Promise<{ reply: string; caseSummary?: CaseSummary }> {
   try {
-    const firstUserContent = history.find((m) => m.role === 'user')?.content ?? ''
-    const systemPrompt = getSystemPrompt(firm, clientContext) + getStageHint(history.length, firstUserContent)
+    const systemPrompt = getSystemPrompt(firm, clientContext) + getStageHint(history.length)
 
     const model = genAI.getGenerativeModel({
       model: 'gemini-2.5-flash',
