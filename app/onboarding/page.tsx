@@ -167,7 +167,7 @@ export default function OnboardingPage() {
     setLoading(false)
   }
 
-  const chatLink = firmSlug ? `https://chat.casefront.app/chat/${firmSlug}` : ''
+  const chatLink = firmSlug ? `https://chat.casefront.app/${firmSlug}` : ''
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{ background: '#f3f5fa' }}>
