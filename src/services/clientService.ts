@@ -54,10 +54,10 @@ function extractName(text: string): string | null {
   return null
 }
 
-// Extract email from text
+// Extract email from text (always lowercase)
 function extractEmail(text: string): string | null {
   const match = text.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/)
-  return match ? match[0] : null
+  return match ? match[0].toLowerCase() : null
 }
 
 // Scan all messages (oldest first) to find name, phone, email
@@ -88,14 +88,13 @@ function extractIdentityFromHistory(
 
   if (!phone) return { name: null, phone: null, email }
 
-  // Look for name: in same message, or within 3 messages before phone
+  // Search for name in ALL messages from beginning up to (and including) phone message
   let name: string | null = null
-  const searchFrom = Math.max(0, phoneMsgIndex - 3)
-  for (let i = searchFrom; i <= phoneMsgIndex; i++) {
+  for (let i = 0; i <= phoneMsgIndex; i++) {
     const n = extractName(allTexts[i])
     if (n) {
       name = n
-      break
+      // keep searching — later occurrence closer to phone is more reliable
     }
   }
 
