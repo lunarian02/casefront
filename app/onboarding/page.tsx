@@ -1,9 +1,9 @@
 'use client'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabaseBrowser } from '@/lib/supabaseClient'
 
-const SPECIALTIES = ['민사', '형사', '가사', '교통사고', '부동산', '상속', '이혼', '노동', '도산', '성범죄', '기타']
+const SPECIALTIES = ['민사', '형사', '가사', '교통사고', '부동산', '상속', '이혼', '노동', '도산', '성범죄', '행정', '기타']
 
 const STEPS = ['사무소 기본정보', '전문분야', '로고/사진', 'AI 인사말', '완료']
 
@@ -30,6 +30,7 @@ export default function OnboardingPage() {
   const [firmId, setFirmId] = useState<string | null>(null)
   const [firmSlug, setFirmSlug] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [initializing, setInitializing] = useState(true)
   const [error, setError] = useState('')
 
   // Step 1
@@ -44,10 +45,49 @@ export default function OnboardingPage() {
   // Step 3
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
+  const [dragOver, setDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Step 4
   const [greeting, setGreeting] = useState('')
+
+  // Step 5
+  const [copied, setCopied] = useState(false)
+
+  // On mount: check if already onboarded
+  useEffect(() => {
+    async function checkOnboarding() {
+      const { data: { session } } = await supabaseBrowser.auth.getSession()
+      if (!session) {
+        router.push('/login')
+        return
+      }
+
+      const res = await fetch('/api/dashboard/onboarding', {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+      const data = await res.json()
+
+      if (data.firm?.name) {
+        // Already onboarded → redirect to dashboard
+        router.push('/dashboard')
+        return
+      }
+
+      if (data.firm) {
+        // Firm exists (partial, e.g. from Google OAuth flow) → pre-fill
+        setFirmId(data.firm.id)
+        setFirmSlug(data.firm.slug)
+        if (data.firm.name) setName(data.firm.name)
+        if (data.firm.lawyer_name) setLawyerName(data.firm.lawyer_name)
+        if (data.firm.specialties?.length) setSpecialties(data.firm.specialties)
+        if (data.firm.greeting) setGreeting(data.firm.greeting)
+      }
+
+      setInitializing(false)
+    }
+    checkOnboarding()
+  }, [router])
 
   async function getToken() {
     const { data: { session } } = await supabaseBrowser.auth.getSession()
@@ -61,6 +101,28 @@ export default function OnboardingPage() {
     const token = await getToken()
     if (!token) { router.push('/login'); return }
 
+    const defaultGreeting = `안녕하세요, ${name}입니다. 어떤 일로 연락 주셨나요?`
+
+    if (firmId) {
+      // Firm already exists → PATCH
+      const res = await fetch('/api/dashboard/onboarding', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ name, lawyer_name: lawyerName, phone, hours }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        setError(data.error ?? '오류가 발생했습니다.')
+        setLoading(false)
+        return
+      }
+      if (!greeting) setGreeting(defaultGreeting)
+      setStep(2)
+      setLoading(false)
+      return
+    }
+
+    // POST to create new firm
     const res = await fetch('/api/dashboard/onboarding', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -69,8 +131,14 @@ export default function OnboardingPage() {
 
     if (!res.ok) {
       const data = await res.json()
-      // If firm already exists, proceed to next step
+
       if (res.status === 409) {
+        // Firm created in background → PATCH with the entered data
+        await fetch('/api/dashboard/onboarding', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ name, lawyer_name: lawyerName, phone, hours }),
+        })
         const checkRes = await fetch('/api/dashboard/onboarding', {
           headers: { Authorization: `Bearer ${token}` },
         })
@@ -78,12 +146,13 @@ export default function OnboardingPage() {
         if (checkData.firm) {
           setFirmId(checkData.firm.id)
           setFirmSlug(checkData.firm.slug)
-          setGreeting(checkData.firm.greeting ?? `안녕하세요, ${checkData.firm.name}입니다. 어떤 일로 연락 주셨나요?`)
+          if (!greeting) setGreeting(defaultGreeting)
           setStep(2)
           setLoading(false)
           return
         }
       }
+
       setError(data.error ?? '오류가 발생했습니다.')
       setLoading(false)
       return
@@ -92,12 +161,16 @@ export default function OnboardingPage() {
     const data = await res.json()
     setFirmId(data.firm.id)
     setFirmSlug(data.firm.slug)
-    setGreeting(`안녕하세요, ${name}입니다. 어떤 일로 연락 주셨나요?`)
+    if (!greeting) setGreeting(defaultGreeting)
     setStep(2)
     setLoading(false)
   }
 
   async function handleStep2() {
+    if (specialties.length === 0) {
+      setError('전문분야를 최소 1개 이상 선택해주세요.')
+      return
+    }
     setLoading(true)
     setError('')
     const token = await getToken()
@@ -116,6 +189,17 @@ export default function OnboardingPage() {
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
+    setLogoFile(file)
+    const reader = new FileReader()
+    reader.onload = (ev) => setLogoPreview(ev.target?.result as string)
+    reader.readAsDataURL(file)
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault()
+    setDragOver(false)
+    const file = e.dataTransfer.files?.[0]
+    if (!file || !file.type.startsWith('image/')) return
     setLogoFile(file)
     const reader = new FileReader()
     reader.onload = (ev) => setLogoPreview(ev.target?.result as string)
@@ -167,7 +251,22 @@ export default function OnboardingPage() {
     setLoading(false)
   }
 
+  function handleCopyLink() {
+    navigator.clipboard.writeText(chatLink)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
   const chatLink = firmSlug ? `https://chat.casefront.app/${firmSlug}` : ''
+  const defaultGreeting = `안녕하세요, ${name || '사무소'}입니다. 어떤 일로 연락 주셨나요?`
+
+  if (initializing) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#f3f5fa' }}>
+        <div className="w-6 h-6 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#1a2b5a', borderTopColor: 'transparent' }} />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{ background: '#f3f5fa' }}>
@@ -281,7 +380,7 @@ export default function OnboardingPage() {
           {step === 2 && (
             <div className="space-y-4">
               <h2 className="text-lg font-bold text-slate-900 mb-4">전문분야 선택</h2>
-              <p className="text-sm text-slate-500">해당하는 전문분야를 모두 선택해주세요.</p>
+              <p className="text-sm text-slate-500">해당하는 전문분야를 모두 선택해주세요. (최소 1개)</p>
               <div className="grid grid-cols-3 gap-2">
                 {SPECIALTIES.map((s) => {
                   const checked = specialties.includes(s)
@@ -330,16 +429,22 @@ export default function OnboardingPage() {
             <div className="space-y-4">
               <h2 className="text-lg font-bold text-slate-900 mb-1">로고/사진 업로드</h2>
               <p className="text-sm text-slate-500">
-                이 이미지는 고객이 채팅 접속 시 상단에 표시됩니다. 고객에게 신뢰감을 줄 수 있어요.
+                고객이 채팅 접속 시 상단에 표시됩니다. 고객에게 신뢰감을 줄 수 있어요.
               </p>
+
+              {/* Drop zone */}
               <div
-                className="border-2 border-dashed border-slate-200 rounded-xl p-6 text-center cursor-pointer hover:border-slate-300 transition-colors"
+                className="border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors"
+                style={{ borderColor: dragOver ? '#4a7aef' : '#e2e8f0', background: dragOver ? '#f0f5ff' : '#fff' }}
                 onClick={() => fileInputRef.current?.click()}
+                onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={handleDrop}
               >
                 {logoPreview ? (
                   <div className="flex flex-col items-center gap-3">
                     <img src={logoPreview} alt="미리보기" className="w-24 h-24 object-cover rounded-xl" />
-                    <p className="text-sm text-slate-500">클릭하여 변경</p>
+                    <p className="text-sm text-slate-500">클릭하거나 드래그하여 변경</p>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center gap-2 text-slate-400">
@@ -347,7 +452,7 @@ export default function OnboardingPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                         d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    <p className="text-sm font-medium">클릭하여 파일 선택</p>
+                    <p className="text-sm font-medium">클릭하거나 드래그하여 파일 선택</p>
                     <p className="text-xs">JPG, PNG (권장: 500×500px)</p>
                   </div>
                 )}
@@ -359,6 +464,33 @@ export default function OnboardingPage() {
                 className="hidden"
                 onChange={handleFileChange}
               />
+
+              {/* Chat header preview */}
+              {logoPreview && (
+                <div className="border border-slate-200 rounded-xl overflow-hidden">
+                  <p className="text-xs font-medium text-slate-400 px-4 pt-3 pb-2 uppercase tracking-wider">채팅 상단 미리보기</p>
+                  <div className="px-4 pb-4">
+                    <div className="rounded-xl border border-slate-200 overflow-hidden">
+                      <div className="flex items-center gap-3 px-4 py-3" style={{ background: '#0f1629' }}>
+                        <img src={logoPreview} alt="logo" className="w-9 h-9 rounded-lg object-cover flex-shrink-0" />
+                        <div>
+                          <p className="text-sm font-semibold text-white leading-tight">{name || '사무소명'}</p>
+                          <p className="text-xs" style={{ color: '#8aa4cc' }}>AI 법률 상담</p>
+                        </div>
+                      </div>
+                      <div className="px-4 py-3 bg-slate-50">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-lg flex-shrink-0" style={{ background: '#1a2b5a' }} />
+                          <div className="bg-white rounded-xl rounded-tl-sm px-3 py-1.5 text-xs text-slate-600 border border-slate-200">
+                            안녕하세요 👋 무엇을 도와드릴까요?
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <p className="text-xs text-slate-400 text-center">선택사항 — 미등록 시 CaseFront 기본 아이콘 사용</p>
               {error && <p className="text-red-500 text-sm">{error}</p>}
               <div className="flex gap-3">
@@ -369,8 +501,14 @@ export default function OnboardingPage() {
                   ← 이전
                 </button>
                 <button
+                  onClick={() => setStep(4)}
+                  className="flex-1 py-2.5 rounded-lg text-sm font-medium border border-slate-200 text-slate-600"
+                >
+                  건너뛰기
+                </button>
+                <button
                   onClick={handleStep3}
-                  disabled={loading}
+                  disabled={loading || !logoFile}
                   className="flex-1 text-white py-2.5 rounded-lg text-sm font-medium disabled:opacity-50"
                   style={{ background: '#1a2b5a' }}
                 >
@@ -386,7 +524,16 @@ export default function OnboardingPage() {
               <h2 className="text-lg font-bold text-slate-900 mb-1">AI 인사말 설정</h2>
               <p className="text-sm text-slate-500">고객이 채팅을 시작할 때 처음 보게 될 인사말입니다.</p>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">인사말</label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-sm font-medium text-slate-700">인사말</label>
+                  <button
+                    type="button"
+                    onClick={() => setGreeting(defaultGreeting)}
+                    className="text-xs px-2 py-1 rounded border border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors"
+                  >
+                    기본값 사용
+                  </button>
+                </div>
                 <textarea
                   value={greeting}
                   onChange={(e) => setGreeting(e.target.value)}
@@ -440,7 +587,7 @@ export default function OnboardingPage() {
                 </svg>
               </div>
               <div>
-                <h2 className="text-lg font-bold text-slate-900">설정 완료!</h2>
+                <h2 className="text-lg font-bold text-slate-900">설정이 완료되었습니다!</h2>
                 <p className="text-sm text-slate-500 mt-1">이제 고객이 아래 링크로 상담을 시작할 수 있어요.</p>
               </div>
 
@@ -448,14 +595,21 @@ export default function OnboardingPage() {
                 <p className="text-xs font-medium text-slate-400 mb-2 uppercase tracking-wider">채팅 링크</p>
                 <p className="text-sm font-mono text-slate-700 break-all">{chatLink}</p>
                 <button
-                  onClick={() => navigator.clipboard.writeText(chatLink)}
-                  className="mt-3 text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-white transition-colors"
+                  onClick={handleCopyLink}
+                  className="mt-3 text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors"
+                  style={
+                    copied
+                      ? { background: '#1a2b5a', color: '#fff', borderColor: '#1a2b5a' }
+                      : { background: '#fff', color: '#475569', borderColor: '#e2e8f0' }
+                  }
                 >
-                  링크 복사
+                  {copied ? '✓ 복사됨' : '링크 복사'}
                 </button>
               </div>
 
-              <p className="text-sm text-slate-500">이 링크를 홈페이지나 명함에 넣으시면 고객이 바로 상담을 시작할 수 있어요.</p>
+              <p className="text-sm text-slate-500">
+                이 링크를 홈페이지나 명함에 넣으시면 고객이 바로 접수를 시작할 수 있어요.
+              </p>
 
               <button
                 onClick={() => router.push('/dashboard')}
