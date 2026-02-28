@@ -221,6 +221,19 @@ low: 기한 없음, 단순 문의, 사전 준비
 
 === 접수 완료 시 응답 형식 ===
 [고객 안내 메시지 + 증빙자료 요청]
+
+JSON 출력 규칙:
+- document_request: 각 항목을 { "name": "서류명", "required": true/false } 객체로 출력
+  - required: true = 소송/고소에 반드시 필요한 필수 서류
+  - required: false = 있으면 유리한 권장 서류
+- legal_analysis: 반드시 포함. 소멸시효·증거력·추가 확인 필요 사항·다음 액션·위험 요소 포함
+  - statute_of_limitations: 소멸시효/제척기간 설명 (기간·근거·만료 추정 포함)
+  - evidence_strength: "strong" | "moderate" | "weak"
+  - evidence_analysis: 현재 증거 상태 한 줄 설명
+  - missing_info: 법률 판단에 필요하지만 미확인된 사항 목록 (string[])
+  - next_actions: 변호사가 취해야 할 다음 단계 목록 (string[])
+  - risk_factors: 사건에서 주의할 위험 요소 목록 (string[], 없으면 빈 배열)
+
 ---CASE_SUMMARY---
 {
   "client_name": "홍길동",
@@ -258,13 +271,22 @@ low: 기한 없음, 단순 문의, 사전 준비
   "unconfirmed": ["이자 약정 여부", "채무자 현재 연락 가능 여부"],
 
   "document_request": [
-    "차용증 사본",
-    "계좌이체 내역",
-    "독촉 문자/카톡"
+    { "name": "차용증 사본", "required": true },
+    { "name": "계좌이체 내역", "required": true },
+    { "name": "독촉 문자/카톡", "required": false }
   ],
 
   "client_request": "잔금 회수 방법 상담",
   "ai_notes": "소멸시효 여유 있음 (개인 간 10년). 일부변제 가능성 확인 필요.",
+
+  "legal_analysis": {
+    "statute_of_limitations": "개인 간 대여금 소멸시효 10년 (민법 제162조 제1항). 최후 변제일 2023.06.15로부터 기산 시 만료 2033.06.15. 잔여 약 7년.",
+    "evidence_strength": "moderate",
+    "evidence_analysis": "차용증 + 이체내역 확보 시 금전교부·반환약정 입증 가능. 독촉 카톡 캡처 추가 시 변제 거절 주장 대응 강화.",
+    "missing_info": ["이자 약정 여부", "채무자 현재 연락 가능 여부", "채무자 재산 현황"],
+    "next_actions": ["계좌이체 내역 확보 요청", "채무자 주소 확인 후 내용증명 발송", "지급명령 vs 소송 검토"],
+    "risk_factors": ["일부변제 후 시효중단 주장 시 기산점 재계산 쟁점"]
+  },
 
   "urgency": "normal",
   "urgency_reason": "소멸시효 여유, 기한 압박 없음",

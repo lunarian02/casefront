@@ -46,6 +46,20 @@ export interface Message {
   created_at?: string
 }
 
+export interface DocumentRequestItem {
+  name: string
+  required: boolean
+}
+
+export interface LegalAnalysis {
+  statute_of_limitations?: string
+  evidence_strength?: 'strong' | 'moderate' | 'weak'
+  evidence_analysis?: string
+  missing_info?: string[]
+  next_actions?: string[]
+  risk_factors?: string[]
+}
+
 export interface CaseEvent {
   date: string
   subject: string
@@ -80,7 +94,7 @@ export interface CaseSummary {
   requirements: CaseRequirement[]
   evidence: string[]
   unconfirmed: string[]
-  document_request: string[]
+  document_request: (string | DocumentRequestItem)[]
   client_request: string
   ai_notes: string
 
@@ -89,4 +103,5 @@ export interface CaseSummary {
   summary_text: string
   conversation_turns: number
   timestamp: string
+  legal_analysis?: LegalAnalysis
 }
