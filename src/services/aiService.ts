@@ -19,9 +19,13 @@ export async function generateResponse(
       model: 'gemini-2.5-flash',
       systemInstruction: systemPrompt,
       generationConfig: {
-        maxOutputTokens: 2048,
+        maxOutputTokens: 4096,
         temperature: 0.7,
-      },
+        // Limit thinking budget so output tokens are sufficient for case summary JSON
+        thinkingConfig: {
+          thinkingBudget: 1024,
+        },
+      } as Record<string, unknown>,
     })
 
     // Convert history to Gemini chat format
