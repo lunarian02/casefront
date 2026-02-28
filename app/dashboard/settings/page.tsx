@@ -11,6 +11,7 @@ type FirmSettings = {
   hours: string
   specialties: string[]
   greeting: string
+  notify_email: string
   notification_email: boolean
   notification_new_case: boolean
   notification_urgent_only: boolean
@@ -221,6 +222,7 @@ export default function SettingsPage() {
     hours: '평일 09:00-18:00',
     specialties: [],
     greeting: '',
+    notify_email: '',
     notification_email: true,
     notification_new_case: true,
     notification_urgent_only: false,
@@ -249,6 +251,7 @@ export default function SettingsPage() {
           hours: firm.hours ?? '평일 09:00-18:00',
           specialties: Array.isArray(firm.specialties) ? firm.specialties : [],
           greeting: firm.greeting ?? '',
+          notify_email: (firm as { notify_email?: string }).notify_email ?? '',
           notification_email: firm.notification_email ?? true,
           notification_new_case: firm.notification_new_case ?? true,
           notification_urgent_only: firm.notification_urgent_only ?? false,
@@ -260,6 +263,10 @@ export default function SettingsPage() {
 
   async function handleSave() {
     if (!session) return
+    if (form.notify_email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.notify_email.trim())) {
+      setError('알림 이메일 형식이 올바르지 않습니다.')
+      return
+    }
     setSaving(true); setSaved(false); setError('')
     try {
       const res = await fetch('/api/dashboard/settings', {
@@ -341,6 +348,16 @@ export default function SettingsPage() {
         <section className="bg-white rounded-xl border border-slate-200 p-5">
           <h2 className="text-sm font-semibold text-slate-700 mb-4">알림 설정</h2>
           <div className="space-y-4">
+            <Field label="알림 이메일">
+              <input
+                type="email"
+                value={form.notify_email}
+                onChange={(e) => setForm((p) => ({ ...p, notify_email: e.target.value }))}
+                placeholder="사건 접수 알림을 받을 이메일 주소"
+                className={INPUT_CLASS}
+              />
+              <p className="text-xs text-slate-400 mt-1">비워두면 가입 이메일로 전송됩니다.</p>
+            </Field>
             <Toggle
               checked={form.notification_email}
               onChange={(v) => setForm((p) => ({ ...p, notification_email: v }))}

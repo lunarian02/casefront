@@ -13,6 +13,7 @@ export interface Firm {
   notification_email: boolean
   notification_new_case: boolean
   notification_urgent_only: boolean
+  notify_email: string | null
 }
 
 export interface Client {

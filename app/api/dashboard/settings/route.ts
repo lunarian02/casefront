@@ -36,6 +36,7 @@ export async function PATCH(request: Request) {
   const allowedCols = [
     'name', 'lawyer_name', 'phone', 'hours', 'specialties',
     'greeting', 'notification_email', 'notification_new_case', 'notification_urgent_only',
+    'notify_email',
   ]
 
   const updates: Record<string, unknown> = {}
