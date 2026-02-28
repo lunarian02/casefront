@@ -12,7 +12,7 @@ function UploadGuide() {
         className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-slate-700 bg-white"
         onClick={() => setOpen(open ? null : 'galaxy')}
       >
-        <span>📋 업로드 방법 보기</span>
+        <span>업로드 방법 보기</span>
         <svg className={`w-4 h-4 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"/>
         </svg>
@@ -28,7 +28,7 @@ function UploadGuide() {
                 className="flex-1 py-1.5 rounded-lg text-xs font-medium transition-colors"
                 style={open === t ? { background: '#1a2b5a', color: '#fff' } : { background: '#fff', color: '#64748b', border: '1px solid #e4e8f1' }}
               >
-                {t === 'galaxy' ? '📱 갤럭시' : '🍎 아이폰'}
+                {t === 'galaxy' ? '갤럭시' : '아이폰'}
               </button>
             ))}
           </div>

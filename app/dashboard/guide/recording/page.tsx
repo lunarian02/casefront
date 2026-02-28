@@ -82,7 +82,7 @@ export default function RecordingGuidePage() {
                 : { background: '#f3f5fa', color: '#64748b' }
             }
           >
-            {t === 'galaxy' ? '📱 갤럭시 (Samsung)' : '🍎 아이폰 (iPhone)'}
+            {t === 'galaxy' ? '갤럭시 (Samsung)' : '아이폰 (iPhone)'}
           </button>
         ))}
       </div>
@@ -105,7 +105,7 @@ export default function RecordingGuidePage() {
               <li>3. "모든 통화" 또는 "특정 번호만" 선택</li>
             </ol>
             <InfoBox>
-              ⚠️ <span className="font-medium">에이닷(A.) 전화</span> 사용 시: 에이닷 앱 내에서도 자동 녹음 설정 가능. 녹음 파일이 <code>TPhoneCallRecords</code> 폴더에 저장될 수 있습니다.
+              <span className="font-medium">에이닷(A.) 전화</span> 사용 시: 에이닷 앱 내에서도 자동 녹음 설정 가능. 녹음 파일이 <code>TPhoneCallRecords</code> 폴더에 저장될 수 있습니다.
             </InfoBox>
           </div>
 
@@ -144,7 +144,7 @@ export default function RecordingGuidePage() {
               </div>
             </div>
             <TipBox>
-              💡 <span className="font-medium">꿀팁</span>: 대시보드를 홈화면에 추가하면 앱처럼 바로 접속됩니다. 브라우저 메뉴 → "홈 화면에 추가"
+              대시보드를 홈화면에 추가하면 앱처럼 바로 접속됩니다. 브라우저 메뉴 → "홈 화면에 추가"
             </TipBox>
           </div>
         </div>
@@ -167,7 +167,7 @@ export default function RecordingGuidePage() {
               <li>2. 통화 중 좌측 상단 녹음 아이콘을 눌러 녹음 시작</li>
             </ol>
             <InfoBox>
-              ⚠️ 상대방에게 <span className="font-medium">"이 통화가 녹음됩니다"</span> 자동 고지됩니다 (애플 정책). 갤럭시와 달리 <span className="font-medium">자동 녹음 불가</span> — 매 통화마다 수동으로 녹음 버튼을 눌러야 합니다.
+              상대방에게 <span className="font-medium">"이 통화가 녹음됩니다"</span> 자동 고지됩니다 (애플 정책). 갤럭시와 달리 <span className="font-medium">자동 녹음 불가</span> — 매 통화마다 수동으로 녹음 버튼을 눌러야 합니다.
             </InfoBox>
           </div>
 
@@ -202,7 +202,7 @@ export default function RecordingGuidePage() {
               </div>
             </div>
             <TipBox>
-              💡 홈화면에 추가하면 앱처럼 보이고, 녹음 파일 공유 시 앱 목록에 <span className="font-medium">CaseFront</span>가 표시됩니다.
+              홈화면에 추가하면 앱처럼 보이고, 녹음 파일 공유 시 앱 목록에 <span className="font-medium">CaseFront</span>가 표시됩니다.
             </TipBox>
           </div>
         </div>
