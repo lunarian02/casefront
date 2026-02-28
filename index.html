@@ -374,21 +374,50 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
 
 <footer><div class="container"><p>© 2026 CaseFront</p></div></footer>
 
-<script>
-// Nav scroll effect
-window.addEventListener('scroll',()=>{document.getElementById('nav').classList.toggle('scrolled',window.scrollY>20)});
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
 
-// Inquiry form
-function submitInquiry(){
-  const name=document.getElementById('inq-name').value.trim();
-  const email=document.getElementById('inq-email').value.trim();
-  const firm=document.getElementById('inq-firm').value.trim();
-  if(!name||!email){alert('이름과 이메일을 입력해주세요.');return;}
-  // TODO: 실제 API 연동 (Supabase insert 또는 Resend 이메일)
-  document.getElementById('inq-btn').disabled=true;
-  document.getElementById('inq-btn').textContent='접수 완료';
-  document.getElementById('inq-btn').style.opacity='0.6';
-  document.getElementById('inq-msg').style.display='block';
+const supabase = createClient(
+  'https://psihfrowcngdmpjrhekp.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBzaWhmcm93Y25nZG1wanJoZWtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwNzI3MTYsImV4cCI6MjA4NzY0ODcxNn0.g1qTuVztmiJhxheJVY-hOylkUs3Z1-khgBpjMac39IY'
+)
+
+// Nav scroll effect
+window.addEventListener('scroll',()=>{document.getElementById('nav').classList.toggle('scrolled',window.scrollY>20)})
+
+window.submitInquiry = async function() {
+  const name = document.getElementById('inq-name').value.trim()
+  const email = document.getElementById('inq-email').value.trim()
+  const firm = document.getElementById('inq-firm').value.trim()
+  const btn = document.getElementById('inq-btn')
+  const msg = document.getElementById('inq-msg')
+
+  if (!name || !email) { alert('이름과 이메일을 입력해주세요.'); return }
+
+  btn.disabled = true
+  btn.textContent = '처리 중...'
+
+  const { error } = await supabase.from('waitlist').insert({ name, email, firm_name: firm || null })
+
+  if (error) {
+    if (error.code === '23505') {
+      // 이미 등록된 이메일
+      btn.textContent = '이미 접수됨'
+      btn.style.opacity = '0.6'
+      msg.textContent = '이미 접수된 이메일입니다. 곧 연락드리겠습니다.'
+      msg.style.display = 'block'
+    } else {
+      btn.disabled = false
+      btn.textContent = '문의하기'
+      alert('오류가 발생했습니다. 잠시 후 다시 시도해주세요.')
+    }
+    return
+  }
+
+  btn.textContent = '접수 완료'
+  btn.style.opacity = '0.6'
+  msg.textContent = '접수되었습니다. 빠르게 연락드리겠습니다.'
+  msg.style.display = 'block'
 }
 </script>
 </body>
