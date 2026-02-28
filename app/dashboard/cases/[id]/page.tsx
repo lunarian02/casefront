@@ -75,6 +75,10 @@ export default function CaseDetailPage() {
   const [showConnectModal, setShowConnectModal] = useState(false)
   const [connectSaving, setConnectSaving] = useState(false)
 
+  // Delete confirm
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+
   const sessionId = params?.id as string
 
   useEffect(() => {
@@ -161,6 +165,22 @@ export default function CaseDetailPage() {
     }
   }
 
+  async function handleDelete() {
+    if (!session || !sessionId || deleting) return
+    setDeleting(true)
+    try {
+      const res = await fetch(`/api/dashboard/cases/${sessionId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+      if (res.ok) {
+        router.push('/dashboard')
+      }
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   if (loading || fetching) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -214,7 +234,7 @@ export default function CaseDetailPage() {
           </h1>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          {/* Edit / Connect buttons */}
+          {/* Edit / Connect / Delete buttons */}
           {!editMode && (
             <>
               <button
@@ -231,6 +251,15 @@ export default function CaseDetailPage() {
                   기존 사건에 연결
                 </button>
               )}
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 border border-slate-200 rounded-lg transition-colors"
+                title="사건 삭제"
+              >
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+                </svg>
+              </button>
             </>
           )}
           {editMode && (
@@ -509,6 +538,36 @@ export default function CaseDetailPage() {
             >
               닫기
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Delete confirm modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
+            <h3 className="text-base font-semibold text-slate-900 mb-1">사건을 삭제하시겠어요?</h3>
+            <p className="text-sm text-slate-500 mb-1">
+              <span className="font-medium text-slate-700">{caseData.client_name}</span>님의{' '}
+              <span className="font-medium text-slate-700">{caseData.case_type}</span> 사건이 삭제됩니다.
+            </p>
+            <p className="text-xs text-red-500 mb-6">삭제된 사건은 복구할 수 없습니다.</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 h-11 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50"
+                disabled={deleting}
+              >
+                취소
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex-1 h-11 rounded-xl text-white text-sm font-medium bg-red-500 hover:bg-red-600 disabled:opacity-50 transition-colors"
+              >
+                {deleting ? '삭제 중...' : '삭제'}
+              </button>
+            </div>
           </div>
         </div>
       )}
