@@ -17,6 +17,30 @@ async function getAuthFirmId(request: Request): Promise<string | null> {
   return firm?.id ?? null
 }
 
+export async function POST(request: Request) {
+  const firmId = await getAuthFirmId(request)
+  if (!firmId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const body = await request.json()
+  if (!body.name || !body.phone) {
+    return NextResponse.json({ error: '이름과 전화번호는 필수입니다.' }, { status: 400 })
+  }
+
+  const { data, error } = await supabaseAdmin
+    .from('clients')
+    .insert({ firm_id: firmId, name: body.name, phone: body.phone, email: body.email || null })
+    .select('id, name, phone, email, created_at, last_contact_at')
+    .single()
+
+  if (error) {
+    if (error.code === '23505') {
+      return NextResponse.json({ error: '이미 등록된 전화번호입니다.' }, { status: 409 })
+    }
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+  return NextResponse.json({ client: { ...data, case_count: 0 } })
+}
+
 export async function GET(request: Request) {
   const firmId = await getAuthFirmId(request)
   if (!firmId) {

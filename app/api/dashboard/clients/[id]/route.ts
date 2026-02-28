@@ -17,6 +17,54 @@ async function getAuthFirmId(request: Request): Promise<string | null> {
   return firm?.id ?? null
 }
 
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id: clientId } = await params
+  const firmId = await getAuthFirmId(request)
+  if (!firmId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const body = await request.json()
+  const allowed: Record<string, unknown> = {}
+  if (body.name) allowed.name = body.name
+  if (body.phone) allowed.phone = body.phone
+  if ('email' in body) allowed.email = body.email || null
+
+  if (Object.keys(allowed).length === 0) {
+    return NextResponse.json({ error: '수정할 항목이 없습니다.' }, { status: 400 })
+  }
+
+  const { data, error } = await supabaseAdmin
+    .from('clients')
+    .update(allowed)
+    .eq('id', clientId)
+    .eq('firm_id', firmId)
+    .select('id, name, phone, email')
+    .single()
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ client: data })
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id: clientId } = await params
+  const firmId = await getAuthFirmId(request)
+  if (!firmId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const { error } = await supabaseAdmin
+    .from('clients')
+    .delete()
+    .eq('id', clientId)
+    .eq('firm_id', firmId)
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ success: true })
+}
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }

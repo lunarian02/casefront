@@ -206,7 +206,7 @@ export default function CaseDetailPage() {
               <input
                 value={editCaseType}
                 onChange={(e) => setEditCaseType(e.target.value)}
-                className="border border-blue-300 rounded px-2 py-0.5 text-base font-bold focus:outline-none"
+                className="border border-blue-300 rounded px-2 py-0.5 text-base font-bold text-slate-900 bg-white focus:outline-none"
               />
             ) : (
               `${caseData.case_type} 사건`
@@ -327,7 +327,7 @@ export default function CaseDetailPage() {
                 value={editSummaryText}
                 onChange={(e) => setEditSummaryText(e.target.value)}
                 rows={3}
-                className="w-full border border-blue-300 rounded-lg px-3 py-2 text-sm focus:outline-none resize-none"
+                className="w-full border border-blue-300 rounded-lg px-3 py-2 text-sm text-slate-900 bg-white focus:outline-none resize-none"
               />
             ) : (
               <p className="text-slate-700 text-sm leading-relaxed">{summary?.summary_text}</p>
