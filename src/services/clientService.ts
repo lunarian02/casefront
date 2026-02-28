@@ -15,11 +15,11 @@ export interface ClientContext {
   }>
 }
 
-// Extract phone number from text
+// Extract phone number from text (supports hyphens and spaces)
 function extractPhone(text: string): string | null {
-  const match = text.match(/01[016789]-?\d{3,4}-?\d{4}/)
+  const match = text.match(/01[016789][\s-]?\d{3,4}[\s-]?\d{4}/)
   if (!match) return null
-  const raw = match[0].replace(/-/g, '')
+  const raw = match[0].replace(/[\s-]/g, '')
   return raw.replace(/(\d{3})(\d{3,4})(\d{4})/, '$1-$2-$3')
 }
 
@@ -31,7 +31,7 @@ const EXCLUDED_WORDS = new Set([
   '있어요', '했어요', '했습', '합니다', '하고', '하는', '이고', '에요',
 ])
 
-const KOREAN_PARTICLES = ['이에요', '이고요', '이요', '입니다', '예요', '이야', '이에', '이거든']
+const KOREAN_PARTICLES = ['이에요', '이고요', '이요', '입니다', '예요', '이야', '이에', '이거든', '이']
 
 function stripParticle(word: string): string {
   for (const p of KOREAN_PARTICLES) {
