@@ -1,5 +1,5 @@
 'use client'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/hooks/useAuth'
@@ -20,6 +20,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { user, session, loading } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     if (loading) return
@@ -27,7 +28,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       router.push('/login')
       return
     }
-    // Check if onboarding is done
     const token = session?.access_token
     if (!token) return
     fetch('/api/dashboard/onboarding', {
@@ -39,6 +39,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       })
       .catch(() => {})
   }, [user, session, loading, router])
+
+  // Close sidebar on route change
+  useEffect(() => {
+    setSidebarOpen(false)
+  }, [pathname])
 
   async function handleLogout() {
     await supabaseBrowser.auth.signOut()
@@ -103,8 +108,47 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex h-screen" style={{ background: '#f3f5fa' }}>
+
+      {/* Mobile top header */}
+      <div
+        className="md:hidden fixed top-0 left-0 right-0 z-30 flex items-center gap-3 px-4 h-14"
+        style={{ background: '#0f1629' }}
+      >
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="w-10 h-10 flex items-center justify-center rounded-lg shrink-0"
+          style={{ color: '#8aa4cc' }}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+        <div className="flex items-center gap-2">
+          <SidebarIcon />
+          <span className="text-white font-semibold text-sm">CaseFront</span>
+        </div>
+      </div>
+
+      {/* Sidebar backdrop (mobile) */}
+      {sidebarOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-40 bg-black/50"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-56 flex flex-col shrink-0" style={{ background: '#0f1629' }}>
+      <aside
+        className={`
+          fixed md:static inset-y-0 left-0 z-50
+          w-56 flex flex-col shrink-0
+          transition-transform duration-200 ease-in-out
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+        `}
+        style={{ background: '#0f1629' }}
+      >
         {/* Brand */}
         <div className="flex items-center gap-2.5 px-5 py-5" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
           <SidebarIcon />
@@ -154,7 +198,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* Main */}
-      <main className="flex-1 overflow-auto">{children}</main>
+      <main className="flex-1 overflow-auto pt-14 md:pt-0">{children}</main>
     </div>
   )
 }
