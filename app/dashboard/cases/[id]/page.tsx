@@ -313,6 +313,16 @@ export default function CaseDetailPage() {
         <div className="flex items-center gap-2 flex-wrap">
           {!editMode && (
             <>
+              <a
+                href={`tel:${caseData.client_phone}`}
+                className="px-3 py-1.5 text-sm font-medium text-white rounded-lg flex items-center gap-1.5 hover:opacity-90 transition-opacity"
+                style={{ background: '#1a2b5a' }}
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 015.13 12.7a19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
+                </svg>
+                콜백
+              </a>
               <button
                 onClick={openEditMode}
                 className="px-3 py-1.5 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
@@ -447,7 +457,7 @@ export default function CaseDetailPage() {
 
           {/* Summary */}
           <div className="bg-white rounded-xl border border-slate-200 p-4">
-            <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">사건 요약</h2>
+            <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">접수 요약</h2>
             {editMode ? (
               <textarea
                 value={editSummaryText}
@@ -543,6 +553,93 @@ export default function CaseDetailPage() {
                   })}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Legal Analysis */}
+          {!editMode && summary?.legal_analysis && (
+            <div className="bg-white rounded-xl border border-slate-200 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">사건 검토 분석</h2>
+                <span className="text-xs text-slate-400">참고용 추정</span>
+              </div>
+              <p className="text-xs text-slate-400 mb-4">※ 본 리포트는 접수 단계의 참고 자료이며, 법률 자문을 대체하지 않습니다.</p>
+              <div className="space-y-4">
+
+                {/* Statute of limitations */}
+                {summary.legal_analysis.statute_of_limitations && (
+                  <div className="p-3 bg-blue-50 border border-blue-100 rounded-lg">
+                    <p className="text-xs font-semibold text-blue-700 mb-1">소멸시효 (참고)</p>
+                    <p className="text-sm text-blue-800 leading-relaxed">{summary.legal_analysis.statute_of_limitations}</p>
+                  </div>
+                )}
+
+                {/* Evidence strength */}
+                {(summary.legal_analysis.evidence_strength || summary.legal_analysis.evidence_analysis) && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="text-xs font-medium text-slate-500">증거 확보 상태</p>
+                      {summary.legal_analysis.evidence_strength && (
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold border ${
+                          summary.legal_analysis.evidence_strength === 'strong'
+                            ? 'bg-green-50 border-green-200 text-green-700'
+                            : summary.legal_analysis.evidence_strength === 'moderate'
+                            ? 'bg-yellow-50 border-yellow-200 text-yellow-700'
+                            : 'bg-red-50 border-red-200 text-red-700'
+                        }`}>
+                          {summary.legal_analysis.evidence_strength === 'strong' ? '강함'
+                            : summary.legal_analysis.evidence_strength === 'moderate' ? '보통' : '약함'}
+                        </span>
+                      )}
+                    </div>
+                    {summary.legal_analysis.evidence_analysis && (
+                      <p className="text-sm text-slate-600">{summary.legal_analysis.evidence_analysis}</p>
+                    )}
+                  </div>
+                )}
+
+                {/* Missing info */}
+                {(summary.legal_analysis.missing_info?.length ?? 0) > 0 && (
+                  <div>
+                    <p className="text-xs font-medium text-slate-500 mb-1.5">추가 확인 필요</p>
+                    <ul className="space-y-1">
+                      {summary.legal_analysis.missing_info!.map((item, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
+                          <span className="flex-shrink-0 mt-0.5 text-amber-500">?</span>
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Next actions */}
+                {(summary.legal_analysis.next_actions?.length ?? 0) > 0 && (
+                  <div>
+                    <p className="text-xs font-medium text-slate-500 mb-1.5">다음 액션 제안</p>
+                    <ul className="space-y-1">
+                      {summary.legal_analysis.next_actions!.map((action, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
+                          <span className="flex-shrink-0 mt-0.5" style={{ color: '#4a7aef' }}>→</span>
+                          {action}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Risk factors */}
+                {(summary.legal_analysis.risk_factors?.length ?? 0) > 0 && (
+                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                    <p className="text-xs font-semibold text-amber-700 mb-1.5">⚠ 위험 요소</p>
+                    <ul className="space-y-1">
+                      {summary.legal_analysis.risk_factors!.map((risk, i) => (
+                        <li key={i} className="text-sm text-amber-700">{risk}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
@@ -643,12 +740,23 @@ export default function CaseDetailPage() {
             <div className="bg-white rounded-xl border border-slate-200 p-4">
               <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">요청 증빙자료</h2>
               <ul className="space-y-2">
-                {summary.document_request.map((doc, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
-                    <span className="flex-shrink-0 mt-0.5" style={{ color: '#4a7aef' }}>•</span>
-                    {doc}
-                  </li>
-                ))}
+                {summary.document_request.map((doc, i) => {
+                  const isObj = typeof doc === 'object' && doc !== null && 'name' in doc
+                  const name = isObj ? (doc as { name: string; required: boolean }).name : doc as string
+                  const required = isObj ? (doc as { name: string; required: boolean }).required : null
+                  return (
+                    <li key={i} className="flex items-center gap-2 text-sm text-slate-700">
+                      <span className="flex-shrink-0" style={{ color: '#4a7aef' }}>•</span>
+                      <span className="flex-1">{name}</span>
+                      {required === true && (
+                        <span className="flex-shrink-0 px-1.5 py-0.5 text-xs font-semibold rounded bg-red-50 border border-red-200 text-red-600">필수</span>
+                      )}
+                      {required === false && (
+                        <span className="flex-shrink-0 px-1.5 py-0.5 text-xs font-semibold rounded bg-slate-50 border border-slate-200 text-slate-500">권장</span>
+                      )}
+                    </li>
+                  )
+                })}
               </ul>
             </div>
           )}
