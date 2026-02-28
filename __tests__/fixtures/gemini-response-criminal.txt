@@ -1,0 +1,48 @@
+접수해드렸습니다. 사기 피해 건으로 고소 절차를 안내드릴 수 있습니다. 변호사님이 검토 후 연락드릴 예정입니다.
+---CASE_SUMMARY---
+{
+  "client_name": "이수진",
+  "client_phone": "010-7777-8888",
+  "client_email": "sjlee@example.com",
+  "is_proxy": false,
+  "contact_name": null,
+  "contact_phone": null,
+  "contact_email": null,
+  "contact_relation": null,
+  "is_returning": false,
+  "case_type": "형사",
+  "case_subtype": "사기",
+  "case_sub_tag": null,
+  "position": "피해자",
+  "events": [
+    {
+      "date": "2025-12-01",
+      "subject": "이수진",
+      "object": "상대방",
+      "action": "투자 명목 1,000만원 송금",
+      "summary": "이수진은 2025. 12. 1. 투자 명목으로 상대방에게 1,000만 원을 송금하였다"
+    },
+    {
+      "date": "2026-01-15",
+      "subject": "상대방",
+      "object": null,
+      "action": "연락 두절",
+      "summary": "상대방이 2026. 1. 15. 이후 연락이 두절되었다"
+    }
+  ],
+  "requirements": [
+    { "element": "기망행위", "status": "confirmed", "detail": "투자 수익 보장 허위 약속" },
+    { "element": "재산상 손해", "status": "confirmed", "detail": "1,000만 원" },
+    { "element": "고의성", "status": "unknown", "detail": "처음부터 편취 의도 미확인" }
+  ],
+  "evidence": ["계좌이체 내역", "카카오톡 대화"],
+  "unconfirmed": ["상대방 신원", "고의성"],
+  "document_request": ["계좌이체 영수증", "대화 캡처"],
+  "client_request": "사기 고소",
+  "ai_notes": "투자 사기 의심. 1,000만 원 피해. 고소장 작성 필요.",
+  "urgency": "normal",
+  "urgency_reason": "시한 압박 없음 (공소시효 7년)",
+  "summary_text": "투자 사기 피해 1,000만 원 (계좌이체 증거 있음)",
+  "conversation_turns": 11,
+  "timestamp": "2026-02-28T10:00:00+09:00"
+}
