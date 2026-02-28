@@ -52,6 +52,12 @@ export default function DashboardPage() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'new' | 'reviewing' | 'done'>('all')
   const [fetching, setFetching] = useState(true)
 
+  // Text paste modal state
+  const [modalOpen, setModalOpen] = useState(false)
+  const [pasteText, setPasteText] = useState('')
+  const [importing, setImporting] = useState(false)
+  const [importError, setImportError] = useState('')
+
   useEffect(() => {
     if (!session) return
     fetch('/api/dashboard/cases', {
@@ -64,6 +70,42 @@ export default function DashboardPage() {
       })
       .catch(() => setFetching(false))
   }, [session])
+
+  async function handleImport() {
+    if (!pasteText.trim()) {
+      setImportError('텍스트를 입력해 주세요.')
+      return
+    }
+    if (!session) return
+    setImporting(true)
+    setImportError('')
+    try {
+      const res = await fetch('/api/dashboard/cases/text-import', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ text: pasteText }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setImportError(data.error ?? '구조화 중 오류가 발생했습니다.')
+        setImporting(false)
+        return
+      }
+      router.push(`/dashboard/cases/${data.session_id}`)
+    } catch {
+      setImportError('네트워크 오류가 발생했습니다.')
+      setImporting(false)
+    }
+  }
+
+  function openModal() {
+    setPasteText('')
+    setImportError('')
+    setModalOpen(true)
+  }
 
   if (loading || fetching) {
     return (
@@ -98,6 +140,16 @@ export default function DashboardPage() {
             )}
           </p>
         </div>
+        <button
+          onClick={openModal}
+          className="hidden md:flex items-center gap-2 px-4 h-9 rounded-lg text-white text-sm font-medium"
+          style={{ background: '#1a2b5a' }}
+        >
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          사건 추가
+        </button>
       </div>
 
       {/* Filters — horizontal scroll on mobile */}
@@ -253,15 +305,74 @@ export default function DashboardPage() {
 
       {/* FAB — mobile only */}
       <button
-        onClick={() => router.push('/dashboard/upload')}
+        onClick={openModal}
         className="md:hidden fixed bottom-6 right-6 flex items-center gap-2 px-4 h-12 rounded-full text-white shadow-lg text-sm font-medium"
         style={{ background: '#1a2b5a' }}
       >
-        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-          <path d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
-        녹음 업로드
+        사건 추가
       </button>
+
+      {/* Text paste modal */}
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.5)' }}>
+          <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl">
+            <div className="px-5 pt-5 pb-4 border-b border-slate-100">
+              <div className="flex items-center justify-between">
+                <h2 className="text-base font-semibold text-slate-900">텍스트로 사건 추가</h2>
+                <button
+                  onClick={() => setModalOpen(false)}
+                  className="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-100"
+                >
+                  <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </button>
+              </div>
+              <p className="text-sm text-slate-500 mt-1">
+                에이닷 통화 요약, 상담 메모, 카톡 대화 등을 붙여넣으면 AI가 사건을 구조화합니다.
+              </p>
+            </div>
+            <div className="px-5 py-4">
+              <textarea
+                value={pasteText}
+                onChange={(e) => setPasteText(e.target.value)}
+                placeholder="텍스트를 여기에 붙여넣어 주세요..."
+                rows={10}
+                className="w-full text-sm text-slate-800 placeholder-slate-400 border border-slate-200 rounded-xl px-3 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={importing}
+              />
+              {importError && (
+                <p className="mt-2 text-sm text-red-600">{importError}</p>
+              )}
+            </div>
+            <div className="px-5 pb-5 flex gap-3">
+              <button
+                onClick={() => setModalOpen(false)}
+                className="flex-1 h-11 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50"
+                disabled={importing}
+              >
+                취소
+              </button>
+              <button
+                onClick={handleImport}
+                disabled={importing || !pasteText.trim()}
+                className="flex-1 h-11 rounded-xl text-white text-sm font-medium disabled:opacity-50 transition-opacity"
+                style={{ background: '#1a2b5a' }}
+              >
+                {importing ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin border-white" />
+                    구조화 중...
+                  </span>
+                ) : '구조화 시작'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

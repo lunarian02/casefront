@@ -18,18 +18,5 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ],
-  "share_target": {
-    "action": "/dashboard/upload",
-    "method": "POST",
-    "enctype": "multipart/form-data",
-    "params": {
-      "files": [
-        {
-          "name": "file",
-          "accept": ["audio/mp4", "audio/x-m4a", "audio/mpeg", "audio/wav", "audio/ogg", "video/mp4"]
-        }
-      ]
-    }
-  }
+  ]
 }
