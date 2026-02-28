@@ -39,6 +39,9 @@ type ClientCase = {
   created_at: string
 }
 
+type EditEvent = { date: string; summary: string }
+type EditRequirement = { element: string; status: 'confirmed' | 'denied' | 'unknown'; detail: string }
+
 const STATUS_CONFIG = {
   new:       { label: '신규',  style: 'text-yellow-700 bg-yellow-50 border-yellow-200', next: 'reviewing' as const, nextLabel: '검토 시작' },
   reviewing: { label: '검토중', style: 'text-blue-700 bg-blue-50 border-blue-200',     next: 'done' as const,       nextLabel: '완료 처리' },
@@ -51,6 +54,12 @@ const URGENCY_CONFIG = {
   low:    { label: '여유', style: 'text-slate-600 bg-slate-50 border-slate-200' },
 }
 
+const REQ_STATUS_CONFIG = {
+  confirmed: { icon: '✓', bg: '#f0fdf4', border: '#bbf7d0', text: '#15803d', label: '충족' },
+  denied:    { icon: '✗', bg: '#fef2f2', border: '#fecaca', text: '#dc2626', label: '불충족' },
+  unknown:   { icon: '?', bg: '#f8fafc', border: '#e2e8f0', text: '#64748b', label: '미확인' },
+}
+
 export default function CaseDetailPage() {
   const params = useParams()
   const router = useRouter()
@@ -59,7 +68,6 @@ export default function CaseDetailPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [parentMessages, setParentMessages] = useState<Message[]>([])
   const [clientCases, setClientCases] = useState<ClientCase[]>([])
-  const [showChat, setShowChat] = useState(false)
   const [recordingUrl, setRecordingUrl] = useState<string | null>(null)
   const [fetching, setFetching] = useState(true)
   const [notFound, setNotFound] = useState(false)
@@ -67,8 +75,14 @@ export default function CaseDetailPage() {
 
   // Edit mode
   const [editMode, setEditMode] = useState(false)
+  const [editClientName, setEditClientName] = useState('')
+  const [editClientPhone, setEditClientPhone] = useState('')
+  const [editClientEmail, setEditClientEmail] = useState('')
   const [editCaseType, setEditCaseType] = useState('')
+  const [editUrgency, setEditUrgency] = useState<'urgent' | 'normal' | 'low'>('normal')
   const [editSummaryText, setEditSummaryText] = useState('')
+  const [editEvents, setEditEvents] = useState<EditEvent[]>([])
+  const [editRequirements, setEditRequirements] = useState<EditRequirement[]>([])
   const [editSaving, setEditSaving] = useState(false)
 
   // Connect modal
@@ -97,12 +111,34 @@ export default function CaseDetailPage() {
         setParentMessages(data.parentMessages ?? [])
         setClientCases(data.clientCases ?? [])
         setRecordingUrl(data.recordingUrl ?? null)
-        setEditCaseType(data.case?.case_type ?? '')
-        setEditSummaryText(data.case?.summary?.summary_text ?? '')
         setFetching(false)
       })
       .catch(() => setFetching(false))
   }, [session, sessionId])
+
+  function openEditMode() {
+    if (!caseData) return
+    setEditClientName(caseData.client_name ?? '')
+    setEditClientPhone(caseData.client_phone ?? '')
+    setEditClientEmail(caseData.client_email ?? '')
+    setEditCaseType(caseData.case_type ?? '')
+    setEditUrgency(caseData.urgency ?? 'normal')
+    setEditSummaryText(caseData.summary?.summary_text ?? '')
+    setEditEvents(
+      (caseData.summary?.events ?? []).map((e) => ({
+        date: e.date ?? '',
+        summary: e.summary ?? '',
+      }))
+    )
+    setEditRequirements(
+      (caseData.summary?.requirements ?? []).map((r) => ({
+        element: r.element ?? '',
+        status: (r.status as 'confirmed' | 'denied' | 'unknown') ?? 'unknown',
+        detail: r.detail ?? '',
+      }))
+    )
+    setEditMode(true)
+  }
 
   async function handleStatusChange(nextStatus: 'reviewing' | 'done') {
     if (!session || !sessionId || statusUpdating) return
@@ -129,16 +165,36 @@ export default function CaseDetailPage() {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
         body: JSON.stringify({
+          client_name: editClientName,
+          client_phone: editClientPhone,
+          client_email: editClientEmail,
           case_type: editCaseType,
-          summary_patch: { summary_text: editSummaryText },
+          urgency: editUrgency,
+          summary_patch: {
+            summary_text: editSummaryText,
+            events: editEvents.map((e) => ({
+              date: e.date,
+              summary: e.summary,
+              subject: '', object: '', action: e.summary,
+            })),
+            requirements: editRequirements,
+          },
         }),
       })
       if (res.ok) {
-        const data = await res.json()
         setCaseData((prev) => prev ? {
           ...prev,
+          client_name: editClientName,
+          client_phone: editClientPhone,
+          client_email: editClientEmail,
           case_type: editCaseType,
-          summary: { ...prev.summary, summary_text: editSummaryText },
+          urgency: editUrgency,
+          summary: {
+            ...prev.summary,
+            summary_text: editSummaryText,
+            events: editEvents.map((e) => ({ date: e.date, summary: e.summary, subject: '', object: '', action: e.summary })),
+            requirements: editRequirements,
+          },
         } : prev)
         setEditMode(false)
       }
@@ -173,9 +229,7 @@ export default function CaseDetailPage() {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${session.access_token}` },
       })
-      if (res.ok) {
-        router.push('/dashboard')
-      }
+      if (res.ok) router.push('/dashboard')
     } finally {
       setDeleting(false)
     }
@@ -205,6 +259,8 @@ export default function CaseDetailPage() {
   const summary = caseData.summary
   const urgencyReason = caseData.urgency_reason ?? summary?.urgency_reason
 
+  const inputCls = 'w-full border border-blue-200 rounded-lg px-3 py-2 text-sm text-slate-900 bg-white focus:outline-none focus:border-blue-400'
+
   return (
     <div className="p-6 max-w-5xl">
       {/* Header */}
@@ -218,15 +274,28 @@ export default function CaseDetailPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <span className={`px-2.5 py-1 rounded-lg text-sm font-medium border ${urgency.style}`}>
-            {urgency.label}
-          </span>
+          {editMode ? (
+            <select
+              value={editUrgency}
+              onChange={(e) => setEditUrgency(e.target.value as 'urgent' | 'normal' | 'low')}
+              className="border border-blue-200 rounded-lg px-2 py-1 text-sm font-medium focus:outline-none focus:border-blue-400"
+            >
+              <option value="urgent">긴급</option>
+              <option value="normal">일반</option>
+              <option value="low">여유</option>
+            </select>
+          ) : (
+            <span className={`px-2.5 py-1 rounded-lg text-sm font-medium border ${urgency.style}`}>
+              {urgency.label}
+            </span>
+          )}
           <h1 className="text-xl font-bold text-slate-900">
             {editMode ? (
               <input
                 value={editCaseType}
                 onChange={(e) => setEditCaseType(e.target.value)}
-                className="border border-blue-300 rounded px-2 py-0.5 text-base font-bold text-slate-900 bg-white focus:outline-none"
+                placeholder="사건유형"
+                className="border border-blue-200 rounded-lg px-2 py-0.5 text-base font-bold text-slate-900 bg-white focus:outline-none focus:border-blue-400 w-40"
               />
             ) : (
               `${caseData.case_type} 사건`
@@ -234,11 +303,10 @@ export default function CaseDetailPage() {
           </h1>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          {/* Edit / Connect / Delete buttons */}
           {!editMode && (
             <>
               <button
-                onClick={() => setEditMode(true)}
+                onClick={openEditMode}
                 className="px-3 py-1.5 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
               >
                 수정
@@ -280,26 +348,29 @@ export default function CaseDetailPage() {
               </button>
             </>
           )}
-          {/* Status badge + action */}
-          <span className={`px-2.5 py-1 rounded-lg text-sm font-medium border ${status.style}`}>
-            {status.label}
-          </span>
-          {status.next && !editMode && (
-            <button
-              onClick={() => handleStatusChange(status.next!)}
-              disabled={statusUpdating}
-              className="px-3 py-1.5 text-sm font-medium text-white rounded-lg disabled:opacity-50 transition-colors"
-              style={{ background: '#1a2b5a' }}
-            >
-              {statusUpdating ? '처리 중...' : status.nextLabel}
-            </button>
+          {!editMode && (
+            <>
+              <span className={`px-2.5 py-1 rounded-lg text-sm font-medium border ${status.style}`}>
+                {status.label}
+              </span>
+              {status.next && (
+                <button
+                  onClick={() => handleStatusChange(status.next!)}
+                  disabled={statusUpdating}
+                  className="px-3 py-1.5 text-sm font-medium text-white rounded-lg disabled:opacity-50 transition-colors"
+                  style={{ background: '#1a2b5a' }}
+                >
+                  {statusUpdating ? '처리 중...' : status.nextLabel}
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>
 
       {/* Parent case linked indicator */}
       {caseData.parent_case_id && (
-        <div className="mb-4 px-4 py-2.5 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700 flex items-center gap-2">
+        <div className="mb-4 px-4 py-2.5 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
           기존 사건에 연결됨
         </div>
       )}
@@ -307,13 +378,14 @@ export default function CaseDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Left: main info */}
         <div className="lg:col-span-2 space-y-4">
+
           {/* Client info */}
           <div className="bg-white rounded-xl border border-slate-200 p-4">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
                 {caseData.is_proxy ? '당사자 정보' : '고객 정보'}
               </h2>
-              {caseData.client_id && (
+              {caseData.client_id && !editMode && (
                 <button
                   onClick={() => router.push(`/dashboard/clients/${caseData.client_id}`)}
                   className="text-xs font-medium hover:underline flex items-center gap-1"
@@ -326,14 +398,31 @@ export default function CaseDetailPage() {
                 </button>
               )}
             </div>
-            <div className="space-y-2.5">
-              <InfoRow label="이름" value={caseData.client_name} />
-              <InfoRow label="연락처" value={caseData.client_phone} isPhone />
-              {caseData.client_email && <InfoRow label="이메일" value={caseData.client_email} />}
-              <InfoRow label="접수일" value={new Date(caseData.created_at).toLocaleString('ko-KR', {
-                year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
-              })} />
-            </div>
+            {editMode ? (
+              <div className="space-y-2.5">
+                <div className="flex items-center gap-3">
+                  <span className="text-slate-400 text-sm w-14 flex-shrink-0">이름</span>
+                  <input value={editClientName} onChange={(e) => setEditClientName(e.target.value)} className={inputCls} placeholder="이름" />
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-slate-400 text-sm w-14 flex-shrink-0">연락처</span>
+                  <input value={editClientPhone} onChange={(e) => setEditClientPhone(e.target.value)} className={inputCls} placeholder="010-0000-0000" />
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-slate-400 text-sm w-14 flex-shrink-0">이메일</span>
+                  <input value={editClientEmail} onChange={(e) => setEditClientEmail(e.target.value)} className={inputCls} placeholder="email@example.com" />
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                <InfoRow label="이름" value={caseData.client_name} />
+                <InfoRow label="연락처" value={caseData.client_phone} isPhone />
+                {caseData.client_email && <InfoRow label="이메일" value={caseData.client_email} />}
+                <InfoRow label="접수일" value={new Date(caseData.created_at).toLocaleString('ko-KR', {
+                  year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
+                })} />
+              </div>
+            )}
           </div>
 
           {/* Proxy contact info */}
@@ -356,80 +445,162 @@ export default function CaseDetailPage() {
                 value={editSummaryText}
                 onChange={(e) => setEditSummaryText(e.target.value)}
                 rows={3}
-                className="w-full border border-blue-300 rounded-lg px-3 py-2 text-sm text-slate-900 bg-white focus:outline-none resize-none"
+                className={`${inputCls} resize-none`}
+                placeholder="한 줄 요약"
               />
             ) : (
-              <p className="text-slate-700 text-sm leading-relaxed">{summary?.summary_text}</p>
-            )}
-            {urgencyReason && !editMode && (
-              <div className="mt-3 p-3 bg-red-50 border border-red-100 rounded-lg">
-                <p className="text-red-700 text-sm"><strong>긴급 사유:</strong> {urgencyReason}</p>
-              </div>
-            )}
-            {/* AI notes */}
-            {summary?.ai_notes && !editMode && (
-              <div className="mt-3 p-3 bg-slate-50 border border-slate-100 rounded-lg">
-                <p className="text-xs font-medium text-slate-400 mb-1">AI 참고 메모</p>
-                <p className="text-sm text-slate-600">{summary.ai_notes}</p>
-              </div>
+              <>
+                <p className="text-slate-700 text-sm leading-relaxed">{summary?.summary_text}</p>
+                {urgencyReason && (
+                  <div className="mt-3 p-3 bg-red-50 border border-red-100 rounded-lg">
+                    <p className="text-red-700 text-sm"><strong>긴급 사유:</strong> {urgencyReason}</p>
+                  </div>
+                )}
+                {summary?.ai_notes && (
+                  <div className="mt-3 p-3 bg-slate-50 border border-slate-100 rounded-lg">
+                    <p className="text-xs font-medium text-slate-400 mb-1">AI 참고 메모</p>
+                    <p className="text-sm text-slate-600">{summary.ai_notes}</p>
+                  </div>
+                )}
+              </>
             )}
           </div>
 
           {/* Requirements */}
-          {summary?.requirements?.length > 0 && (
+          {(editMode || (summary?.requirements?.length > 0)) && (
             <div className="bg-white rounded-xl border border-slate-200 p-4">
               <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">요건사실 체크리스트</h2>
-              <div className="space-y-2">
-                {summary.requirements.map((req, i) => {
-                  const cfg = {
-                    confirmed: { icon: '✓', bg: '#f0fdf4', border: '#bbf7d0', text: '#15803d', label: '충족' },
-                    denied:    { icon: '✗', bg: '#fef2f2', border: '#fecaca', text: '#dc2626', label: '불충족' },
-                    unknown:   { icon: '?', bg: '#f8fafc', border: '#e2e8f0', text: '#64748b', label: '미확인' },
-                  }[req.status]
-                  return (
-                    <div key={i} className="flex items-start gap-2.5 p-2.5 rounded-lg border" style={{ background: cfg.bg, borderColor: cfg.border }}>
-                      <span className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold mt-0.5" style={{ background: cfg.text, color: '#fff' }}>
-                        {cfg.icon}
-                      </span>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-sm font-semibold text-slate-800">{req.element}</span>
-                          <span className="text-xs font-medium" style={{ color: cfg.text }}>{cfg.label}</span>
-                        </div>
-                        <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{req.detail}</p>
+              {editMode ? (
+                <div className="space-y-3">
+                  {editRequirements.map((req, i) => (
+                    <div key={i} className="border border-slate-200 rounded-lg p-3 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <input
+                          value={req.element}
+                          onChange={(e) => setEditRequirements((prev) => prev.map((r, j) => j === i ? { ...r, element: e.target.value } : r))}
+                          className={`${inputCls} flex-1`}
+                          placeholder="요건사실 (예: 금전교부)"
+                        />
+                        <select
+                          value={req.status}
+                          onChange={(e) => setEditRequirements((prev) => prev.map((r, j) => j === i ? { ...r, status: e.target.value as EditRequirement['status'] } : r))}
+                          className="border border-blue-200 rounded-lg px-2 py-2 text-sm focus:outline-none focus:border-blue-400 flex-shrink-0"
+                        >
+                          <option value="confirmed">충족</option>
+                          <option value="denied">불충족</option>
+                          <option value="unknown">미확인</option>
+                        </select>
+                        <button
+                          onClick={() => setEditRequirements((prev) => prev.filter((_, j) => j !== i))}
+                          className="p-1.5 text-slate-300 hover:text-red-400 flex-shrink-0"
+                        >
+                          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+                            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                          </svg>
+                        </button>
                       </div>
+                      <input
+                        value={req.detail}
+                        onChange={(e) => setEditRequirements((prev) => prev.map((r, j) => j === i ? { ...r, detail: e.target.value } : r))}
+                        className={inputCls}
+                        placeholder="상세 내용"
+                      />
                     </div>
-                  )
-                })}
-              </div>
+                  ))}
+                  <button
+                    onClick={() => setEditRequirements((prev) => [...prev, { element: '', status: 'unknown', detail: '' }])}
+                    className="w-full py-2 border border-dashed border-slate-300 rounded-lg text-sm text-slate-500 hover:border-blue-300 hover:text-blue-500 transition-colors"
+                  >
+                    + 요건 추가
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {summary.requirements.map((req, i) => {
+                    const cfg = REQ_STATUS_CONFIG[req.status]
+                    return (
+                      <div key={i} className="flex items-start gap-2.5 p-2.5 rounded-lg border" style={{ background: cfg.bg, borderColor: cfg.border }}>
+                        <span className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold mt-0.5" style={{ background: cfg.text, color: '#fff' }}>
+                          {cfg.icon}
+                        </span>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-sm font-semibold text-slate-800">{req.element}</span>
+                            <span className="text-xs font-medium" style={{ color: cfg.text }}>{cfg.label}</span>
+                          </div>
+                          <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{req.detail}</p>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
             </div>
           )}
 
           {/* Events timeline */}
-          {summary?.events?.length > 0 && (
+          {(editMode || (summary?.events?.length > 0)) && (
             <div className="bg-white rounded-xl border border-slate-200 p-4">
               <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">사건 경위</h2>
-              <div className="space-y-0">
-                {summary.events.map((event, i) => (
-                  <div key={i} className="flex gap-3">
-                    <div className="flex flex-col items-center">
-                      <div className="w-2 h-2 rounded-full mt-1 flex-shrink-0" style={{ background: '#4a7aef' }} />
-                      {i < summary.events.length - 1 && (
-                        <div className="w-px flex-1 bg-slate-200 my-1" />
-                      )}
+              {editMode ? (
+                <div className="space-y-3">
+                  {editEvents.map((ev, i) => (
+                    <div key={i} className="border border-slate-200 rounded-lg p-3 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="date"
+                          value={ev.date}
+                          onChange={(e) => setEditEvents((prev) => prev.map((v, j) => j === i ? { ...v, date: e.target.value } : v))}
+                          className={`${inputCls} w-40 flex-shrink-0`}
+                        />
+                        <button
+                          onClick={() => setEditEvents((prev) => prev.filter((_, j) => j !== i))}
+                          className="ml-auto p-1.5 text-slate-300 hover:text-red-400 flex-shrink-0"
+                        >
+                          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+                            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                          </svg>
+                        </button>
+                      </div>
+                      <textarea
+                        value={ev.summary}
+                        onChange={(e) => setEditEvents((prev) => prev.map((v, j) => j === i ? { ...v, summary: e.target.value } : v))}
+                        rows={2}
+                        className={`${inputCls} resize-none`}
+                        placeholder="사건 경위 내용"
+                      />
                     </div>
-                    <div className="pb-4">
-                      <p className="text-xs text-slate-400 font-medium">{event.date}</p>
-                      <p className="text-sm text-slate-700 mt-0.5">{event.summary}</p>
+                  ))}
+                  <button
+                    onClick={() => setEditEvents((prev) => [...prev, { date: '', summary: '' }])}
+                    className="w-full py-2 border border-dashed border-slate-300 rounded-lg text-sm text-slate-500 hover:border-blue-300 hover:text-blue-500 transition-colors"
+                  >
+                    + 경위 추가
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-0">
+                  {summary.events.map((event, i) => (
+                    <div key={i} className="flex gap-3">
+                      <div className="flex flex-col items-center">
+                        <div className="w-2 h-2 rounded-full mt-1 flex-shrink-0" style={{ background: '#4a7aef' }} />
+                        {i < summary.events.length - 1 && (
+                          <div className="w-px flex-1 bg-slate-200 my-1" />
+                        )}
+                      </div>
+                      <div className="pb-4">
+                        <p className="text-xs text-slate-400 font-medium">{event.date}</p>
+                        <p className="text-sm text-slate-700 mt-0.5">{event.summary}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
           {/* Unconfirmed items */}
-          {summary?.unconfirmed?.length > 0 && (
+          {!editMode && summary?.unconfirmed?.length > 0 && (
             <div className="bg-white rounded-xl border border-slate-200 p-4">
               <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">미확인 사항</h2>
               <ul className="space-y-1.5">
@@ -446,8 +617,7 @@ export default function CaseDetailPage() {
 
         {/* Right: documents + chat */}
         <div className="space-y-4">
-          {/* Evidence */}
-          {summary?.evidence?.length > 0 && (
+          {summary?.evidence?.length > 0 && !editMode && (
             <div className="bg-white rounded-xl border border-slate-200 p-4">
               <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">보유 증거</h2>
               <ul className="space-y-2">
@@ -461,8 +631,7 @@ export default function CaseDetailPage() {
             </div>
           )}
 
-          {/* Document requests */}
-          {summary?.document_request?.length > 0 && (
+          {summary?.document_request?.length > 0 && !editMode && (
             <div className="bg-white rounded-xl border border-slate-200 p-4">
               <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">요청 증빙자료</h2>
               <ul className="space-y-2">
@@ -476,33 +645,18 @@ export default function CaseDetailPage() {
             </div>
           )}
 
-          {/* Client request */}
-          {summary?.client_request && (
+          {summary?.client_request && !editMode && (
             <div className="bg-white rounded-xl border border-slate-200 p-4">
               <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">고객 요청사항</h2>
               <p className="text-sm text-slate-700">{summary.client_request}</p>
             </div>
           )}
 
-          {/* Recording player (recording channel only) */}
-          {caseData.channel === 'recording' && recordingUrl && (
-            <div className="bg-white rounded-xl border border-slate-200 p-4">
-              <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">녹음 파일</h2>
-              <audio controls className="w-full rounded-lg" src={recordingUrl}>
-                브라우저가 오디오 재생을 지원하지 않습니다.
-              </audio>
-            </div>
-          )}
-
-          {/* Transcript or Chat history */}
-          {caseData.channel === 'recording' ? (
-            <TranscriptView label={`통화 전사 (${messages.length}개)`} messages={messages} />
-          ) : (
+          {!editMode && (
             <ChatHistory label={`대화 내역 (${messages.length}개)`} messages={messages} />
           )}
 
-          {/* Parent case chat */}
-          {parentMessages.length > 0 && (
+          {!editMode && parentMessages.length > 0 && (
             <ChatHistory label={`이전 사건 대화 (${parentMessages.length}개)`} messages={parentMessages} />
           )}
         </div>
@@ -615,38 +769,6 @@ function ChatHistory({ label, messages }: { label: string; messages: Message[] }
                 >
                   {msg.content}
                 </div>
-              </div>
-            )
-          })}
-        </div>
-      )}
-    </div>
-  )
-}
-
-function TranscriptView({ label, messages }: { label: string; messages: Message[] }) {
-  const [show, setShow] = useState(false)
-  return (
-    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-      <button
-        onClick={() => setShow(!show)}
-        className="w-full px-4 py-3 flex items-center justify-between text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
-      >
-        <span>{label}</span>
-        <svg className={`w-4 h-4 text-slate-400 transition-transform ${show ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-      {show && (
-        <div className="border-t border-slate-100 max-h-96 overflow-y-auto p-3 space-y-2 bg-slate-50">
-          {messages.map((msg, i) => {
-            const isLawyer = msg.role === 'lawyer'
-            return (
-              <div key={i} className="flex gap-2 items-start">
-                <span className={`flex-shrink-0 text-xs font-semibold mt-1 w-12 ${isLawyer ? 'text-slate-400' : 'text-blue-600'}`}>
-                  {isLawyer ? '변호사' : '고객'}
-                </span>
-                <p className="text-sm text-slate-700 leading-relaxed flex-1">{msg.content}</p>
               </div>
             )
           })}

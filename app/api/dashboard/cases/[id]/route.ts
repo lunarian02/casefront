@@ -44,24 +44,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
   const channel = sessionData?.channel ?? 'web'
 
-  // If recording, get signed URL for audio playback
-  let recordingUrl: string | null = null
-  if (channel === 'recording') {
-    const { data: fileData } = await supabaseAdmin
-      .from('files')
-      .select('storage_path')
-      .eq('session_id', sessionId)
-      .eq('category', 'recording')
-      .maybeSingle()
-
-    if (fileData?.storage_path) {
-      const { data: signedData } = await supabaseAdmin.storage
-        .from('recordings')
-        .createSignedUrl(fileData.storage_path, 3600) // 1 hour
-      recordingUrl = signedData?.signedUrl ?? null
-    }
-  }
-
   const { data: messages } = await supabaseAdmin
     .from('messages')
     .select('role, content, created_at')
@@ -107,7 +89,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     messages: messages ?? [],
     parentMessages: parentMessages ?? [],
     clientCases,
-    recordingUrl,
   })
 }
 
@@ -154,9 +135,15 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     return NextResponse.json({ case: data })
   }
 
-  // Edit case fields (case_type, summary JSONB fields)
+  // Edit case fields
   const allowedEdits: Record<string, unknown> = {}
   if ('case_type' in body) allowedEdits.case_type = body.case_type
+  if ('client_name' in body) allowedEdits.client_name = body.client_name
+  if ('client_phone' in body) allowedEdits.client_phone = body.client_phone
+  if ('client_email' in body) allowedEdits.client_email = body.client_email
+  if ('urgency' in body && ['urgent', 'normal', 'low'].includes(body.urgency)) {
+    allowedEdits.urgency = body.urgency
+  }
 
   // Update summary JSONB sub-fields
   if ('summary_patch' in body && typeof body.summary_patch === 'object') {
