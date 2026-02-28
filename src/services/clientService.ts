@@ -23,16 +23,35 @@ function extractPhone(text: string): string | null {
   return raw.replace(/(\d{3})(\d{3,4})(\d{4})/, '$1-$2-$3')
 }
 
-// Extract Korean name (2-5 chars) from text
+// Extract Korean name (2-4 chars) from text, handling common particles
 const EXCLUDED_WORDS = new Set([
   '안녕', '이요', '이고', '이에요', '입니다', '저는', '제가', '이름', '성함',
   '연락처', '번호', '전화', '아니', '네요', '네가', '그게', '모르', '감사',
-  '맞아', '맞습', '맞아요', '이에요', '예요', '이야', '이야요',
+  '맞아', '맞습', '맞아요', '이에요', '예요', '이야', '이야요', '없어요',
+  '있어요', '했어요', '했습', '합니다', '하고', '하는', '이고', '에요',
 ])
 
+const KOREAN_PARTICLES = ['이에요', '이고요', '이요', '입니다', '예요', '이야', '이에', '이거든']
+
+function stripParticle(word: string): string {
+  for (const p of KOREAN_PARTICLES) {
+    if (word.endsWith(p) && word.length - p.length >= 2) {
+      return word.slice(0, -p.length)
+    }
+  }
+  return word
+}
+
 function extractName(text: string): string | null {
-  const words = text.match(/[가-힣]{2,5}/g) ?? []
-  return words.find((w) => !EXCLUDED_WORDS.has(w) && w.length >= 2 && w.length <= 4) ?? null
+  // Match up to 7 chars to catch name+particle (e.g., "홍길동이요" = 5 chars)
+  const words = text.match(/[가-힣]{2,7}/g) ?? []
+  for (const raw of words) {
+    const w = stripParticle(raw)
+    if (w.length >= 2 && w.length <= 4 && !EXCLUDED_WORDS.has(w)) {
+      return w
+    }
+  }
+  return null
 }
 
 // Extract email from text
@@ -143,6 +162,53 @@ export async function identifyClient(
     isReturning,
     previousCases,
   }
+}
+
+// Called at case completion — uses AI's validated caseSummary to reliably upsert client
+export async function upsertClientFromSummary(
+  sessionId: string,
+  firmId: string,
+  summary: { client_name: string | null; client_phone: string | null; client_email?: string | null }
+): Promise<string | null> {
+  if (!summary.client_name || !summary.client_phone) return null
+
+  const name = summary.client_name
+  const phone = summary.client_phone
+  const email = summary.client_email ?? null
+
+  const { data: existing } = await supabaseAdmin
+    .from('clients')
+    .select('*')
+    .eq('firm_id', firmId)
+    .eq('phone', phone)
+    .maybeSingle()
+
+  let clientId: string
+
+  if (existing) {
+    const updates: Record<string, unknown> = { last_contact_at: new Date().toISOString() }
+    if (email && !existing.email) updates.email = email
+    if (!existing.name && name) updates.name = name
+    await supabaseAdmin.from('clients').update(updates).eq('id', existing.id)
+    clientId = existing.id
+  } else {
+    const { data: created, error } = await supabaseAdmin
+      .from('clients')
+      .insert({ firm_id: firmId, name, phone, email })
+      .select('id')
+      .single()
+    if (error) throw error
+    clientId = created.id
+  }
+
+  // Attach client_id to session (only if not already set)
+  await supabaseAdmin
+    .from('sessions')
+    .update({ client_id: clientId })
+    .eq('id', sessionId)
+    .is('client_id', null)
+
+  return clientId
 }
 
 async function getClientContext(clientId: string): Promise<ClientContext | null> {

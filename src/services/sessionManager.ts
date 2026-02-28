@@ -104,7 +104,7 @@ export async function saveCaseSummary(
       summary: summary, // JSONB — stores entire CaseSummary including events[], requirements, etc.
       urgency: summary.urgency,
       urgency_reason: summary.urgency_reason ?? null,
-    })
+    }, { onConflict: 'session_id' })
 
   if (summaryError) throw summaryError
 

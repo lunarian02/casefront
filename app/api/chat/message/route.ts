@@ -7,7 +7,7 @@ import {
   saveCaseSummary,
 } from '@/services/sessionManager'
 import { generateResponse } from '@/services/aiService'
-import { identifyClient } from '@/services/clientService'
+import { identifyClient, upsertClientFromSummary } from '@/services/clientService'
 import { notifyLawyer } from '@/services/notifyService'
 
 export async function POST(request: Request) {
@@ -48,7 +48,9 @@ export async function POST(request: Request) {
 
     // 8. If intake complete, save summary and notify lawyer
     if (caseSummary) {
-      await saveCaseSummary(session.id, firm.id, caseSummary, clientContext?.clientId)
+      // Use AI-validated summary for reliable client upsert (more reliable than mid-chat regex)
+      const resolvedClientId = await upsertClientFromSummary(session.id, firm.id, caseSummary)
+      await saveCaseSummary(session.id, firm.id, caseSummary, resolvedClientId ?? clientContext?.clientId)
       notifyLawyer(firm, caseSummary, session.id).catch((err) =>
         console.error('Notify failed:', err)
       )
