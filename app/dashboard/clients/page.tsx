@@ -331,8 +331,7 @@ export default function ClientsPage() {
           <div className="bg-white rounded-xl p-6 w-full max-w-sm shadow-xl">
             <h3 className="text-base font-bold text-slate-900 mb-2">고객 삭제</h3>
             <p className="text-sm text-slate-500 mb-4">
-              {clients.find((c) => c.id === deletingId)?.name} 고객을 삭제하시겠습니까?<br />
-              관련 사건 기록은 유지됩니다.
+              {clients.find((c) => c.id === deletingId)?.name} 고객을 삭제하시겠습니까?
             </p>
             {deleteError && <p className="text-xs text-red-500 mb-3">{deleteError}</p>}
             <div className="flex gap-2">
