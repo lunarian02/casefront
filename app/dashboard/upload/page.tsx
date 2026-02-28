@@ -3,6 +3,67 @@ import { useState, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 
+function UploadGuide() {
+  const router = useRouter()
+  const [open, setOpen] = useState<'galaxy' | 'iphone' | null>(null)
+  return (
+    <div className="mt-6 rounded-xl overflow-hidden" style={{ border: '1px solid #e4e8f1' }}>
+      <button
+        className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-slate-700 bg-white"
+        onClick={() => setOpen(open ? null : 'galaxy')}
+      >
+        <span>📋 업로드 방법 보기</span>
+        <svg className={`w-4 h-4 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </button>
+      {open && (
+        <div className="bg-slate-50 border-t border-slate-100">
+          {/* Sub tabs */}
+          <div className="flex gap-2 p-3">
+            {(['galaxy', 'iphone'] as const).map((t) => (
+              <button
+                key={t}
+                onClick={() => setOpen(t)}
+                className="flex-1 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                style={open === t ? { background: '#1a2b5a', color: '#fff' } : { background: '#fff', color: '#64748b', border: '1px solid #e4e8f1' }}
+              >
+                {t === 'galaxy' ? '📱 갤럭시' : '🍎 아이폰'}
+              </button>
+            ))}
+          </div>
+          <div className="px-4 pb-4 text-xs text-slate-600 space-y-1.5">
+            {open === 'galaxy' ? (
+              <>
+                <p className="font-medium text-slate-700 mb-1">공유로 업로드</p>
+                <p>1. 전화 앱 → 최근기록 → 통화 선택 → ⓘ → 마이크 아이콘</p>
+                <p>2. 녹음 파일 길게 누르기 → 공유 → 브라우저 선택</p>
+                <p>3. 이 페이지에서 파일 선택 → 자동 업로드</p>
+              </>
+            ) : (
+              <>
+                <p className="font-medium text-slate-700 mb-1">메모 앱에서 업로드 (iOS 18.1+)</p>
+                <p>1. 메모 앱 → 통화 녹음 폴더 → 파일 선택</p>
+                <p>2. 공유(□↑) → 홈화면의 CaseFront 선택</p>
+                <p>3. 업로드 자동 완료</p>
+              </>
+            )}
+          </div>
+          <div className="px-4 pb-3">
+            <button
+              onClick={() => router.push('/dashboard/guide/recording')}
+              className="text-xs font-medium"
+              style={{ color: '#4a7aef' }}
+            >
+              자세한 가이드 보기 →
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 type UploadState = 'idle' | 'uploading' | 'processing' | 'done' | 'error'
 
 const ACCEPTED = '.mp3,.m4a,.wav,.ogg,.mp4'
@@ -208,17 +269,7 @@ export default function UploadPage() {
       )}
 
       {/* Tips */}
-      {state === 'idle' && (
-        <div className="mt-6 p-4 rounded-xl text-sm" style={{ background: '#f8f9fe', border: '1px solid #e4e8f1' }}>
-          <p className="font-medium text-slate-600 mb-2">갤럭시 공유 방법</p>
-          <ol className="text-slate-500 space-y-1 text-xs">
-            <li>1. 통화 녹음 앱에서 해당 녹음 선택</li>
-            <li>2. 공유 버튼 탭</li>
-            <li>3. 브라우저로 이 페이지 열기</li>
-            <li>4. 파일 선택 후 자동 업로드</li>
-          </ol>
-        </div>
-      )}
+      {state === 'idle' && <UploadGuide />}
     </div>
   )
 }
