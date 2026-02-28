@@ -98,14 +98,6 @@ export default function DashboardPage() {
             )}
           </p>
         </div>
-        <button
-          onClick={() => router.push('/dashboard/upload')}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white transition-opacity hover:opacity-80"
-          style={{ background: '#1a2b5a' }}
-        >
-          <span>🎙</span>
-          녹음 업로드
-        </button>
       </div>
 
       {/* Filters */}
