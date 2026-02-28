@@ -43,6 +43,10 @@ export async function PATCH(request: Request) {
   for (const key of allowedCols) {
     if (key in body) updates[key] = body[key]
   }
+  // Normalize email to lowercase
+  if (typeof updates.notify_email === 'string') {
+    updates.notify_email = updates.notify_email.toLowerCase().trim()
+  }
 
   if (Object.keys(updates).length === 0) {
     return NextResponse.json({ error: '수정할 항목이 없습니다.' }, { status: 400 })

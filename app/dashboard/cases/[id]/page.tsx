@@ -54,6 +54,14 @@ const URGENCY_CONFIG = {
   low:    { label: '여유', style: 'text-slate-600 bg-slate-50 border-slate-200' },
 }
 
+function formatPhone(raw: string | null | undefined): string {
+  if (!raw) return ''
+  const digits = raw.replace(/\D/g, '')
+  if (digits.length === 11) return digits.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3')
+  if (digits.length === 10) return digits.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3')
+  return raw
+}
+
 const REQ_STATUS_CONFIG = {
   confirmed: { icon: '✓', bg: '#f0fdf4', border: '#bbf7d0', text: '#15803d', label: '충족' },
   denied:    { icon: '✗', bg: '#fef2f2', border: '#fecaca', text: '#dc2626', label: '불충족' },
@@ -254,7 +262,7 @@ export default function CaseDetailPage() {
     )
   }
 
-  const urgency = URGENCY_CONFIG[caseData.urgency]
+  const urgency = URGENCY_CONFIG[caseData.urgency ?? 'normal']
   const status = STATUS_CONFIG[caseData.status ?? 'new']
   const summary = caseData.summary
   const urgencyReason = caseData.urgency_reason ?? summary?.urgency_reason
@@ -417,7 +425,7 @@ export default function CaseDetailPage() {
               <div className="space-y-2.5">
                 <InfoRow label="이름" value={caseData.client_name} />
                 <InfoRow label="연락처" value={caseData.client_phone} isPhone />
-                {caseData.client_email && <InfoRow label="이메일" value={caseData.client_email} />}
+                {caseData.client_email && <InfoRow label="이메일" value={caseData.client_email} isEmail />}
                 <InfoRow label="접수일" value={new Date(caseData.created_at).toLocaleString('ko-KR', {
                   year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
                 })} />
@@ -432,7 +440,7 @@ export default function CaseDetailPage() {
               <div className="space-y-2.5">
                 <InfoRow label="이름" value={`${caseData.contact_name}${caseData.contact_relation ? ` (${caseData.contact_relation})` : ''}`} />
                 {caseData.contact_phone && <InfoRow label="연락처" value={caseData.contact_phone} isPhone />}
-                {caseData.contact_email && <InfoRow label="이메일" value={caseData.contact_email} />}
+                {caseData.contact_email && <InfoRow label="이메일" value={caseData.contact_email} isEmail />}
               </div>
             </div>
           )}
@@ -729,14 +737,15 @@ export default function CaseDetailPage() {
   )
 }
 
-function InfoRow({ label, value, isPhone }: { label: string; value: string; isPhone?: boolean }) {
+function InfoRow({ label, value, isPhone, isEmail }: { label: string; value: string; isPhone?: boolean; isEmail?: boolean }) {
+  const display = isPhone ? formatPhone(value) : isEmail ? value.toLowerCase() : value
   return (
     <div className="flex items-center gap-3">
       <span className="text-slate-400 text-sm w-14 flex-shrink-0">{label}</span>
       {isPhone ? (
-        <a href={`tel:${value}`} className="text-sm hover:underline" style={{ color: '#4a7aef' }}>{value}</a>
+        <a href={`tel:${value}`} className="text-sm hover:underline" style={{ color: '#4a7aef' }}>{display}</a>
       ) : (
-        <span className="text-slate-700 text-sm">{value}</span>
+        <span className="text-slate-700 text-sm">{display}</span>
       )}
     </div>
   )

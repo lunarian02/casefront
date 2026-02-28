@@ -19,6 +19,14 @@ type ClientFormState = {
   email: string
 }
 
+function formatPhone(raw: string | null | undefined): string {
+  if (!raw) return ''
+  const digits = raw.replace(/\D/g, '')
+  if (digits.length === 11) return digits.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3')
+  if (digits.length === 10) return digits.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3')
+  return raw
+}
+
 function formatDate(dateStr: string) {
   if (!dateStr) return '-'
   const d = new Date(dateStr)
@@ -97,11 +105,16 @@ export default function ClientsPage() {
     setFormError('')
 
     try {
+      const payload = {
+        name: form.name.trim(),
+        phone: form.phone.trim(),
+        email: form.email.trim() ? form.email.trim().toLowerCase() : null,
+      }
       if (modalMode === 'add') {
         const res = await fetch('/api/dashboard/clients', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
-          body: JSON.stringify({ name: form.name.trim(), phone: form.phone.trim(), email: form.email.trim() || null }),
+          body: JSON.stringify(payload),
         })
         const data = await res.json()
         if (!res.ok) { setFormError(data.error ?? '저장에 실패했습니다.'); return }
@@ -110,7 +123,7 @@ export default function ClientsPage() {
         const res = await fetch(`/api/dashboard/clients/${editingClient.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
-          body: JSON.stringify({ name: form.name.trim(), phone: form.phone.trim(), email: form.email.trim() || null }),
+          body: JSON.stringify(payload),
         })
         const data = await res.json()
         if (!res.ok) { setFormError(data.error ?? '수정에 실패했습니다.'); return }
@@ -243,7 +256,7 @@ export default function ClientsPage() {
                       className="hover:underline"
                       style={{ color: '#4a7aef' }}
                     >
-                      {c.phone}
+                      {formatPhone(c.phone)}
                     </a>
                   </td>
                   <td className="px-4 py-3 text-sm text-slate-500 hidden sm:table-cell">

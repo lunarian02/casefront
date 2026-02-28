@@ -1,6 +1,13 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 
+function normalizePhone(raw: string): string {
+  const digits = raw.replace(/\D/g, '')
+  if (digits.length === 11) return digits.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3')
+  if (digits.length === 10) return digits.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3')
+  return raw
+}
+
 async function getAuthFirmId(request: Request): Promise<string | null> {
   const token = request.headers.get('Authorization')?.replace('Bearer ', '')
   if (!token) return null
@@ -28,7 +35,12 @@ export async function POST(request: Request) {
 
   const { data, error } = await supabaseAdmin
     .from('clients')
-    .insert({ firm_id: firmId, name: body.name, phone: body.phone, email: body.email || null })
+    .insert({
+      firm_id: firmId,
+      name: body.name.trim(),
+      phone: normalizePhone(body.phone),
+      email: body.email ? body.email.toLowerCase().trim() : null,
+    })
     .select('id, name, phone, email, created_at, last_contact_at')
     .single()
 

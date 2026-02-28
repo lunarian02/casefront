@@ -1,6 +1,13 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 
+function normalizePhone(raw: string): string {
+  const digits = raw.replace(/\D/g, '')
+  if (digits.length === 11) return digits.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3')
+  if (digits.length === 10) return digits.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3')
+  return raw
+}
+
 async function getAuthFirm(request: Request) {
   const token = request.headers.get('Authorization')?.replace('Bearer ', '')
   if (!token) return null
@@ -139,8 +146,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const allowedEdits: Record<string, unknown> = {}
   if ('case_type' in body) allowedEdits.case_type = body.case_type
   if ('client_name' in body) allowedEdits.client_name = body.client_name
-  if ('client_phone' in body) allowedEdits.client_phone = body.client_phone
-  if ('client_email' in body) allowedEdits.client_email = body.client_email
+  if ('client_phone' in body) allowedEdits.client_phone = normalizePhone(String(body.client_phone))
+  if ('client_email' in body) allowedEdits.client_email = body.client_email ? String(body.client_email).toLowerCase().trim() : null
   if ('urgency' in body && ['urgent', 'normal', 'low'].includes(body.urgency)) {
     allowedEdits.urgency = body.urgency
   }
