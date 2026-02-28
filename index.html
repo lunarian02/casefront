@@ -6,6 +6,7 @@
 <title>CaseFront — 법률사무소 AI 고객 접수</title>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+html{scroll-behavior:smooth}
 :root {
   --bg: #fafbfd; --bg-alt: #f3f5fa; --surface: #ffffff; --surface-dark: #0f1629;
   --navy: #1a2b5a; --navy-light: #2d4a8a; --blue: #4a7aef; --blue-light: #6b94f5;
@@ -139,9 +140,10 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
     <span class="nav-logo-text">CaseFront</span>
   </a>
   <div class="nav-links">
-    <a href="#services">Services</a>
+    <a href="#svc-chat">Services</a>
     <a href="#how">How it works</a>
     <a href="#pricing">Pricing</a>
+    <a href="#inquiry">도입 문의</a>
     <a href="https://my.casefront.app/signup" class="nav-cta">시작하기</a>
   </div>
 </div></nav>
@@ -151,44 +153,32 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
   <div class="container">
     <div class="hero-badge"><span class="pulse"></span>법률사무소 전용 AI</div>
     <h1>모든 상담, 빠짐없이.<br>AI가 정리하고 변호사가 판단합니다.</h1>
-    <p class="hero-sub">웹채팅, 전화, 통화녹음, 카카오톡 — 어떤 채널이든 AI가 접수하고 요건사실 기준으로 정리합니다.</p>
-    <div class="hub-grid">
+    <p class="hero-sub">웹 채팅과 부재중 전화 — AI가 기본 정보를 접수하고, 요건사실 기준으로 구조화된 수임 검토 리포트를 만들어 드립니다.</p>
+    <div class="hub-grid" style="grid-template-columns:repeat(2,1fr);max-width:600px;">
       <a href="#svc-chat" class="hub-card">
         <div class="hub-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4a7aef" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
         <h3>AI 웹챗 접수</h3>
-        <p>링크 하나로 24시간 접수</p>
+        <p>링크 하나로 24시간<br>사건 접수 자동화</p>
         <span class="hub-tag">웹사이트</span>
-      </a>
-      <a href="#svc-call" class="hub-card">
-        <div class="hub-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4a7aef" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16" fill="#4a7aef" stroke="none"/></svg></div>
-        <h3>통화 녹음 요약</h3>
-        <p>녹음을 법률 리포트로</p>
-        <span class="hub-tag">녹음</span>
-      </a>
-      <a href="#svc-kakao" class="hub-card">
-        <div class="hub-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4a7aef" stroke-width="2" stroke-linecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
-        <h3>카카오톡 채널</h3>
-        <p>카톡으로 접수 · 안내</p>
-        <span class="hub-tag">카톡</span>
       </a>
       <a href="#svc-phone" class="hub-card">
         <div class="hub-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4a7aef" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
         <h3>부재중 전화 AI</h3>
-        <p>못 받은 전화, AI가 대신</p>
+        <p>못 받은 전화를<br>AI가 대신 접수</p>
         <span class="hub-tag">전화</span>
       </a>
     </div>
     <div class="hero-actions">
       <a href="https://my.casefront.app/signup" class="btn-primary">시작하기</a>
-      <a href="/cdn-cgi/l/email-protection#3c5f5352485d5f487c5f5d4f595a4e535248125d4c4c" class="btn-secondary">도입 문의</a>
+      <a href="#inquiry" class="btn-secondary">도입 문의</a>
     </div>
   </div>
 </section>
 
 <div class="proof"><div class="container"><div class="proof-nums">
   <div class="proof-num"><strong>24/7</strong><span>무중단 접수</span></div>
-  <div class="proof-num"><strong>3분</strong><span>평균 접수</span></div>
-  <div class="proof-num"><strong>4채널</strong><span>통합 접수</span></div>
+  <div class="proof-num"><strong>5분</strong><span>리포트 전달</span></div>
+  <div class="proof-num"><strong>10분</strong><span>설치 완료</span></div>
 </div></div></div>
 
 <!-- ========== SVC 1: 웹챗 (긴 대화) ========== -->
@@ -217,7 +207,7 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
           <div class="b-ai"><div class="b-ai-avatar"><svg width="16" height="16" viewBox="0 0 120 120" fill="none"><rect width="120" height="120" rx="28" fill="#1a2b5a"/><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><circle cx="46" cy="50" r="6" fill="#fff"/><circle cx="74" cy="50" r="6" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="4" stroke-linecap="round" fill="none"/></svg></div><span>많이 속상하시겠어요. 변호사님께 잘 전달드릴게요. 먼저 성함을 알려주시겠어요?</span></div>
           <div class="b-user">홍길동이요.</div>
           <div class="b-ai"><div class="b-ai-avatar"><svg width="16" height="16" viewBox="0 0 120 120" fill="none"><rect width="120" height="120" rx="28" fill="#1a2b5a"/><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><circle cx="46" cy="50" r="6" fill="#fff"/><circle cx="74" cy="50" r="6" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="4" stroke-linecap="round" fill="none"/></svg></div><span>감사합니다, 홍길동 님. 연락 가능한 전화번호와 이메일도 부탁드려요.</span></div>
-          <div class="b-user">010-1234-5678, <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="a5cdcacbc2e5c0c8c4ccc98bc6cac8">[email&#160;protected]</a>이요.</div>
+          <div class="b-user">010-1234-5678, hong@email.com이요.</div>
           <div class="b-ai"><div class="b-ai-avatar"><svg width="16" height="16" viewBox="0 0 120 120" fill="none"><rect width="120" height="120" rx="28" fill="#1a2b5a"/><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><circle cx="46" cy="50" r="6" fill="#fff"/><circle cx="74" cy="50" r="6" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="4" stroke-linecap="round" fill="none"/></svg></div><span>확인했습니다. 이제 사건에 대해 좀 더 여쭤볼게요. 얼마를 빌려주셨나요?</span></div>
           <div class="b-user">5천만 원이요. 2022년 1월에 계좌이체로 보냈어요.</div>
           <div class="b-ai"><div class="b-ai-avatar"><svg width="16" height="16" viewBox="0 0 120 120" fill="none"><rect width="120" height="120" rx="28" fill="#1a2b5a"/><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><circle cx="46" cy="50" r="6" fill="#fff"/><circle cx="74" cy="50" r="6" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="4" stroke-linecap="round" fill="none"/></svg></div><span>차용증이나 갚겠다는 약속이 있었나요?</span></div>
@@ -231,8 +221,9 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
     <!-- RIGHT: report -->
     <div>
       <div class="sc">
-        <div class="sc-label">접수 요약 → 변호사 전달</div>
-        <div class="sc-s"><div class="sc-k">고객 정보</div><div>홍길동 · 010-1234-5678 · <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5e363130391e3b333f3732703d3133">[email&#160;protected]</a></div></div>
+        <div class="sc-label">수임 검토 리포트 → 변호사 전달</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.25);margin-bottom:14px;">※ 본 리포트는 접수 단계의 참고 자료이며, 법률 자문을 대체하지 않습니다.</div>
+        <div class="sc-s"><div class="sc-k">고객 정보</div><div>홍길동 · 010-1234-5678 · hong@email.com</div></div>
         <div class="sc-s"><div class="sc-k">사건 유형</div><span class="sc-tag">민사</span><span class="sc-tag">대여금</span></div>
         <div class="sc-s">
           <div class="sc-k">주요 사건 (시간순)</div>
@@ -251,119 +242,36 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
           <div class="sc-req"><span class="sc-chk">✓</span> 변제기 도래 — 1년 초과 경과</div>
         </div>
         <div class="sc-s"><div class="sc-k">증빙자료 요청</div><div style="color:rgba(255,255,255,0.6);font-size:12.5px;">차용증 사본 · 계좌이체 내역 · 변제 관련 카톡 · 최고 카톡 캡처</div></div>
-        <div class="sc-s" style="margin-bottom:0"><div class="sc-k">AI 메모</div><div style="color:rgba(255,255,255,0.35);font-style:italic;font-size:12px;">소멸시효 여유 (개인 간 10년). 일부변제로 시효중단 가능성. 최고 내역 있어 내용증명 없이 지급명령 검토 가능. 잔금 4,500만 원 기준 소가 산정.</div></div>
-      </div>
-    </div>
-  </div></div>
-</section>
-
-<!-- ========== SVC 2: 통화 녹음 (인터넷 욕설) ========== -->
-<section class="svc" id="svc-call">
-  <div class="container"><div class="svc-inner">
-    <!-- LEFT: title + transcript -->
-    <div>
-      <div class="section-label">Service 02 — Call Summary</div>
-      <h2 class="section-title">통화 녹음 → 법률 요약</h2>
-      <p class="section-desc">상담 통화를 녹음하면 AI가 요건사실 기준으로 자동 요약합니다. 일반 통화앱은 대화를 나열하지만, CaseFront는 법률 구조에 맞춰 정리합니다.</p>
-      <div style="margin-top:20px;display:flex;gap:8px;flex-wrap:wrap;">
-        <span class="hub-tag">녹음 업로드</span>
-        <span class="hub-tag">자동 텍스트 변환</span>
-        <span class="hub-tag">요건사실 체크</span>
-      </div>
-      <!-- Call transcript -->
-      <div class="chat-preview" style="margin-top:24px;">
-        <div class="chat-header">
-          <div class="chat-avatar" style="background:var(--blue);">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16" fill="#fff" stroke="none"/></svg>
-          </div>
-          <div><div class="chat-header-text">통화 녹음 텍스트</div><div class="chat-header-sub">2026. 2. 20. · 4분 15초 · 인터넷 모욕 상담</div></div>
-        </div>
-        <div style="font-size:12.5px;line-height:1.9;color:var(--text-secondary);padding:4px 0;">
-          <p style="margin-bottom:8px;"><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 변호사님, 인터넷에서 욕을 너무 심하게 당하고 있어서 고소하고 싶어요.</p>
-          <p style="margin-bottom:8px;"><span style="color:var(--navy);font-weight:600;font-size:11px;">변호사</span> 어떤 플랫폼에서 어떤 식으로 당하셨나요?</p>
-          <p style="margin-bottom:8px;"><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 네이버 카페에 제가 글을 올렸는데 댓글로 심한 욕이 달렸어요. "XX" 이런 수준이 아니라 진짜 심한 인신공격이요.</p>
-          <p style="margin-bottom:8px;"><span style="color:var(--navy);font-weight:600;font-size:11px;">변호사</span> 댓글이 한 번만 달린 건가요?</p>
-          <p style="margin-bottom:8px;"><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 아니요, 같은 사람이 세 번이나 썼어요. 1월 10일이랑 12일에 카페에, 그리고 20일에는 제 블로그까지 찾아와서 또 욕했어요.</p>
-          <p style="margin-bottom:8px;"><span style="color:var(--navy);font-weight:600;font-size:11px;">변호사</span> 그 사람이 본인을 특정해서 쓴 건가요? 닉네임이나 실명 언급이 있었나요?</p>
-          <p style="margin-bottom:8px;"><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 네, 제 닉네임 직접 언급하면서 욕했고, 블로그에는 제 실명까지 썼어요.</p>
-          <p style="margin-bottom:8px;"><span style="color:var(--navy);font-weight:600;font-size:11px;">변호사</span> 캡처는 해두셨나요?</p>
-          <p><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 네, 댓글 캡처랑 URL 다 저장해뒀어요. 상대 닉네임도 알고 있어요.</p>
-        </div>
-      </div>
-    </div>
-    <!-- RIGHT: report -->
-    <div style="margin-top:80px;">
-      <div class="sc">
-        <div class="sc-label">통화 요약 리포트</div>
-        <div class="sc-s"><div class="sc-k">고객 정보</div><div>이○○ · 010-XXXX-3456</div></div>
-        <div class="sc-s"><div class="sc-k">사건 유형</div><span class="sc-tag">형사</span><span class="sc-tag">모욕</span><span class="sc-tag">사이버</span></div>
-        <div class="sc-s">
-          <div class="sc-k">주요 사건 (시간순)</div>
-          <div style="color:rgba(255,255,255,0.6);line-height:1.8;font-size:12.5px;">
-            ① 2026. 1. 10. 피의자 "닉네임A"가 네이버 카페 게시글 댓글에 피해자를 특정하여 욕설을 게시하였다<br>
-            ② 2026. 1. 12. 동일인이 같은 게시글에 2차 욕설 댓글을 추가하였다<br>
-            ③ 2026. 1. 20. 피의자가 피해자의 블로그에 욕설 포함 댓글을 작성하였다<br>
-            ④ 피해자는 모든 댓글을 캡처하고 URL을 보존하였다
+        <div class="sc-s"><div class="sc-k">사건 검토 분석 <span style="color:rgba(255,255,255,0.2);font-size:9px;font-weight:400;">참고용 추정</span></div>
+          <div style="color:rgba(255,255,255,0.6);font-size:12px;line-height:1.9;">
+            <div style="margin-bottom:6px;"><span style="color:var(--blue-light);font-weight:600;">소멸시효 (참고)</span> 10년 (민법 162조 1항) · 만료 추정 2034.01.15 · 잔여 약 8년</div>
+            <div style="margin-bottom:6px;"><span style="color:#34d399;font-weight:600;">증거 확보 상태</span> 차용증 + 이체내역 확보 시 입증에 유리</div>
+            <div style="margin-bottom:6px;"><span style="color:var(--amber);font-weight:600;">추가 확인 필요</span> 이자 약정 여부, 채무자 연락 가능 여부, 재산 상태</div>
+            <div><span style="color:rgba(255,255,255,0.5);font-weight:600;">다음 액션 제안</span> 이체내역 확보 → 채무자 주소 확인 → 지급명령 vs 소송 검토</div>
           </div>
         </div>
-        <div class="sc-s">
-          <div class="sc-k">요건사실 충족 여부 (형법 제311조 모욕)</div>
-          <div class="sc-req"><span class="sc-chk">✓</span> 공연성 — 네이버 카페/블로그 (불특정 다수 열람 가능)</div>
-          <div class="sc-req"><span class="sc-chk">✓</span> 특정인 지목 — 피해자 닉네임/실명 언급</div>
-          <div class="sc-req"><span class="sc-chk">✓</span> 모욕적 표현 — 구체적 욕설 기재 (3건)</div>
-        </div>
-        <div class="sc-s"><div class="sc-k">증빙자료 요청</div><div style="color:rgba(255,255,255,0.6);font-size:12.5px;">댓글 캡처 (3건) · URL · 카페/블로그 회원 정보 · 게시글 원문 캡처</div></div>
-        <div class="sc-s" style="margin-bottom:0"><div class="sc-k">AI 메모</div><div style="color:rgba(255,255,255,0.35);font-style:italic;font-size:12px;">공연성 요건 충족 가능성 높음. 반복 3회로 양형 가중 사유. 사이버수사대 고소장 접수 또는 내용증명 후 합의 검토. 피의자 특정을 위해 정보통신서비스 제공자에 대한 자료보전 요청 필요.</div></div>
       </div>
     </div>
   </div></div>
 </section>
 
-<!-- ========== SVC 4: 카카오톡 ========== -->
-<section class="svc" id="svc-kakao">
-  <div class="container"><div class="svc-inner">
-    <div>
-      <div class="section-label">Service 03 — KakaoTalk</div>
-      <h2 class="section-title">카카오톡 채널 연결</h2>
-      <p class="section-desc">카카오톡 채널로 접수 안내, 서류 요청, 상담 일정 알림을 보냅니다. 고객이 가장 편한 채널에서 소통합니다.</p>
-      <div style="margin-top:20px;display:flex;gap:8px;flex-wrap:wrap;">
-        <span class="hub-tag">접수 알림</span>
-        <span class="hub-tag">서류 요청</span>
-        <span class="hub-tag">상담 리마인더</span>
-      </div>
-    </div>
-    <div class="kakao-mock">
-      <div class="kakao-header">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="#3C1E1E"><path d="M12 3C6.48 3 2 6.58 2 10.94c0 2.8 1.86 5.27 4.66 6.67-.15.56-.96 3.56-.99 3.79 0 0-.02.17.09.24.1.06.23.03.23.03.31-.04 3.6-2.36 4.17-2.77.6.08 1.21.13 1.84.13 5.52 0 10-3.58 10-7.97C22 6.58 17.52 3 12 3z"/></svg>
-        <span>김철수 변호사사무소</span>
-      </div>
-      <div class="kakao-msgs">
-        <div class="k-bot">안녕하세요, 김철수 변호사사무소입니다. 접수해주신 상담 건이 변호사님에게 전달되었습니다.</div>
-        <div class="k-bot">📋 상담 전 준비 서류<br><br>① 차용증 사본<br>② 계좌이체 내역<br>③ 관련 카톡 대화 캡처<br><br>위 서류를 상담일 전까지 보내주세요.</div>
-        <div class="k-user">네 알겠습니다!</div>
-        <div class="k-bot">📅 상담 일정 안내<br><br>2026. 3. 5. (목) 오후 2시<br>김철수 변호사사무소 3층<br><br>변경이 필요하시면 말씀해주세요.</div>
-      </div>
-    </div>
-  </div></div>
-</section>
-
-<!-- ========== SVC 4: 부재중 전화 ========== -->
+<!-- ========== SVC 2: 부재중 전화 ========== -->
 <section class="svc" id="svc-phone">
   <div class="container"><div class="svc-inner">
     <div>
-      <div class="section-label">Service 04 — Phone</div>
-      <h2 class="section-title">부재중 전화 AI 응대</h2>
-      <p class="section-desc">재판 중, 상담 중, 퇴근 후 — 변호사가 전화를 받지 못하면 AI가 대신 응대합니다. 사건 내용을 파악하고 정리된 리포트를 전달합니다.</p>
+      <div class="section-label">Service 02 — AI Phone</div>
+      <h2 class="section-title">부재중 전화 AI 접수</h2>
+      <p class="section-desc">재판 중, 상담 중, 퇴근 후 — 변호사가 전화를 받지 못하면 AI가 대신 접수합니다. 사건 내용을 파악하고 정리된 리포트를 즉시 전달합니다.</p>
       <div style="margin-top:20px;display:flex;gap:8px;flex-wrap:wrap;">
-        <span class="hub-tag">부재중 자동 전환</span>
-        <span class="hub-tag">AI 음성 응대</span>
+        <span class="hub-tag">부재중 · 통화중 · 퇴근 후</span>
+        <span class="hub-tag">AI 음성 접수</span>
         <span class="hub-tag">리포트 즉시 전달</span>
       </div>
     </div>
     <div class="phone-flow">
       <div style="font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',monospace;margin-bottom:16px;">부재중 전화 처리 흐름</div>
-      <div class="pf-step"><div class="pf-num">1</div><div><h4>고객이 사무소에 전화</h4><p>변호사가 부재중 — 3회 벨 후 자동 전환</p></div></div>
-      <div class="pf-step"><div class="pf-num">2</div><div><h4>AI가 접수 시작</h4><p>"안녕하세요, 김철수 변호사사무소입니다. 상담 내용을 미리 접수해드릴게요."</p></div></div>
+      <div class="pf-step"><div class="pf-num">1</div><div><h4>고객이 사무소에 전화</h4><p>부재중 · 통화중 · 업무시간 외 — 자동으로 AI 접수 전환</p></div></div>
+      <div class="pf-step"><div class="pf-num">2</div><div><h4>AI가 접수 시작</h4><p>"안녕하세요, 김철수 변호사사무소입니다. 문의 내용을 미리 접수해드릴게요."</p></div></div>
       <div class="pf-step"><div class="pf-num">3</div><div><h4>사건 정보 수집</h4><p>사건유형 파악 · 긴급도 판단 · 연락처 확인 · 핵심 사실관계 질문</p></div></div>
       <div class="pf-step"><div class="pf-num">4</div><div><h4>요약 리포트 전달</h4><p>요건사실 기준으로 정리된 접수 요약이 이메일/푸시로 즉시 전달</p></div></div>
       <!-- 음성 데모 -->
@@ -374,6 +282,28 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
       </div>
     </div>
   </div></div>
+  <p style="text-align:center;font-size:11px;color:var(--text-light);margin-top:24px;padding-bottom:8px;">※ CaseFront는 법률 자문을 제공하지 않으며, 상담 접수 및 요약 전달을 지원합니다.</p>
+</section>
+<section class="svc" style="background:var(--bg-alt);">
+  <div class="container">
+    <div class="section-label" style="text-align:center;">Why CaseFront</div>
+    <h2 class="section-title" style="text-align:center;">부재중 1건 = 수임 1건 손실</h2>
+    <p style="text-align:center;font-size:15px;color:var(--text-secondary);max-width:520px;margin:0 auto 40px;line-height:1.8;">광고로 유입된 고객일수록 콜백이 늦으면 이탈합니다. CaseFront는 접수 내용을 즉시 전달해 빠른 콜백을 만듭니다.</p>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:720px;margin:0 auto;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px 20px;text-align:center;">
+        <div style="font-family:'Source Serif 4',serif;font-size:28px;font-weight:700;color:var(--navy);margin-bottom:8px;">긴급 표시</div>
+        <p style="font-size:13px;color:var(--text-secondary);line-height:1.7;">구속/체포, 시한 임박 건은 긴급 표시로 콜백 우선순위 결정</p>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px 20px;text-align:center;">
+        <div style="font-family:'Source Serif 4',serif;font-size:28px;font-weight:700;color:var(--navy);margin-bottom:8px;">연락처 확보</div>
+        <p style="font-size:13px;color:var(--text-secondary);line-height:1.7;">AI가 이름, 전화번호, 이메일을 빠짐없이 수집하고 재확인</p>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px 20px;text-align:center;">
+        <div style="font-family:'Source Serif 4',serif;font-size:28px;font-weight:700;color:var(--navy);margin-bottom:8px;">즉시 전달</div>
+        <p style="font-size:13px;color:var(--text-secondary);line-height:1.7;">접수 완료 즉시 이메일 알림. 리포트를 보고 바로 콜백</p>
+      </div>
+    </div>
+  </div>
 </section>
 
 <!-- ========== HOW ========== -->
@@ -383,9 +313,9 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
     <h2 class="section-title">10분이면 시작합니다</h2>
     <div class="steps">
       <div class="step"><div class="step-num">01</div><h4>가입</h4><p>사무소 정보와 취급 분야 입력</p></div>
-      <div class="step"><div class="step-num">02</div><h4>채널 연결</h4><p>웹챗 링크, 전화번호, 카톡 채널 설정</p></div>
+      <div class="step"><div class="step-num">02</div><h4>채널 연결</h4><p>웹챗 링크 설치 + 부재중 전화 착신전환 (2분 가이드 제공)</p></div>
       <div class="step"><div class="step-num">03</div><h4>AI가 접수</h4><p>고객이 연락하면 AI가 사건 정보 수집</p></div>
-      <div class="step"><div class="step-num">04</div><h4>리포트 수신</h4><p>요건사실 기준 접수 요약 전달</p></div>
+      <div class="step"><div class="step-num">04</div><h4>리포트 수신</h4><p>요건사실 + 소멸시효 + 다음 액션이 포함된 수임 검토 리포트 전달</p></div>
     </div>
   </div>
 </section>
@@ -399,12 +329,14 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
         <div class="price-name">Basic</div>
         <div class="price-amount">₩99,000<span>/월</span></div>
         <ul class="price-features">
-          <li>월 100건 AI 접수</li>
-          <li>사건유형 자동 분류</li>
-          <li>웹 채팅 접수</li>
+          <li>AI 웹챗 접수 (24시간)</li>
+          <li>주요 사건유형 자동 분류</li>
+          <li>요건사실 체크리스트</li>
+          <li>소멸시효 참고 계산</li>
+          <li>증거 확보 상태 분석</li>
+          <li>다음 액션 제안</li>
           <li>재방문 고객 자동 인식</li>
-          <li>이메일 알림</li>
-          <li>접수 요약 대시보드</li>
+          <li>이메일 알림 + 대시보드</li>
         </ul>
         <a href="https://my.casefront.app/signup" class="price-btn" style="text-decoration:none;text-align:center;">시작하기</a>
       </div>
@@ -412,22 +344,52 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
         <div class="price-name">Pro</div>
         <div class="price-amount">₩199,000<span>/월</span></div>
         <ul class="price-features">
-          <li>월 300건 AI 접수</li>
-          <li>사건유형 자동 분류</li>
-          <li>부재중 전화 AI 응대</li>
-          <li>통화 녹음 → 법률 요약</li>
-          <li>카카오톡 채널 연결</li>
-          <li>재방문 고객 자동 인식</li>
-          <li>접수 요약 대시보드</li>
+          <li>Basic 전부 포함</li>
+          <li>부재중 전화 AI 접수 (Early Access)</li>
+          <li>착신전환 설정 가이드 제공</li>
+          <li>우선 지원</li>
         </ul>
         <a href="https://my.casefront.app/signup" class="price-btn" style="text-decoration:none;text-align:center;">시작하기</a>
+        <p style="font-size:11px;color:var(--text-light);margin-top:12px;">현재: 웹챗 + 부재중 전화 / 추후: 카카오 채널 연동</p>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== INQUIRY ========== -->
+<section id="inquiry" style="padding:80px 0;border-top:1px solid var(--border);">
+  <div class="container" style="max-width:480px;">
+    <div class="section-label" style="text-align:center;">Contact</div>
+    <h2 class="section-title" style="text-align:center;margin-bottom:12px;">도입 문의</h2>
+    <p style="text-align:center;font-size:14px;color:var(--text-secondary);margin-bottom:32px;">이메일을 남겨주시면 빠르게 안내드리겠습니다.</p>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <input type="text" id="inq-name" placeholder="이름" style="padding:12px 16px;border:1px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;outline:none;transition:border .2s;" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'">
+      <input type="email" id="inq-email" placeholder="이메일" style="padding:12px 16px;border:1px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;outline:none;transition:border .2s;" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'">
+      <input type="text" id="inq-firm" placeholder="사무소명" style="padding:12px 16px;border:1px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;outline:none;transition:border .2s;" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'">
+      <button id="inq-btn" onclick="submitInquiry()" class="btn-primary" style="width:100%;text-align:center;">문의하기</button>
+      <p id="inq-msg" style="text-align:center;font-size:13px;color:var(--green);display:none;">접수되었습니다. 빠르게 연락드리겠습니다.</p>
     </div>
   </div>
 </section>
 
 <footer><div class="container"><p>© 2026 CaseFront</p></div></footer>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+<script>
+// Nav scroll effect
+window.addEventListener('scroll',()=>{document.getElementById('nav').classList.toggle('scrolled',window.scrollY>20)});
+
+// Inquiry form
+function submitInquiry(){
+  const name=document.getElementById('inq-name').value.trim();
+  const email=document.getElementById('inq-email').value.trim();
+  const firm=document.getElementById('inq-firm').value.trim();
+  if(!name||!email){alert('이름과 이메일을 입력해주세요.');return;}
+  // TODO: 실제 API 연동 (Supabase insert 또는 Resend 이메일)
+  document.getElementById('inq-btn').disabled=true;
+  document.getElementById('inq-btn').textContent='접수 완료';
+  document.getElementById('inq-btn').style.opacity='0.6';
+  document.getElementById('inq-msg').style.display='block';
+}
+</script>
 </body>
 </html>
