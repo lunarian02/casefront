@@ -17,7 +17,8 @@ export async function notifyLawyer(
   summary: CaseSummary,
   caseId?: string
 ): Promise<void> {
-  if (!firm.lawyer_email) {
+  const toEmail = firm.notify_email || firm.lawyer_email
+  if (!toEmail) {
     console.log(`[Notify] No email for firm ${firm.name}, skipping`)
     return
   }
@@ -80,10 +81,10 @@ export async function notifyLawyer(
 
   await getResend().emails.send({
     from: 'CaseFront <noreply@casefront.app>',
-    to: firm.lawyer_email,
+    to: toEmail,
     subject,
     html,
   })
 
-  console.log(`[Notify] Email sent to ${firm.lawyer_email}`)
+  console.log(`[Notify] Email sent to ${toEmail}`)
 }

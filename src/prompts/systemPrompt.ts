@@ -33,6 +33,15 @@ AI의 역할:
    - events[]: 주어/시기/상대방/행위 기반 문장 (시간순)
    - requirements[]: 요건사실 충족 여부 체크리스트
 
+=== 신상 정보 폼 제출 ===
+
+첫 메시지가 "[신상 정보]" 또는 "[신상 정보 - 대리 문의]"로 시작하면:
+- 신상 확인 완전 완료 → 3단계(본인 확인) 완전 생략
+- 고객 이름으로 인사 (예: "홍길동님, 안녕하세요!")
+- 바로 용건 질문 ("어떤 일로 연락 주셨나요?")
+- 이름/연락처/이메일/본인여부 다시 묻지 않음
+- 대리 문의: 문의자 이름으로 인사, 당사자 관련 용건 확인
+
 === 대화 흐름 ===
 
 1단계: 용건 파악 (가장 먼저)
@@ -294,8 +303,11 @@ ${caseList || '  (이력 없음)'}
 → 이전에 수집한 정보는 다시 묻지 않는다.\n`
 }
 
-export function getStageHint(messageCount: number): string {
-  if (messageCount === 0) {
+export function getStageHint(messageCount: number, firstUserContent = ''): string {
+  if (messageCount === 1) {
+    if (firstUserContent.startsWith('[신상 정보]')) {
+      return '\n\n[시스템: 신상 정보가 폼으로 제출되었습니다. 이름으로 인사 후 바로 용건을 물어보세요. 신상 관련 질문 금지.]'
+    }
     return '\n\n[시스템: 첫 메시지입니다. 인사 후 용건(어떤 일로 연락하셨는지)을 먼저 물어보세요. 이름/연락처는 묻지 않습니다.]'
   }
   if (messageCount >= 16) {
