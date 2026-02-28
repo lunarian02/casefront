@@ -185,7 +185,6 @@ export default function DashboardPage() {
                     )}
                   </div>
                   <div className="text-sm text-slate-600 mb-0.5">
-                    {c.channel === 'recording' && <span className="mr-1">🎙</span>}
                     {c.case_type}
                   </div>
                   <div className="text-sm text-slate-500 mb-0.5">{c.client_phone}</div>
@@ -234,7 +233,6 @@ export default function DashboardPage() {
                         )}
                       </td>
                       <td className="px-4 py-3 text-sm text-slate-600">
-                        {c.channel === 'recording' && <span className="mr-1 text-xs">🎙</span>}
                         {c.case_type}
                       </td>
                       <td className="px-4 py-3 text-sm text-slate-500">{c.client_phone}</td>

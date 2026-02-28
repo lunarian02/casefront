@@ -221,14 +221,14 @@ export default function CaseDetailPage() {
                 onClick={() => setEditMode(true)}
                 className="px-3 py-1.5 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
               >
-                ✏️ 수정
+                수정
               </button>
               {clientCases.length > 0 && (
                 <button
                   onClick={() => setShowConnectModal(true)}
                   className="px-3 py-1.5 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
                 >
-                  🔗 기존 사건에 연결
+                  기존 사건에 연결
                 </button>
               )}
             </>
@@ -271,7 +271,7 @@ export default function CaseDetailPage() {
       {/* Parent case linked indicator */}
       {caseData.parent_case_id && (
         <div className="mb-4 px-4 py-2.5 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700 flex items-center gap-2">
-          🔗 기존 사건에 연결됨
+          기존 사건에 연결됨
         </div>
       )}
 
@@ -458,7 +458,7 @@ export default function CaseDetailPage() {
           {/* Recording player (recording channel only) */}
           {caseData.channel === 'recording' && recordingUrl && (
             <div className="bg-white rounded-xl border border-slate-200 p-4">
-              <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">🎙 녹음 파일</h2>
+              <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">녹음 파일</h2>
               <audio controls className="w-full rounded-lg" src={recordingUrl}>
                 브라우저가 오디오 재생을 지원하지 않습니다.
               </audio>
@@ -573,7 +573,7 @@ function TranscriptView({ label, messages }: { label: string; messages: Message[
         onClick={() => setShow(!show)}
         className="w-full px-4 py-3 flex items-center justify-between text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
       >
-        <span>📝 {label}</span>
+        <span>{label}</span>
         <svg className={`w-4 h-4 text-slate-400 transition-transform ${show ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
