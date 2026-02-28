@@ -16,6 +16,7 @@ type CaseRow = {
   is_proxy: boolean | null
   contact_name: string | null
   contact_relation: string | null
+  channel: string | null
   created_at: string
 }
 
@@ -97,6 +98,14 @@ export default function DashboardPage() {
             )}
           </p>
         </div>
+        <button
+          onClick={() => router.push('/dashboard/upload')}
+          className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white transition-opacity hover:opacity-80"
+          style={{ background: '#1a2b5a' }}
+        >
+          <span>🎙</span>
+          녹음 업로드
+        </button>
       </div>
 
       {/* Filters */}
@@ -193,7 +202,10 @@ export default function DashboardPage() {
                         <span className="ml-1.5 text-xs text-slate-400">{proxyLabel}</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-sm text-slate-600">{c.case_type}</td>
+                    <td className="px-4 py-3 text-sm text-slate-600">
+                      {c.channel === 'recording' && <span className="mr-1 text-xs">🎙</span>}
+                      {c.case_type}
+                    </td>
                     <td className="px-4 py-3 text-sm text-slate-500 hidden sm:table-cell">{c.client_phone}</td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${s.badge}`}>

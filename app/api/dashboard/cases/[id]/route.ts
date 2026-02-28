@@ -35,6 +35,33 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     return NextResponse.json({ error: 'Case not found' }, { status: 404 })
   }
 
+  // Fetch session channel
+  const { data: sessionData } = await supabaseAdmin
+    .from('sessions')
+    .select('channel')
+    .eq('id', sessionId)
+    .maybeSingle()
+
+  const channel = sessionData?.channel ?? 'web'
+
+  // If recording, get signed URL for audio playback
+  let recordingUrl: string | null = null
+  if (channel === 'recording') {
+    const { data: fileData } = await supabaseAdmin
+      .from('files')
+      .select('storage_path')
+      .eq('session_id', sessionId)
+      .eq('category', 'recording')
+      .maybeSingle()
+
+    if (fileData?.storage_path) {
+      const { data: signedData } = await supabaseAdmin.storage
+        .from('recordings')
+        .createSignedUrl(fileData.storage_path, 3600) // 1 hour
+      recordingUrl = signedData?.signedUrl ?? null
+    }
+  }
+
   const { data: messages } = await supabaseAdmin
     .from('messages')
     .select('role, content, created_at')
@@ -76,10 +103,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   }
 
   return NextResponse.json({
-    case: caseData,
+    case: { ...caseData, channel },
     messages: messages ?? [],
     parentMessages: parentMessages ?? [],
     clientCases,
+    recordingUrl,
   })
 }
 

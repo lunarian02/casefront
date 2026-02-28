@@ -22,11 +22,12 @@ type CaseDetail = {
   status: 'new' | 'reviewing' | 'done' | null
   parent_case_id: number | null
   summary: CaseSummary
+  channel: string | null
   created_at: string
 }
 
 type Message = {
-  role: 'user' | 'assistant'
+  role: 'user' | 'assistant' | 'customer' | 'lawyer'
   content: string
   created_at: string
 }
@@ -59,6 +60,7 @@ export default function CaseDetailPage() {
   const [parentMessages, setParentMessages] = useState<Message[]>([])
   const [clientCases, setClientCases] = useState<ClientCase[]>([])
   const [showChat, setShowChat] = useState(false)
+  const [recordingUrl, setRecordingUrl] = useState<string | null>(null)
   const [fetching, setFetching] = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [statusUpdating, setStatusUpdating] = useState(false)
@@ -90,6 +92,7 @@ export default function CaseDetailPage() {
         setMessages(data.messages ?? [])
         setParentMessages(data.parentMessages ?? [])
         setClientCases(data.clientCases ?? [])
+        setRecordingUrl(data.recordingUrl ?? null)
         setEditCaseType(data.case?.case_type ?? '')
         setEditSummaryText(data.case?.summary?.summary_text ?? '')
         setFetching(false)
@@ -452,8 +455,22 @@ export default function CaseDetailPage() {
             </div>
           )}
 
-          {/* Chat history */}
-          <ChatHistory label={`대화 내역 (${messages.length}개)`} messages={messages} />
+          {/* Recording player (recording channel only) */}
+          {caseData.channel === 'recording' && recordingUrl && (
+            <div className="bg-white rounded-xl border border-slate-200 p-4">
+              <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">🎙 녹음 파일</h2>
+              <audio controls className="w-full rounded-lg" src={recordingUrl}>
+                브라우저가 오디오 재생을 지원하지 않습니다.
+              </audio>
+            </div>
+          )}
+
+          {/* Transcript or Chat history */}
+          {caseData.channel === 'recording' ? (
+            <TranscriptView label={`통화 전사 (${messages.length}개)`} messages={messages} />
+          ) : (
+            <ChatHistory label={`대화 내역 (${messages.length}개)`} messages={messages} />
+          )}
 
           {/* Parent case chat */}
           {parentMessages.length > 0 && (
@@ -527,20 +544,53 @@ function ChatHistory({ label, messages }: { label: string; messages: Message[] }
       </button>
       {show && (
         <div className="border-t border-slate-100 max-h-96 overflow-y-auto p-3 space-y-2 bg-slate-50">
-          {messages.map((msg, i) => (
-            <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div
-                className={`max-w-[85%] px-3 py-2 rounded-xl text-sm ${
-                  msg.role === 'user'
-                    ? 'text-white rounded-br-sm'
-                    : 'bg-white text-slate-800 border border-slate-200 rounded-bl-sm'
-                }`}
-                style={msg.role === 'user' ? { background: '#1a2b5a' } : {}}
-              >
-                {msg.content}
+          {messages.map((msg, i) => {
+            const isUser = msg.role === 'user'
+            return (
+              <div key={i} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+                <div
+                  className={`max-w-[85%] px-3 py-2 rounded-xl text-sm ${
+                    isUser ? 'text-white rounded-br-sm' : 'bg-white text-slate-800 border border-slate-200 rounded-bl-sm'
+                  }`}
+                  style={isUser ? { background: '#1a2b5a' } : {}}
+                >
+                  {msg.content}
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function TranscriptView({ label, messages }: { label: string; messages: Message[] }) {
+  const [show, setShow] = useState(false)
+  return (
+    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+      <button
+        onClick={() => setShow(!show)}
+        className="w-full px-4 py-3 flex items-center justify-between text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+      >
+        <span>📝 {label}</span>
+        <svg className={`w-4 h-4 text-slate-400 transition-transform ${show ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {show && (
+        <div className="border-t border-slate-100 max-h-96 overflow-y-auto p-3 space-y-2 bg-slate-50">
+          {messages.map((msg, i) => {
+            const isLawyer = msg.role === 'lawyer'
+            return (
+              <div key={i} className="flex gap-2 items-start">
+                <span className={`flex-shrink-0 text-xs font-semibold mt-1 w-12 ${isLawyer ? 'text-slate-400' : 'text-blue-600'}`}>
+                  {isLawyer ? '변호사' : '고객'}
+                </span>
+                <p className="text-sm text-slate-700 leading-relaxed flex-1">{msg.content}</p>
+              </div>
+            )
+          })}
         </div>
       )}
     </div>

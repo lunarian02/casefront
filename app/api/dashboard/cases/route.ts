@@ -30,7 +30,7 @@ export async function GET(request: Request) {
 
   const { data: cases, error } = await supabaseAdmin
     .from('case_summaries')
-    .select('id, session_id, client_name, client_phone, client_email, case_type, urgency, urgency_reason, status, is_proxy, contact_name, contact_relation, created_at')
+    .select('id, session_id, client_name, client_phone, client_email, case_type, urgency, urgency_reason, status, is_proxy, contact_name, contact_relation, created_at, sessions(channel)')
     .eq('firm_id', firm.id)
     .order('created_at', { ascending: false })
     .limit(100)
@@ -39,5 +39,11 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  return NextResponse.json({ cases })
+  // Flatten sessions.channel to top-level
+  const flatCases = (cases ?? []).map((c: Record<string, unknown>) => {
+    const sessions = c.sessions as { channel?: string } | null
+    return { ...c, channel: sessions?.channel ?? 'web', sessions: undefined }
+  })
+
+  return NextResponse.json({ cases: flatCases })
 }
