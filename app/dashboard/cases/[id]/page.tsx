@@ -574,27 +574,11 @@ export default function CaseDetailPage() {
                   </div>
                 )}
 
-                {/* Evidence strength */}
-                {(summary.legal_analysis.evidence_strength || summary.legal_analysis.evidence_analysis) && (
+                {/* Evidence analysis */}
+                {summary.legal_analysis.evidence_analysis && (
                   <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="text-xs font-medium text-slate-500">증거 확보 상태</p>
-                      {summary.legal_analysis.evidence_strength && (
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold border ${
-                          summary.legal_analysis.evidence_strength === 'strong'
-                            ? 'bg-green-50 border-green-200 text-green-700'
-                            : summary.legal_analysis.evidence_strength === 'moderate'
-                            ? 'bg-yellow-50 border-yellow-200 text-yellow-700'
-                            : 'bg-red-50 border-red-200 text-red-700'
-                        }`}>
-                          {summary.legal_analysis.evidence_strength === 'strong' ? '강함'
-                            : summary.legal_analysis.evidence_strength === 'moderate' ? '보통' : '약함'}
-                        </span>
-                      )}
-                    </div>
-                    {summary.legal_analysis.evidence_analysis && (
-                      <p className="text-sm text-slate-600">{summary.legal_analysis.evidence_analysis}</p>
-                    )}
+                    <p className="text-xs font-medium text-slate-500 mb-1">증거 확보 상태</p>
+                    <p className="text-sm text-slate-600">{summary.legal_analysis.evidence_analysis}</p>
                   </div>
                 )}
 
