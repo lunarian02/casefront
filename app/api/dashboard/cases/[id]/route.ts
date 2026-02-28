@@ -191,3 +191,42 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ case: data })
 }
+
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id: sessionId } = await params
+
+  const firm = await getAuthFirm(request)
+  if (!firm) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  // Get case_summary id first (needed to delete related records)
+  const { data: caseData, error: findError } = await supabaseAdmin
+    .from('case_summaries')
+    .select('id')
+    .eq('session_id', sessionId)
+    .eq('firm_id', firm.id)
+    .maybeSingle()
+
+  if (findError || !caseData) {
+    return NextResponse.json({ error: '사건을 찾을 수 없습니다.' }, { status: 404 })
+  }
+
+  const caseId = caseData.id
+
+  // Delete related records in order
+  await supabaseAdmin.from('case_notes').delete().eq('case_id', caseId)
+  await supabaseAdmin.from('files').delete().eq('case_id', caseId)
+
+  const { error: deleteError } = await supabaseAdmin
+    .from('case_summaries')
+    .delete()
+    .eq('id', caseId)
+    .eq('firm_id', firm.id)
+
+  if (deleteError) {
+    return NextResponse.json({ error: deleteError.message }, { status: 500 })
+  }
+
+  return NextResponse.json({ ok: true })
+}

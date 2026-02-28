@@ -58,6 +58,10 @@ export default function DashboardPage() {
   const [importing, setImporting] = useState(false)
   const [importError, setImportError] = useState('')
 
+  // Delete confirm state
+  const [deleteTarget, setDeleteTarget] = useState<CaseRow | null>(null)
+  const [deleting, setDeleting] = useState(false)
+
   useEffect(() => {
     if (!session) return
     fetch('/api/dashboard/cases', {
@@ -105,6 +109,23 @@ export default function DashboardPage() {
     setPasteText('')
     setImportError('')
     setModalOpen(true)
+  }
+
+  async function handleDelete() {
+    if (!deleteTarget || !session || deleting) return
+    setDeleting(true)
+    try {
+      const res = await fetch(`/api/dashboard/cases/${deleteTarget.session_id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+      if (res.ok) {
+        setCases((prev) => prev.filter((c) => c.session_id !== deleteTarget.session_id))
+        setDeleteTarget(null)
+      }
+    } finally {
+      setDeleting(false)
+    }
   }
 
   if (loading || fetching) {
@@ -220,7 +241,6 @@ export default function DashboardPage() {
               return (
                 <div
                   key={c.session_id}
-                  onClick={() => router.push(`/dashboard/cases/${c.session_id}`)}
                   className="bg-white rounded-xl p-4 border border-slate-200 active:bg-slate-50"
                 >
                   <div className="flex items-center justify-between mb-2">
@@ -228,19 +248,32 @@ export default function DashboardPage() {
                       <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${u.dot}`} />
                       {u.label}
                     </span>
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${s.badge}`}>{s.label}</span>
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${s.badge}`}>{s.label}</span>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setDeleteTarget(c) }}
+                        className="p-1 text-slate-300 hover:text-red-400 transition-colors"
+                      >
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+                        </svg>
+                      </button>
+                    </div>
                   </div>
-                  <div className="font-semibold text-slate-900 text-base leading-snug mb-0.5">
-                    {c.client_name}
-                    {c.is_proxy && c.contact_name && (
-                      <span className="ml-1.5 text-xs font-normal text-slate-400">(대리: {c.contact_name})</span>
-                    )}
+                  <div
+                    onClick={() => router.push(`/dashboard/cases/${c.session_id}`)}
+                    className="cursor-pointer"
+                  >
+                    <div className="font-semibold text-slate-900 text-base leading-snug mb-0.5">
+                      {c.client_name}
+                      {c.is_proxy && c.contact_name && (
+                        <span className="ml-1.5 text-xs font-normal text-slate-400">(대리: {c.contact_name})</span>
+                      )}
+                    </div>
+                    <div className="text-sm text-slate-600 mb-0.5">{c.case_type}</div>
+                    <div className="text-sm text-slate-500 mb-0.5">{c.client_phone}</div>
+                    <div className="text-xs text-slate-400">{formatDate(c.created_at)}</div>
                   </div>
-                  <div className="text-sm text-slate-600 mb-0.5">
-                    {c.case_type}
-                  </div>
-                  <div className="text-sm text-slate-500 mb-0.5">{c.client_phone}</div>
-                  <div className="text-xs text-slate-400">{formatDate(c.created_at)}</div>
                 </div>
               )
             })}
@@ -257,6 +290,7 @@ export default function DashboardPage() {
                   <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">연락처</th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">상태</th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">접수</th>
+                  <th className="px-4 py-3" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -270,7 +304,7 @@ export default function DashboardPage() {
                     <tr
                       key={c.session_id}
                       onClick={() => router.push(`/dashboard/cases/${c.session_id}`)}
-                      className="hover:bg-slate-50 cursor-pointer transition-colors"
+                      className="hover:bg-slate-50 cursor-pointer transition-colors group"
                     >
                       <td className="px-4 py-3">
                         <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${u.badge}`}>
@@ -284,9 +318,7 @@ export default function DashboardPage() {
                           <span className="ml-1.5 text-xs text-slate-400">{proxyLabel}</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-sm text-slate-600">
-                        {c.case_type}
-                      </td>
+                      <td className="px-4 py-3 text-sm text-slate-600">{c.case_type}</td>
                       <td className="px-4 py-3 text-sm text-slate-500">{c.client_phone}</td>
                       <td className="px-4 py-3">
                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${s.badge}`}>
@@ -294,6 +326,17 @@ export default function DashboardPage() {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-sm text-slate-500">{formatDate(c.created_at)}</td>
+                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          onClick={() => setDeleteTarget(c)}
+                          className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-300 hover:text-red-400 hover:bg-red-50 rounded-lg transition-all"
+                          title="사건 삭제"
+                        >
+                          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+                          </svg>
+                        </button>
+                      </td>
                     </tr>
                   )
                 })}
@@ -314,6 +357,36 @@ export default function DashboardPage() {
         </svg>
         사건 추가
       </button>
+
+      {/* Delete confirm modal */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.5)' }}>
+          <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-6">
+            <h2 className="text-base font-semibold text-slate-900 mb-1">사건을 삭제하시겠어요?</h2>
+            <p className="text-sm text-slate-500 mb-1">
+              <span className="font-medium text-slate-700">{deleteTarget.client_name}</span>님의{' '}
+              <span className="font-medium text-slate-700">{deleteTarget.case_type}</span> 사건이 삭제됩니다.
+            </p>
+            <p className="text-xs text-red-500 mb-6">삭제된 사건은 복구할 수 없습니다.</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                className="flex-1 h-11 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50"
+                disabled={deleting}
+              >
+                취소
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex-1 h-11 rounded-xl text-white text-sm font-medium bg-red-500 hover:bg-red-600 disabled:opacity-50 transition-colors"
+              >
+                {deleting ? '삭제 중...' : '삭제'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Text paste modal */}
       {modalOpen && (
