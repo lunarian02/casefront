@@ -64,7 +64,7 @@ export async function generateResponse(
   } catch (error) {
     console.error('AI service error:', error)
     return {
-      reply: '죄송합니다, 일시적인 오류가 발생했습니다. 잠시 후 다시 말씀해 주시거나, 직접 전화 주시면 친절히 안내해 드리겠습니다.',
+      reply: '죄송해요, 지금 연결이 원활하지 않네요. 잠시 후 다시 말씀해주시겠어요?',
     }
   }
 }
