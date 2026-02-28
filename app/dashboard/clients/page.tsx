@@ -76,10 +76,23 @@ export default function ClientsPage() {
 
   async function handleSave() {
     if (!session) return
-    if (!form.name.trim() || !form.phone.trim()) {
+
+    const phoneTrimmed = form.phone.trim()
+    const emailTrimmed = form.email.trim()
+
+    if (!form.name.trim() || !phoneTrimmed) {
       setFormError('이름과 전화번호를 입력해주세요.')
       return
     }
+    if (!/^01[016789]-?\d{3,4}-?\d{4}$/.test(phoneTrimmed)) {
+      setFormError('올바른 전화번호 형식이 아닙니다. (예: 010-1234-5678)')
+      return
+    }
+    if (emailTrimmed && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrimmed)) {
+      setFormError('올바른 이메일 형식이 아닙니다.')
+      return
+    }
+
     setFormSaving(true)
     setFormError('')
 
