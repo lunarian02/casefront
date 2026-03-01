@@ -75,6 +75,37 @@ nav.scrolled{box-shadow:0 1px 20px rgba(0,0,0,0.04)}
 
 .sc{background:var(--surface-dark);color:#fff;border-radius:16px;padding:24px;font-size:13px}
 .sc-label{font-size:11px;color:rgba(138,164,204,0.6);font-family:'JetBrains Mono',monospace;margin-bottom:16px}
+
+/* 밝은 리포트 카드 (제품 UI 스타일) */
+.rpt{background:var(--bg);border-radius:16px;font-size:13px;overflow:hidden}
+.rpt-header{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--border)}
+.rpt-badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:6px}
+.rpt-badge.urgent{background:#FEF2F2;color:#DC2626}
+.rpt-badge.normal{background:var(--blue-bg);color:var(--blue)}
+.rpt-title{font-size:15px;font-weight:600;color:var(--text)}
+.rpt-body{padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.rpt-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px}
+.rpt-card.full{grid-column:1/-1}
+.rpt-lbl{font-size:11px;color:var(--blue);font-weight:500;margin-bottom:8px}
+.rpt-val{font-size:13px;color:var(--text);line-height:1.7}
+.rpt-val small{color:var(--text-light);font-size:12px}
+.rpt-chk{display:flex;align-items:flex-start;gap:8px;padding:8px 12px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;margin-bottom:6px}
+.rpt-chk-icon{width:20px;height:20px;border-radius:50%;background:#22C55E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:1px}
+.rpt-chk-miss{background:#FEF9C3;border-color:#FDE68A}
+.rpt-chk-miss .rpt-chk-icon{background:#F59E0B}
+.rpt-timeline{position:relative;padding-left:20px}
+.rpt-timeline::before{content:'';position:absolute;left:5px;top:8px;bottom:8px;width:2px;background:var(--border)}
+.rpt-tl-item{position:relative;padding:6px 0 6px 12px;font-size:12px;color:var(--text-secondary);line-height:1.7}
+.rpt-tl-item::before{content:'';position:absolute;left:-18px;top:12px;width:8px;height:8px;border-radius:50%;background:var(--blue);border:2px solid var(--surface)}
+.rpt-tl-date{font-size:10px;color:var(--text-light);font-family:'JetBrains Mono',monospace}
+.rpt-analysis{background:#F8FAFC;border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:8px}
+.rpt-analysis-row{display:flex;gap:8px;padding:4px 0;font-size:12px;color:var(--text-secondary);line-height:1.6}
+.rpt-analysis-label{font-weight:600;white-space:nowrap;flex-shrink:0}
+.rpt-evidence{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.rpt-evidence.strong{background:#DCFCE7;color:#16A34A}
+.rpt-evidence.moderate{background:#FEF9C3;color:#CA8A04}
+.rpt-evidence.weak{background:#FEE2E2;color:#DC2626}
+.rpt-footer{padding:12px 20px;border-top:1px solid var(--border);font-size:10px;color:var(--text-light)}
 .sc-s{margin-bottom:14px}
 .sc-k{color:rgba(255,255,255,0.3);font-size:10px;margin-bottom:3px;font-family:'JetBrains Mono',monospace;letter-spacing:0.5px}
 .sc-tag{display:inline-block;background:rgba(74,122,239,0.15);color:var(--blue-light);padding:2px 10px;border-radius:6px;font-size:12px;margin-right:4px}
@@ -153,7 +184,7 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
   <div class="container">
     <div class="hero-badge"><span class="pulse"></span>법률사무소 전용 AI</div>
     <h1>모든 상담, 빠짐없이.<br>AI가 정리하고 변호사가 판단합니다.</h1>
-    <p class="hero-sub">웹 채팅과 부재중 전화 — AI가 기본 정보를 접수하고, 요건사실 기준으로 구조화된 수임 검토 리포트를 만들어 드립니다.</p>
+    <p class="hero-sub">AI가 기본 정보를 접수하고, 요건사실 기준으로 구조화된 수임 검토 리포트를 만들어 드립니다.</p>
     <div class="hub-grid" style="grid-template-columns:repeat(2,1fr);max-width:600px;">
       <a href="#svc-chat" class="hub-card">
         <div class="hub-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4a7aef" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
@@ -218,38 +249,69 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
         </div>
       </div>
     </div>
-    <!-- RIGHT: report -->
+    <!-- RIGHT: report (제품 UI 스타일) -->
     <div>
-      <div class="sc">
-        <div class="sc-label">수임 검토 리포트 → 변호사 전달</div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.25);margin-bottom:14px;">※ 본 리포트는 접수 단계의 참고 자료이며, 법률 자문을 대체하지 않습니다.</div>
-        <div class="sc-s"><div class="sc-k">고객 정보</div><div>홍길동 · 010-1234-5678 · hong@email.com</div></div>
-        <div class="sc-s"><div class="sc-k">사건 유형</div><span class="sc-tag">민사</span><span class="sc-tag">대여금</span></div>
-        <div class="sc-s">
-          <div class="sc-k">주요 사건 (시간순)</div>
-          <div style="color:rgba(255,255,255,0.6);line-height:1.8;font-size:12.5px;">
-            ① 홍○○은 2022. 1. 15. 김XX에게 5,000만 원을 계좌이체로 대여하였다<br>
-            ② 김XX는 같은 날 차용증을 작성하여 교부하였다 (변제기 2024. 1. 15.)<br>
-            ③ 김XX는 2023. 6. 15. 500만 원을 변제하였다<br>
-            ④ 2024. 1. 15. 변제기 도래, 잔금 4,500만 원 미변제<br>
-            ⑤ 홍○○은 2024. 3. 카톡으로 변제를 최고하였으나 김XX 무응답
+      <div class="rpt">
+        <div class="rpt-header">
+          <span class="rpt-badge normal">민사</span>
+          <span class="rpt-title">대여금 사건</span>
+          <span style="margin-left:auto;font-size:11px;color:var(--text-light);">접수일 2026. 2. 25.</span>
+        </div>
+        <div class="rpt-body">
+          <!-- 고객 정보 -->
+          <div class="rpt-card">
+            <div class="rpt-lbl">고객 정보</div>
+            <div class="rpt-val">
+              <div style="font-weight:600;">홍길동</div>
+              <div><small>010-1234-5678</small></div>
+              <div><small>hong@email.com</small></div>
+            </div>
+          </div>
+          <!-- 요청 증빙자료 -->
+          <div class="rpt-card">
+            <div class="rpt-lbl">요청 증빙자료</div>
+            <div class="rpt-val">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><span style="width:5px;height:5px;border-radius:50%;background:var(--blue);flex-shrink:0;"></span> 차용증 사본</div>
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><span style="width:5px;height:5px;border-radius:50%;background:var(--blue);flex-shrink:0;"></span> 계좌이체 내역</div>
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><span style="width:5px;height:5px;border-radius:50%;background:var(--blue);flex-shrink:0;"></span> 변제 독촉 카톡 캡처</div>
+            </div>
+          </div>
+          <!-- 접수 요약 -->
+          <div class="rpt-card full">
+            <div class="rpt-lbl">접수 요약</div>
+            <div class="rpt-val">대여금 4,500만 원 미회수 — 차용증 있음, 변제기 경과, 채무자 연락 두절 상태</div>
+          </div>
+          <!-- 요건사실 체크리스트 -->
+          <div class="rpt-card full">
+            <div class="rpt-lbl">요건사실 체크리스트</div>
+            <div class="rpt-chk"><span class="rpt-chk-icon">✓</span><div><div style="font-weight:600;">금전교부 <span style="color:#16A34A;font-size:11px;">충족</span></div><div style="font-size:12px;color:var(--text-secondary);">5,000만 원 계좌이체 (2022. 1. 15.)</div></div></div>
+            <div class="rpt-chk"><span class="rpt-chk-icon">✓</span><div><div style="font-weight:600;">반환약정 <span style="color:#16A34A;font-size:11px;">충족</span></div><div style="font-size:12px;color:var(--text-secondary);">차용증 작성, 변제기 2024. 1. 15.</div></div></div>
+            <div class="rpt-chk"><span class="rpt-chk-icon">✓</span><div><div style="font-weight:600;">변제기 도래 <span style="color:#16A34A;font-size:11px;">충족</span></div><div style="font-size:12px;color:var(--text-secondary);">1년 초과 경과</div></div></div>
+            <div class="rpt-chk rpt-chk-miss"><span class="rpt-chk-icon">?</span><div><div style="font-weight:600;">이자 약정 <span style="color:#CA8A04;font-size:11px;">미확인</span></div><div style="font-size:12px;color:var(--text-secondary);">이자 청구 가능 여부 추가 확인 필요</div></div></div>
+          </div>
+          <!-- 사건 경위 -->
+          <div class="rpt-card full">
+            <div class="rpt-lbl">사건 경위</div>
+            <div class="rpt-timeline">
+              <div class="rpt-tl-item"><div class="rpt-tl-date">2022-01-15</div>홍○○은 김XX에게 5,000만 원을 계좌이체로 대여하였다</div>
+              <div class="rpt-tl-item"><div class="rpt-tl-date">2022-01-15</div>김XX는 차용증을 작성하여 교부하였다 (변제기 2024. 1. 15.)</div>
+              <div class="rpt-tl-item"><div class="rpt-tl-date">2023-06-15</div>김XX는 500만 원을 변제하였다</div>
+              <div class="rpt-tl-item"><div class="rpt-tl-date">2024-01-15</div>변제기 도래, 잔금 4,500만 원 미변제</div>
+              <div class="rpt-tl-item"><div class="rpt-tl-date">2024-03</div>홍○○은 카톡으로 변제를 최고하였으나 김XX 무응답</div>
+            </div>
+          </div>
+          <!-- 사건 검토 분석 -->
+          <div class="rpt-card full">
+            <div class="rpt-lbl">사건 검토 분석 <span style="color:var(--text-light);font-size:10px;font-weight:400;">참고용 추정</span></div>
+            <div class="rpt-analysis">
+              <div class="rpt-analysis-row"><span class="rpt-analysis-label" style="color:var(--blue);">소멸시효</span> 10년 (민법 162조 1항) · 만료 추정 2034.01.15 · 잔여 약 8년</div>
+              <div class="rpt-analysis-row"><span class="rpt-analysis-label" style="color:#16A34A;">증거 확보</span> 차용증 + 이체내역 확보 시 입증에 유리</div>
+              <div class="rpt-analysis-row"><span class="rpt-analysis-label" style="color:#CA8A04;">추가 확인</span> 이자 약정 여부 · 채무자 연락 가능 여부 · 재산 상태</div>
+              <div class="rpt-analysis-row"><span class="rpt-analysis-label" style="color:var(--text-secondary);">다음 액션</span> 이체내역 확보 → 채무자 주소 확인 → 지급명령 vs 소송 검토</div>
+            </div>
           </div>
         </div>
-        <div class="sc-s">
-          <div class="sc-k">요건사실 충족 여부</div>
-          <div class="sc-req"><span class="sc-chk">✓</span> 금전교부 — 5,000만 원 계좌이체</div>
-          <div class="sc-req"><span class="sc-chk">✓</span> 반환약정 — 차용증 있음, 변제기 2024.01.15</div>
-          <div class="sc-req"><span class="sc-chk">✓</span> 변제기 도래 — 1년 초과 경과</div>
-        </div>
-        <div class="sc-s"><div class="sc-k">증빙자료 요청</div><div style="color:rgba(255,255,255,0.6);font-size:12.5px;">차용증 사본 · 계좌이체 내역 · 변제 관련 카톡 · 최고 카톡 캡처</div></div>
-        <div class="sc-s"><div class="sc-k">사건 검토 분석 <span style="color:rgba(255,255,255,0.2);font-size:9px;font-weight:400;">참고용 추정</span></div>
-          <div style="color:rgba(255,255,255,0.6);font-size:12px;line-height:1.9;">
-            <div style="margin-bottom:6px;"><span style="color:var(--blue-light);font-weight:600;">소멸시효 (참고)</span> 10년 (민법 162조 1항) · 만료 추정 2034.01.15 · 잔여 약 8년</div>
-            <div style="margin-bottom:6px;"><span style="color:#34d399;font-weight:600;">증거 확보 상태</span> 차용증 + 이체내역 확보 시 입증에 유리</div>
-            <div style="margin-bottom:6px;"><span style="color:var(--amber);font-weight:600;">추가 확인 필요</span> 이자 약정 여부, 채무자 연락 가능 여부, 재산 상태</div>
-            <div><span style="color:rgba(255,255,255,0.5);font-weight:600;">다음 액션 제안</span> 이체내역 확보 → 채무자 주소 확인 → 지급명령 vs 소송 검토</div>
-          </div>
-        </div>
+        <div class="rpt-footer">※ 본 리포트는 접수 단계의 참고 자료이며, 법률 자문을 대체하지 않습니다.</div>
       </div>
     </div>
   </div></div>
@@ -275,10 +337,29 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
       <div class="pf-step"><div class="pf-num">3</div><div><h4>사건 정보 수집</h4><p>사건유형 파악 · 긴급도 판단 · 연락처 확인 · 핵심 사실관계 질문</p></div></div>
       <div class="pf-step"><div class="pf-num">4</div><div><h4>요약 리포트 전달</h4><p>요건사실 기준으로 정리된 접수 요약이 이메일/푸시로 즉시 전달</p></div></div>
       <!-- 음성 데모 -->
-      <div style="margin-top:20px;padding:20px;background:var(--bg-alt);border-radius:12px;text-align:center;">
-        <div style="font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',monospace;margin-bottom:8px;">🎧 AI 통화 데모</div>
-        <!-- TODO: 실제 음성/영상 파일로 교체 -->
-        <div style="background:var(--border);border-radius:8px;height:48px;display:flex;align-items:center;justify-content:center;color:var(--text-light);font-size:13px;">▶ 데모 음성 재생 (준비 중)</div>
+      <div style="margin-top:20px;border-radius:12px;overflow:hidden;position:relative;cursor:pointer;" id="demo-trigger" onclick="document.getElementById('demo-script').style.display=document.getElementById('demo-script').style.display==='none'?'block':'none'">
+        <img src="demo-phone.png" alt="AI 전화 접수 데모" style="width:100%;display:block;border-radius:12px;">
+        <div style="position:absolute;inset:0;background:rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;transition:background .2s;" onmouseover="this.style.background='rgba(0,0,0,0.35)'" onmouseout="this.style.background='rgba(0,0,0,0.25)'">
+          <div style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.95);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,0.15);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="var(--navy)"><polygon points="8,5 20,12 8,19"/></svg>
+          </div>
+        </div>
+        <div style="position:absolute;bottom:12px;left:12px;background:rgba(0,0,0,0.6);color:#fff;font-size:11px;padding:4px 10px;border-radius:6px;font-family:'JetBrains Mono',monospace;">AI 통화 데모 듣기</div>
+      </div>
+      <!-- 통화 스크립트 (클릭 시 토글) -->
+      <div id="demo-script" style="display:none;margin-top:14px;background:var(--bg-alt);border:1px solid var(--border);border-radius:12px;padding:20px;font-size:12.5px;line-height:1.9;color:var(--text-secondary);">
+        <div style="font-size:11px;color:var(--text-light);font-family:'JetBrains Mono',monospace;margin-bottom:12px;">통화 스크립트 · 2분 34초</div>
+        <p style="margin-bottom:8px;"><span style="color:var(--navy);font-weight:600;font-size:11px;">AI</span> 안녕하세요, 김철수 변호사사무소입니다. 변호사님이 자리를 비우셔서 제가 문의 내용을 미리 접수해드릴게요. 어떤 일로 연락 주셨나요?</p>
+        <p style="margin-bottom:8px;"><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 중고거래에서 사기를 당했어요. 300만 원 보냈는데 물건도 안 보내고 연락이 끊겼어요.</p>
+        <p style="margin-bottom:8px;"><span style="color:var(--navy);font-weight:600;font-size:11px;">AI</span> 많이 당황스러우셨겠어요. 변호사님께 잘 전달드릴게요. 먼저 성함을 알려주시겠어요?</p>
+        <p style="margin-bottom:8px;"><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 박지훈이요.</p>
+        <p style="margin-bottom:8px;"><span style="color:var(--navy);font-weight:600;font-size:11px;">AI</span> 감사합니다. 연락 가능한 전화번호도 부탁드려요.</p>
+        <p style="margin-bottom:8px;"><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 010-5562-8833이요.</p>
+        <p style="margin-bottom:8px;"><span style="color:var(--navy);font-weight:600;font-size:11px;">AI</span> 확인했습니다. 거래가 언제, 어디서 이루어졌나요?</p>
+        <p style="margin-bottom:8px;"><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 1월 20일에 당근마켓에서요. 명품가방 판매글 보고 연락했는데, 계좌이체 하니까 바로 잠수 탔어요.</p>
+        <p style="margin-bottom:8px;"><span style="color:var(--navy);font-weight:600;font-size:11px;">AI</span> 송금 내역이나 대화 캡처를 갖고 계신가요?</p>
+        <p style="margin-bottom:8px;"><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 네, 송금 내역이랑 당근 채팅 캡처 다 있어요.</p>
+        <p><span style="color:var(--navy);font-weight:600;font-size:11px;">AI</span> 접수가 완료되었습니다. 변호사님께 즉시 전달드릴게요. 송금 내역, 판매 게시글 캡처, 대화 기록 캡처를 준비해주시면 상담이 원활합니다.</p>
       </div>
     </div>
   </div></div>
@@ -374,50 +455,21 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
 
 <footer><div class="container"><p>© 2026 CaseFront</p></div></footer>
 
-<script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
-
-const supabase = createClient(
-  'https://psihfrowcngdmpjrhekp.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBzaWhmcm93Y25nZG1wanJoZWtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwNzI3MTYsImV4cCI6MjA4NzY0ODcxNn0.g1qTuVztmiJhxheJVY-hOylkUs3Z1-khgBpjMac39IY'
-)
-
+<script>
 // Nav scroll effect
-window.addEventListener('scroll',()=>{document.getElementById('nav').classList.toggle('scrolled',window.scrollY>20)})
+window.addEventListener('scroll',()=>{document.getElementById('nav').classList.toggle('scrolled',window.scrollY>20)});
 
-window.submitInquiry = async function() {
-  const name = document.getElementById('inq-name').value.trim()
-  const email = document.getElementById('inq-email').value.trim()
-  const firm = document.getElementById('inq-firm').value.trim()
-  const btn = document.getElementById('inq-btn')
-  const msg = document.getElementById('inq-msg')
-
-  if (!name || !email) { alert('이름과 이메일을 입력해주세요.'); return }
-
-  btn.disabled = true
-  btn.textContent = '처리 중...'
-
-  const { error } = await supabase.from('waitlist').insert({ name, email, firm_name: firm || null })
-
-  if (error) {
-    if (error.code === '23505') {
-      // 이미 등록된 이메일
-      btn.textContent = '이미 접수됨'
-      btn.style.opacity = '0.6'
-      msg.textContent = '이미 접수된 이메일입니다. 곧 연락드리겠습니다.'
-      msg.style.display = 'block'
-    } else {
-      btn.disabled = false
-      btn.textContent = '문의하기'
-      alert('오류가 발생했습니다. 잠시 후 다시 시도해주세요.')
-    }
-    return
-  }
-
-  btn.textContent = '접수 완료'
-  btn.style.opacity = '0.6'
-  msg.textContent = '접수되었습니다. 빠르게 연락드리겠습니다.'
-  msg.style.display = 'block'
+// Inquiry form
+function submitInquiry(){
+  const name=document.getElementById('inq-name').value.trim();
+  const email=document.getElementById('inq-email').value.trim();
+  const firm=document.getElementById('inq-firm').value.trim();
+  if(!name||!email){alert('이름과 이메일을 입력해주세요.');return;}
+  // TODO: 실제 API 연동 (Supabase insert 또는 Resend 이메일)
+  document.getElementById('inq-btn').disabled=true;
+  document.getElementById('inq-btn').textContent='접수 완료';
+  document.getElementById('inq-btn').style.opacity='0.6';
+  document.getElementById('inq-msg').style.display='block';
 }
 </script>
 </body>
