@@ -286,7 +286,7 @@ export default function CaseDetailPage() {
             <select
               value={editUrgency}
               onChange={(e) => setEditUrgency(e.target.value as 'urgent' | 'normal' | 'low')}
-              className="border border-blue-200 rounded-lg px-2 py-1 text-sm font-medium focus:outline-none focus:border-blue-400"
+              className="border border-slate-300 rounded-lg px-2 py-1 text-sm font-medium text-slate-900 bg-white focus:outline-none focus:border-blue-400"
             >
               <option value="urgent">긴급</option>
               <option value="normal">일반</option>
