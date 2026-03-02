@@ -97,7 +97,7 @@ export default function LoginPage() {
               CaseFront
             </span>
           </div>
-          <p className="text-slate-500 text-sm">변호사 대시보드</p>
+          <p className="text-slate-500 text-sm">Dashboard</p>
         </div>
 
         {/* Forgot password mode */}

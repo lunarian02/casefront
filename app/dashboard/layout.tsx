@@ -143,7 +143,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <SidebarIcon />
           <div>
             <div className="text-white font-semibold text-sm leading-tight">CaseFront</div>
-            <div className="text-xs leading-tight" style={{ color: '#4a6fa5' }}>변호사 대시보드</div>
+            <div className="text-xs leading-tight" style={{ color: '#4a6fa5' }}>Dashboard</div>
           </div>
         </div>
 
