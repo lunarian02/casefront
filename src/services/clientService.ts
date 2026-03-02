@@ -15,12 +15,23 @@ export interface ClientContext {
   }>
 }
 
-// Extract phone number from text (supports hyphens and spaces)
+// Extract phone number from text (mobile + landline)
 function extractPhone(text: string): string | null {
-  const match = text.match(/01[016789][\s-]?\d{3,4}[\s-]?\d{4}/)
-  if (!match) return null
-  const raw = match[0].replace(/[\s-]/g, '')
-  return raw.replace(/(\d{3})(\d{3,4})(\d{4})/, '$1-$2-$3')
+  // Mobile: 010/011/016/017/018/019
+  const mobile = text.match(/01[016789][\s-]?\d{3,4}[\s-]?\d{4}/)
+  if (mobile) {
+    const raw = mobile[0].replace(/[\s-]/g, '')
+    return raw.replace(/(\d{3})(\d{3,4})(\d{4})/, '$1-$2-$3')
+  }
+  // Landline: 02 (Seoul), 031-099 (local), etc.
+  const landline = text.match(/0\d{1,2}[\s-]\d{3,4}[\s-]\d{4}/)
+  if (landline) {
+    const raw = landline[0].replace(/[\s-]/g, '')
+    if (raw.length >= 9 && raw.length <= 11) {
+      return raw.replace(/(\d{2,3})(\d{3,4})(\d{4})/, '$1-$2-$3')
+    }
+  }
+  return null
 }
 
 // Extract Korean name (2-4 chars) from text, handling common particles
@@ -164,6 +175,7 @@ export async function identifyClient(
 }
 
 // Called at case completion — uses AI's validated caseSummary to reliably upsert client
+// If the customer corrected their contact info mid-chat, the AI summary has the latest values.
 export async function upsertClientFromSummary(
   sessionId: string,
   firmId: string,
@@ -175,6 +187,26 @@ export async function upsertClientFromSummary(
   const phone = summary.client_phone
   const email = summary.client_email ?? null
 
+  // First: check if session already has a client_id (from mid-chat identification)
+  const { data: sessionRow } = await supabaseAdmin
+    .from('sessions')
+    .select('client_id')
+    .eq('id', sessionId)
+    .single()
+
+  if (sessionRow?.client_id) {
+    // Update the existing client with the AI's final (possibly corrected) values
+    const updates: Record<string, unknown> = {
+      last_contact_at: new Date().toISOString(),
+      name,
+      phone,
+    }
+    if (email) updates.email = email
+    await supabaseAdmin.from('clients').update(updates).eq('id', sessionRow.client_id)
+    return sessionRow.client_id
+  }
+
+  // No existing client — look up by phone or create new
   const { data: existing } = await supabaseAdmin
     .from('clients')
     .select('*')
@@ -187,7 +219,7 @@ export async function upsertClientFromSummary(
   if (existing) {
     const updates: Record<string, unknown> = { last_contact_at: new Date().toISOString() }
     if (email && !existing.email) updates.email = email
-    if (!existing.name && name) updates.name = name
+    if (name) updates.name = name
     await supabaseAdmin.from('clients').update(updates).eq('id', existing.id)
     clientId = existing.id
   } else {
@@ -200,12 +232,11 @@ export async function upsertClientFromSummary(
     clientId = created.id
   }
 
-  // Attach client_id to session (only if not already set)
+  // Attach client_id to session
   await supabaseAdmin
     .from('sessions')
     .update({ client_id: clientId })
     .eq('id', sessionId)
-    .is('client_id', null)
 
   return clientId
 }
