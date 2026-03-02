@@ -534,8 +534,8 @@ export default function CaseDetailPage() {
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {summary.requirements.map((req, i) => {
-                    const cfg = REQ_STATUS_CONFIG[req.status]
+                  {(summary?.requirements ?? []).map((req, i) => {
+                    const cfg = REQ_STATUS_CONFIG[req.status ?? 'unknown'] ?? REQ_STATUS_CONFIG.unknown
                     return (
                       <div key={i} className="flex items-start gap-2.5 p-2.5 rounded-lg border" style={{ background: cfg.bg, borderColor: cfg.border }}>
                         <span className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold mt-0.5" style={{ background: cfg.text, color: '#fff' }}>
@@ -669,11 +669,11 @@ export default function CaseDetailPage() {
                 </div>
               ) : (
                 <div className="space-y-0">
-                  {summary.events.map((event, i) => (
+                  {(summary?.events ?? []).map((event, i) => (
                     <div key={i} className="flex gap-3">
                       <div className="flex flex-col items-center">
                         <div className="w-2 h-2 rounded-full mt-1 flex-shrink-0" style={{ background: '#4a7aef' }} />
-                        {i < summary.events.length - 1 && (
+                        {i < (summary?.events ?? []).length - 1 && (
                           <div className="w-px flex-1 bg-slate-200 my-1" />
                         )}
                       </div>
@@ -829,8 +829,8 @@ export default function CaseDetailPage() {
   )
 }
 
-function InfoRow({ label, value, isPhone, isEmail }: { label: string; value: string; isPhone?: boolean; isEmail?: boolean }) {
-  const display = isPhone ? formatPhone(value) : isEmail ? value.toLowerCase() : value
+function InfoRow({ label, value, isPhone, isEmail }: { label: string; value: string | null | undefined; isPhone?: boolean; isEmail?: boolean }) {
+  const display = isPhone ? formatPhone(value) : isEmail ? (value ?? '').toLowerCase() : (value ?? '')
   return (
     <div className="flex items-center gap-3">
       <span className="text-slate-400 text-sm w-14 flex-shrink-0">{label}</span>
