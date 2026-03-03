@@ -6,12 +6,6 @@ function getResend() {
   return new Resend(process.env.RESEND_API_KEY!)
 }
 
-const URGENCY_LABELS: Record<CaseSummary['urgency'], string> = {
-  urgent: '긴급',
-  normal: '일반',
-  low: '여유',
-}
-
 export async function notifyLawyer(
   firm: Firm,
   summary: CaseSummary,
@@ -28,18 +22,10 @@ export async function notifyLawyer(
     return
   }
 
-  const urgencyLabel = URGENCY_LABELS[summary.urgency]
-  const subject = `[CaseFront] 새 접수 — ${summary.case_type} 건 (${urgencyLabel})`
+  const subject = `[CaseFront] 새 접수 — ${summary.case_type} 건`
   const dashboardUrl = caseId
     ? `https://app.casefront.app/dashboard/cases/${caseId}`
     : `https://app.casefront.app/dashboard`
-
-  const urgencyBadge =
-    summary.urgency === 'urgent'
-      ? `🔴 긴급${summary.urgency_reason ? ` — ${summary.urgency_reason}` : ''}`
-      : summary.urgency === 'normal'
-        ? '🔵 일반'
-        : '⚪ 여유'
 
   const html = `
 <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
@@ -50,7 +36,6 @@ export async function notifyLawyer(
     <p><strong>고객명:</strong> ${summary.client_name}</p>
     <p><strong>연락처:</strong> ${summary.client_phone}</p>
     <p><strong>사건 유형:</strong> ${summary.case_type}</p>
-    <p><strong>긴급도:</strong> ${urgencyBadge}</p>
   </div>
 
   <div style="background: #fff; border-left: 4px solid #4f46e5; padding: 12px 16px; margin: 16px 0;">

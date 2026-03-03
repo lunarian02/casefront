@@ -296,9 +296,6 @@ JSON 출력 규칙:
     "risk_factors": ["일부변제 후 시효중단 주장 시 기산점 재계산 쟁점"]
   },
 
-  "urgency": "normal",
-  "urgency_reason": "소멸시효 여유, 기한 압박 없음",
-
   "summary_text": "대여금 5,000만 원 미변제 건",
 
   "conversation_turns": 10,
