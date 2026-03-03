@@ -98,8 +98,6 @@ export interface CaseSummary {
   client_request: string
   ai_notes: string
 
-  urgency: 'urgent' | 'normal' | 'low'
-  urgency_reason: string
   summary_text: string
   conversation_turns: number
   timestamp: string

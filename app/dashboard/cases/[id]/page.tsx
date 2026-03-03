@@ -17,8 +17,6 @@ type CaseDetail = {
   contact_email?: string | null
   contact_relation?: string | null
   case_type: string
-  urgency: 'urgent' | 'normal' | 'low'
-  urgency_reason?: string
   status: 'new' | 'reviewing' | 'done' | null
   parent_case_id: number | null
   summary: CaseSummary
@@ -46,12 +44,6 @@ const STATUS_CONFIG = {
   new:       { label: '신규',  style: 'text-yellow-700 bg-yellow-50 border-yellow-200', next: 'reviewing' as const, nextLabel: '검토 시작' },
   reviewing: { label: '검토중', style: 'text-blue-700 bg-blue-50 border-blue-200',     next: 'done' as const,       nextLabel: '완료 처리' },
   done:      { label: '완료',  style: 'text-green-700 bg-green-50 border-green-200',   next: null,                  nextLabel: null },
-}
-
-const URGENCY_CONFIG = {
-  urgent: { label: '긴급', style: 'text-red-700 bg-red-50 border-red-200' },
-  normal: { label: '일반', style: 'text-blue-700 bg-blue-50 border-blue-200' },
-  low:    { label: '여유', style: 'text-slate-600 bg-slate-50 border-slate-200' },
 }
 
 function formatPhone(raw: string | null | undefined): string {
@@ -87,7 +79,6 @@ export default function CaseDetailPage() {
   const [editClientPhone, setEditClientPhone] = useState('')
   const [editClientEmail, setEditClientEmail] = useState('')
   const [editCaseType, setEditCaseType] = useState('')
-  const [editUrgency, setEditUrgency] = useState<'urgent' | 'normal' | 'low'>('normal')
   const [editSummaryText, setEditSummaryText] = useState('')
   const [editEvents, setEditEvents] = useState<EditEvent[]>([])
   const [editRequirements, setEditRequirements] = useState<EditRequirement[]>([])
@@ -130,7 +121,6 @@ export default function CaseDetailPage() {
     setEditClientPhone(caseData.client_phone ?? '')
     setEditClientEmail(caseData.client_email ?? '')
     setEditCaseType(caseData.case_type ?? '')
-    setEditUrgency(caseData.urgency ?? 'normal')
     setEditSummaryText(caseData.summary?.summary_text ?? '')
     setEditEvents(
       (caseData.summary?.events ?? []).map((e) => ({
@@ -177,7 +167,6 @@ export default function CaseDetailPage() {
           client_phone: editClientPhone,
           client_email: editClientEmail,
           case_type: editCaseType,
-          urgency: editUrgency,
           summary_patch: {
             summary_text: editSummaryText,
             events: editEvents.map((e) => ({
@@ -196,7 +185,6 @@ export default function CaseDetailPage() {
           client_phone: editClientPhone,
           client_email: editClientEmail,
           case_type: editCaseType,
-          urgency: editUrgency,
           summary: {
             ...prev.summary,
             summary_text: editSummaryText,
@@ -262,10 +250,8 @@ export default function CaseDetailPage() {
     )
   }
 
-  const urgency = URGENCY_CONFIG[caseData.urgency ?? 'normal']
   const status = STATUS_CONFIG[caseData.status ?? 'new']
   const summary = caseData.summary
-  const urgencyReason = caseData.urgency_reason ?? summary?.urgency_reason
 
   const inputCls = 'w-full border border-blue-200 rounded-lg px-3 py-2 text-sm text-slate-900 bg-white focus:outline-none focus:border-blue-400'
 
@@ -282,21 +268,6 @@ export default function CaseDetailPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          {editMode ? (
-            <select
-              value={editUrgency}
-              onChange={(e) => setEditUrgency(e.target.value as 'urgent' | 'normal' | 'low')}
-              className="border border-slate-300 rounded-lg px-2 py-1 text-sm font-medium text-slate-900 bg-white focus:outline-none focus:border-blue-400"
-            >
-              <option value="urgent">긴급</option>
-              <option value="normal">일반</option>
-              <option value="low">여유</option>
-            </select>
-          ) : (
-            <span className={`px-2.5 py-1 rounded-lg text-sm font-medium border ${urgency.style}`}>
-              {urgency.label}
-            </span>
-          )}
           <h1 className="text-xl font-bold text-slate-900">
             {editMode ? (
               <input
@@ -469,11 +440,6 @@ export default function CaseDetailPage() {
             ) : (
               <>
                 <p className="text-slate-700 text-sm leading-relaxed">{summary?.summary_text}</p>
-                {urgencyReason && (
-                  <div className="mt-3 p-3 bg-red-50 border border-red-100 rounded-lg">
-                    <p className="text-red-700 text-sm"><strong>긴급 사유:</strong> {urgencyReason}</p>
-                  </div>
-                )}
                 {summary?.ai_notes && (
                   <div className="mt-3 p-3 bg-slate-50 border border-slate-100 rounded-lg">
                     <p className="text-xs font-medium text-slate-400 mb-1">AI 참고 메모</p>

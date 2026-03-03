@@ -10,20 +10,12 @@ type CaseRow = {
   client_phone: string
   client_email?: string
   case_type: string
-  urgency: 'urgent' | 'normal' | 'low'
-  urgency_reason?: string
   status: 'new' | 'reviewing' | 'done' | null
   is_proxy: boolean | null
   contact_name: string | null
   contact_relation: string | null
   channel: string | null
   created_at: string
-}
-
-const URGENCY_CONFIG = {
-  urgent: { label: '긴급', badge: 'bg-red-100 text-red-700', dot: 'bg-red-500' },
-  normal: { label: '일반', badge: 'bg-blue-100 text-blue-700', dot: 'bg-blue-500' },
-  low: { label: '여유', badge: 'bg-slate-100 text-slate-600', dot: 'bg-slate-400' },
 }
 
 const STATUS_CONFIG = {
@@ -48,7 +40,6 @@ export default function DashboardPage() {
   const { session, loading } = useAuth()
   const router = useRouter()
   const [cases, setCases] = useState<CaseRow[]>([])
-  const [urgencyFilter, setUrgencyFilter] = useState<'all' | 'urgent' | 'normal' | 'low'>('all')
   const [statusFilter, setStatusFilter] = useState<'all' | 'new' | 'reviewing' | 'done'>('all')
   const [fetching, setFetching] = useState(true)
 
@@ -137,12 +128,10 @@ export default function DashboardPage() {
   }
 
   const filtered = cases.filter((c) => {
-    const urgencyOk = urgencyFilter === 'all' || c.urgency === urgencyFilter
     const statusOk = statusFilter === 'all' || (c.status ?? 'new') === statusFilter
-    return urgencyOk && statusOk
+    return statusOk
   })
 
-  const urgentCount = cases.filter((c) => c.urgency === 'urgent').length
   const newCount = cases.filter((c) => !c.status || c.status === 'new').length
 
   return (
@@ -153,9 +142,6 @@ export default function DashboardPage() {
           <h1 className="text-xl font-bold text-slate-900">사건 목록</h1>
           <p className="text-slate-500 text-sm mt-0.5">
             총 {cases.length}건
-            {urgentCount > 0 && (
-              <span className="ml-2 text-red-600 font-medium">• 긴급 {urgentCount}건</span>
-            )}
             {newCount > 0 && (
               <span className="ml-2 text-yellow-600 font-medium">• 신규 {newCount}건</span>
             )}
@@ -173,53 +159,27 @@ export default function DashboardPage() {
         </button>
       </div>
 
-      {/* Filters — horizontal scroll on mobile */}
-      <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 mb-4">
-        <div className="flex gap-x-3 gap-y-2 min-w-max md:flex-wrap md:min-w-0">
-          {/* Urgency filter */}
-          <div className="flex gap-1.5">
-            {(['all', 'urgent', 'normal', 'low'] as const).map((f) => (
-              <button
-                key={f}
-                onClick={() => setUrgencyFilter(f)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
-                  urgencyFilter === f
-                    ? 'text-white border border-transparent'
-                    : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'
-                }`}
-                style={urgencyFilter === f ? { background: '#1a2b5a' } : {}}
-              >
-                {f === 'all' ? '전체' : URGENCY_CONFIG[f].label}
-                <span className="ml-1.5 opacity-70">
-                  {f === 'all' ? cases.length : cases.filter((c) => c.urgency === f).length}
-                </span>
-              </button>
-            ))}
-          </div>
-
-          {/* Status filter */}
-          <div className="flex gap-1.5">
-            {(['all', 'new', 'reviewing', 'done'] as const).map((f) => (
-              <button
-                key={f}
-                onClick={() => setStatusFilter(f)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
-                  statusFilter === f
-                    ? 'text-white border border-transparent'
-                    : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'
-                }`}
-                style={statusFilter === f ? { background: '#4a7aef' } : {}}
-              >
-                {f === 'all' ? '전체상태' : STATUS_CONFIG[f].label}
-                <span className="ml-1.5 opacity-70">
-                  {f === 'all'
-                    ? cases.length
-                    : cases.filter((c) => (c.status ?? 'new') === f).length}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
+      {/* Filters */}
+      <div className="flex gap-1.5 mb-4 flex-wrap">
+        {(['all', 'new', 'reviewing', 'done'] as const).map((f) => (
+          <button
+            key={f}
+            onClick={() => setStatusFilter(f)}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+              statusFilter === f
+                ? 'text-white border border-transparent'
+                : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'
+            }`}
+            style={statusFilter === f ? { background: '#4a7aef' } : {}}
+          >
+            {f === 'all' ? '전체' : STATUS_CONFIG[f].label}
+            <span className="ml-1.5 opacity-70">
+              {f === 'all'
+                ? cases.length
+                : cases.filter((c) => (c.status ?? 'new') === f).length}
+            </span>
+          </button>
+        ))}
       </div>
 
       {/* Empty state */}
@@ -236,7 +196,6 @@ export default function DashboardPage() {
           {/* Mobile: card list */}
           <div className="md:hidden space-y-3 pb-24">
             {filtered.map((c) => {
-              const u = URGENCY_CONFIG[c.urgency]
               const s = STATUS_CONFIG[c.status ?? 'new']
               return (
                 <div
@@ -244,21 +203,15 @@ export default function DashboardPage() {
                   className="bg-white rounded-xl p-4 border border-slate-200 active:bg-slate-50"
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${u.badge}`}>
-                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${u.dot}`} />
-                      {u.label}
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${s.badge}`}>{s.label}</span>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); setDeleteTarget(c) }}
-                        className="p-1 text-slate-400 hover:text-red-500 transition-colors"
-                      >
-                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
-                        </svg>
-                      </button>
-                    </div>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${s.badge}`}>{s.label}</span>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setDeleteTarget(c) }}
+                      className="p-1 text-slate-400 hover:text-red-500 transition-colors"
+                    >
+                      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+                      </svg>
+                    </button>
                   </div>
                   <div
                     onClick={() => router.push(`/dashboard/cases/${c.session_id}`)}
@@ -284,7 +237,6 @@ export default function DashboardPage() {
             <table className="w-full">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">긴급도</th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">고객명</th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">사건유형</th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">연락처</th>
@@ -295,7 +247,6 @@ export default function DashboardPage() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filtered.map((c) => {
-                  const u = URGENCY_CONFIG[c.urgency]
                   const s = STATUS_CONFIG[c.status ?? 'new']
                   const proxyLabel = c.is_proxy && c.contact_name
                     ? `(대리: ${c.contact_name}${c.contact_relation ? `/${c.contact_relation}` : ''})`
@@ -306,12 +257,6 @@ export default function DashboardPage() {
                       onClick={() => router.push(`/dashboard/cases/${c.session_id}`)}
                       className="hover:bg-slate-50 cursor-pointer transition-colors group"
                     >
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${u.badge}`}>
-                          <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${u.dot}`} />
-                          {u.label}
-                        </span>
-                      </td>
                       <td className="px-4 py-3">
                         <span className="text-sm font-medium text-slate-900">{c.client_name}</span>
                         {proxyLabel && (

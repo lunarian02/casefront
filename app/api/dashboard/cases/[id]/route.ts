@@ -33,7 +33,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
   const { data: caseData, error: caseError } = await supabaseAdmin
     .from('case_summaries')
-    .select('id, session_id, client_id, client_name, client_phone, client_email, is_proxy, contact_name, contact_phone, contact_email, contact_relation, case_type, urgency, urgency_reason, status, summary, parent_case_id, created_at')
+    .select('id, session_id, client_id, client_name, client_phone, client_email, is_proxy, contact_name, contact_phone, contact_email, contact_relation, case_type, status, summary, parent_case_id, created_at')
     .eq('session_id', sessionId)
     .eq('firm_id', firm.id)
     .maybeSingle()
@@ -148,10 +148,6 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if ('client_name' in body) allowedEdits.client_name = body.client_name
   if ('client_phone' in body) allowedEdits.client_phone = normalizePhone(String(body.client_phone))
   if ('client_email' in body) allowedEdits.client_email = body.client_email ? String(body.client_email).toLowerCase().trim() : null
-  if ('urgency' in body && ['urgent', 'normal', 'low'].includes(body.urgency)) {
-    allowedEdits.urgency = body.urgency
-  }
-
   // Update summary JSONB sub-fields
   if ('summary_patch' in body && typeof body.summary_patch === 'object') {
     // Fetch current summary
