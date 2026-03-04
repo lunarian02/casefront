@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CaseFront — 법률사무소 AI 고객 접수</title>
+<title>CaseFront — 녹음 한 번으로, 상담이 리포트가 됩니다</title>
+<meta name="description" content="변호사 상담 녹음을 AI가 자동으로 정리합니다. 사실관계, 요건사실, 핵심 쟁점, 증거 현황, 다음 단계까지.">
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 html{scroll-behavior:smooth}
@@ -11,12 +12,15 @@ html{scroll-behavior:smooth}
   --bg: #fafbfd; --bg-alt: #f3f5fa; --surface: #ffffff; --surface-dark: #0f1629;
   --navy: #1a2b5a; --navy-light: #2d4a8a; --blue: #4a7aef; --blue-light: #6b94f5;
   --blue-bg: rgba(74,122,239,0.06); --border: #e4e8f1; --border-dark: #cdd3e0;
-  --text: #1a1f36; --text-secondary: #525a76; --text-light: #8b93ab; --green: #22c55e; --amber: #f59e0b;
+  --text: #1a1f36; --text-secondary: #525a76; --text-light: #8b93ab;
+  --green: #22c55e; --amber: #f59e0b; --red: #ef4444;
+  --warm-orange: #E07040;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',-apple-system,sans-serif;line-height:1.7;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 .container{max-width:1120px;margin:0 auto;padding:0 24px}
 
+/* ===== NAV ===== */
 nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(250,251,253,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
 nav.scrolled{box-shadow:0 1px 20px rgba(0,0,0,0.04)}
 .nav-inner{max-width:1120px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px}
@@ -28,449 +32,873 @@ nav.scrolled{box-shadow:0 1px 20px rgba(0,0,0,0.04)}
 .nav-cta{background:var(--navy);color:#fff!important;padding:8px 20px;border-radius:8px;font-weight:500;transition:transform 0.2s,box-shadow 0.2s}
 .nav-cta:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(26,43,90,0.18)}
 
-.hero{padding:130px 0 60px;text-align:center;position:relative}
-.hero::before{content:'';position:absolute;top:40px;left:50%;transform:translateX(-50%);width:900px;height:500px;background:radial-gradient(ellipse,rgba(74,122,239,0.04) 0%,transparent 70%);pointer-events:none}
+/* ===== HERO ===== */
+.hero{padding:130px 0 40px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:40px;left:50%;transform:translateX(-50%);width:1000px;height:600px;background:radial-gradient(ellipse,rgba(74,122,239,0.04) 0%,transparent 70%);pointer-events:none}
+.hero-inner{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.hero-text{position:relative;z-index:2}
 .hero-badge{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.5px;color:var(--blue);background:var(--blue-bg);padding:6px 16px;border-radius:100px;margin-bottom:24px;animation:fadeUp .6s ease-out both}
 .hero-badge .pulse{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
-.hero h1{font-family:'Source Serif 4',serif;font-size:clamp(32px,5vw,50px);font-weight:700;line-height:1.2;letter-spacing:-1px;color:var(--navy);margin-bottom:16px;animation:fadeUp .6s ease-out .1s both}
-.hero-sub{font-size:16px;color:var(--text-secondary);max-width:480px;margin:0 auto 40px;line-height:1.8;animation:fadeUp .6s ease-out .2s both}
-
-.hub-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;max-width:900px;margin:0 auto 40px;animation:fadeUp .6s ease-out .3s both}
-.hub-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px 20px 24px;text-align:center;cursor:pointer;transition:all .3s;text-decoration:none;color:inherit}
-.hub-card:hover{border-color:var(--blue);transform:translateY(-4px);box-shadow:0 12px 32px rgba(74,122,239,0.08)}
-.hub-icon{width:48px;height:48px;border-radius:12px;background:var(--blue-bg);display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
-.hub-card h3{font-size:14px;font-weight:600;margin-bottom:6px}
-.hub-card p{font-size:12px;color:var(--text-light);line-height:1.6}
-.hub-tag{display:inline-block;margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 8px;border-radius:4px;background:var(--blue-bg);color:var(--blue)}
-
-.hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;animation:fadeUp .6s ease-out .4s both}
-.btn-primary{background:var(--navy);color:#fff;padding:14px 32px;border-radius:10px;border:none;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit;transition:transform .2s,box-shadow .2s;text-decoration:none;display:inline-block}
+.hero h1{font-family:'Source Serif 4',serif;font-size:clamp(30px,4.2vw,46px);font-weight:700;line-height:1.25;letter-spacing:-0.5px;color:var(--navy);margin-bottom:18px;animation:fadeUp .6s ease-out .1s both}
+.hero h1 .accent{color:var(--blue)}
+.hero-sub{font-size:16px;color:var(--text-secondary);max-width:440px;line-height:1.8;margin-bottom:32px;animation:fadeUp .6s ease-out .2s both}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:40px;animation:fadeUp .6s ease-out .3s both}
+.btn-primary{background:var(--navy);color:#fff;padding:14px 32px;border-radius:10px;border:none;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit;transition:transform .2s,box-shadow .2s;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
 .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(26,43,90,0.16)}
 .btn-secondary{background:transparent;color:var(--text);padding:14px 32px;border-radius:10px;border:1px solid var(--border-dark);font-size:15px;cursor:pointer;font-family:inherit;text-decoration:none;transition:background .2s;display:inline-block}
 .btn-secondary:hover{background:var(--bg-alt)}
 
-.proof{text-align:center;padding:32px 0 48px}
-.proof-nums{display:flex;justify-content:center;gap:48px;flex-wrap:wrap}
-.proof-num strong{display:block;font-family:'Source Serif 4',serif;font-size:28px;font-weight:700;color:var(--navy)}
-.proof-num span{font-size:11px;color:var(--text-light)}
+/* Hero stats */
+.hero-stats{display:flex;gap:32px;animation:fadeUp .6s ease-out .4s both}
+.hero-stat{text-align:left}
+.hero-stat strong{display:block;font-family:'Source Serif 4',serif;font-size:26px;font-weight:700;color:var(--navy);line-height:1.2}
+.hero-stat span{font-size:11px;color:var(--text-light)}
 
+/* Phone mockup */
+.hero-visual{position:relative;display:flex;justify-content:center;animation:fadeUp .8s ease-out .3s both}
+.phone-mockup{width:280px;height:560px;background:var(--surface-dark);border-radius:36px;padding:12px;position:relative;box-shadow:0 40px 80px rgba(15,22,41,0.2),0 0 0 1px rgba(255,255,255,0.05) inset}
+.phone-screen{width:100%;height:100%;background:var(--bg);border-radius:26px;overflow:hidden;position:relative}
+.phone-notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:28px;background:var(--surface-dark);border-radius:0 0 16px 16px;z-index:5}
+.phone-status-bar{height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;font-size:11px;font-weight:600;color:var(--text)}
+.phone-content{padding:0 16px}
+.phone-greeting{font-size:13px;color:var(--text-light);margin-bottom:2px}
+.phone-title{font-family:'Source Serif 4',serif;font-size:20px;font-weight:700;color:var(--navy);margin-bottom:16px}
+
+/* Recording card in phone */
+.phone-rec-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px}
+.phone-rec-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.phone-rec-label{font-size:12px;font-weight:600;color:var(--text)}
+.phone-rec-badge{font-size:9px;font-weight:500}
+.phone-rec-badge.done{color:#16A34A}
+.phone-rec-badge.processing{color:#D97706}
+.phone-rec-sub{font-size:10px;color:var(--text-light)}
+.phone-rec-type{display:inline-block;font-size:9px;color:var(--text-light);margin-top:4px}
+
+/* Record button */
+.phone-rec-btn-wrap{display:flex;justify-content:center;margin-top:20px}
+.phone-rec-btn{width:64px;height:64px;border-radius:50%;background:var(--warm-orange);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(224,112,64,0.35);animation:recPulse 2.5s ease-in-out infinite}
+.phone-rec-btn svg{width:24px;height:24px;fill:#fff}
+
+/* Float badge */
+.hero-float{position:absolute;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 14px;box-shadow:0 8px 24px rgba(0,0,0,0.06);font-size:11px;animation:float 3s ease-in-out infinite}
+.hero-float-1{top:60px;right:-20px;animation-delay:0s}
+.hero-float-2{bottom:80px;left:-30px;animation-delay:1.5s}
+.hero-float strong{display:block;font-size:13px;color:var(--navy)}
+
+/* ===== PROBLEM ===== */
+.problem{padding:80px 0;border-top:1px solid var(--border)}
 .section-label{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--blue);margin-bottom:12px}
 .section-title{font-family:'Source Serif 4',serif;font-size:34px;font-weight:700;line-height:1.3;color:var(--navy);margin-bottom:16px}
-.section-desc{font-size:15px;color:var(--text-secondary);line-height:1.8;max-width:480px}
+.section-desc{font-size:15px;color:var(--text-secondary);line-height:1.8;max-width:520px;margin:0 auto}
+.problem-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:40px}
+.problem-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px 24px;transition:transform .3s}
+.problem-card:hover{transform:translateY(-3px)}
+.problem-icon{width:44px;height:44px;border-radius:12px;background:#FEF2F2;display:flex;align-items:center;justify-content:center;margin-bottom:14px;font-size:20px}
+.problem-card h4{font-size:15px;font-weight:600;margin-bottom:6px;color:var(--text)}
+.problem-card p{font-size:13px;color:var(--text-secondary);line-height:1.7}
+.problem-punchline{text-align:center;margin-top:32px;font-size:16px;color:var(--navy);font-weight:600}
+.problem-punchline span{color:var(--blue)}
 
-.svc{padding:80px 0;border-top:1px solid var(--border)}
-.svc:nth-child(even){background:var(--surface)}
-.svc-inner{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+/* ===== HOW IT WORKS ===== */
+.how{padding:80px 0;background:var(--surface-dark);color:#fff}
+.how .section-label{color:rgba(107,148,245,0.5);text-align:center}
+.how .section-title{color:#fff;text-align:center;margin-bottom:14px}
+.how .section-desc{color:rgba(255,255,255,0.45);text-align:center;margin-bottom:56px}
+.flow-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;position:relative}
+.flow-grid::before{content:'';position:absolute;top:44px;left:calc(33.33% + 12px);right:calc(33.33% + 12px);height:2px;background:linear-gradient(90deg,rgba(74,122,239,0.3),rgba(74,122,239,0.3));display:none}
+.flow-card{text-align:center;padding:32px 24px;border-radius:16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);transition:background .3s}
+.flow-card:hover{background:rgba(255,255,255,0.06)}
+.flow-num{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:14px;font-family:'Source Serif 4',serif;font-size:22px;font-weight:700;margin-bottom:16px}
+.flow-num-1{background:rgba(224,112,64,0.15);color:var(--warm-orange)}
+.flow-num-2{background:rgba(74,122,239,0.15);color:var(--blue-light)}
+.flow-num-3{background:rgba(34,197,94,0.15);color:#34d399}
+.flow-card h4{font-size:16px;font-weight:600;margin-bottom:8px}
+.flow-card p{font-size:13px;color:rgba(255,255,255,0.4);line-height:1.7}
+.flow-card .flow-detail{margin-top:14px;background:rgba(255,255,255,0.04);border-radius:10px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(255,255,255,0.3);text-align:left;line-height:1.8}
+.flow-card .flow-detail strong{color:rgba(255,255,255,0.6)}
 
-.chat-preview{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px}
-.chat-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
-.chat-avatar{width:32px;height:32px;background:var(--navy);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.chat-header-text{font-size:13px;font-weight:600}
-.chat-header-sub{font-size:11px;color:var(--text-light)}
-.chat-bubbles{display:flex;flex-direction:column;gap:8px}
-.b-ai{background:var(--blue-bg);padding:10px 14px;border-radius:12px 12px 12px 4px;font-size:13px;max-width:88%;display:flex;gap:8px;align-items:flex-start}
-.b-ai-avatar{width:20px;height:20px;background:var(--navy);border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
-.b-user{background:var(--bg-alt);padding:10px 14px;border-radius:12px 12px 4px 12px;font-size:13px;max-width:85%;align-self:flex-end}
-.bracket-mini svg{display:block}
+/* ===== DEMO REPORT ===== */
+.demo{padding:80px 0;border-top:1px solid var(--border);background:var(--bg-alt)}
+.demo .section-label,.demo .section-title{text-align:center}
+.demo .section-title{margin-bottom:8px}
+.demo .section-desc{text-align:center;margin-bottom:32px}
+.demo-tabs{display:flex;justify-content:center;gap:8px;margin-bottom:28px}
+.demo-tab{padding:8px 20px;border-radius:8px;font-size:13px;font-weight:500;border:1px solid var(--border);background:var(--surface);color:var(--text-secondary);cursor:pointer;transition:all .2s}
+.demo-tab.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.demo-tab:hover:not(.active){background:var(--bg)}
 
-.sc{background:var(--surface-dark);color:#fff;border-radius:16px;padding:24px;font-size:13px}
-.sc-label{font-size:11px;color:rgba(138,164,204,0.6);font-family:'JetBrains Mono',monospace;margin-bottom:16px}
-
-/* 밝은 리포트 카드 (제품 UI 스타일) */
-.rpt{background:var(--bg);border-radius:16px;font-size:13px;overflow:hidden}
+/* Report card */
+.rpt{background:var(--surface);border:1px solid var(--border);border-radius:16px;font-size:13px;overflow:hidden;max-width:800px;margin:0 auto;position:relative}
+.rpt-watermark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-family:'Source Serif 4',serif;font-size:72px;font-weight:700;color:rgba(74,122,239,0.04);pointer-events:none;z-index:1;letter-spacing:8px}
 .rpt-header{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--border)}
-.rpt-badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:6px}
-.rpt-badge.urgent{background:#FEF2F2;color:#DC2626}
-.rpt-badge.normal{background:var(--blue-bg);color:var(--blue)}
+.rpt-badge{font-size:11px;font-weight:500}
+.rpt-badge.criminal{color:#DC2626}
+.rpt-badge.traffic{color:#D97706}
+.rpt-badge.civil{color:var(--text-secondary)}
 .rpt-title{font-size:15px;font-weight:600;color:var(--text)}
-.rpt-body{padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.rpt-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px}
+.rpt-body{padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px;position:relative;z-index:2}
+.rpt-card{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px}
 .rpt-card.full{grid-column:1/-1}
 .rpt-lbl{font-size:11px;color:var(--blue);font-weight:500;margin-bottom:8px}
 .rpt-val{font-size:13px;color:var(--text);line-height:1.7}
 .rpt-val small{color:var(--text-light);font-size:12px}
-.rpt-chk{display:flex;align-items:flex-start;gap:8px;padding:8px 12px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;margin-bottom:6px}
-.rpt-chk-icon{width:20px;height:20px;border-radius:50%;background:#22C55E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:1px}
-.rpt-chk-miss{background:#FEF9C3;border-color:#FDE68A}
-.rpt-chk-miss .rpt-chk-icon{background:#F59E0B}
 .rpt-timeline{position:relative;padding-left:20px}
 .rpt-timeline::before{content:'';position:absolute;left:5px;top:8px;bottom:8px;width:2px;background:var(--border)}
 .rpt-tl-item{position:relative;padding:6px 0 6px 12px;font-size:12px;color:var(--text-secondary);line-height:1.7}
 .rpt-tl-item::before{content:'';position:absolute;left:-18px;top:12px;width:8px;height:8px;border-radius:50%;background:var(--blue);border:2px solid var(--surface)}
 .rpt-tl-date{font-size:10px;color:var(--text-light);font-family:'JetBrains Mono',monospace}
-.rpt-analysis{background:#F8FAFC;border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:8px}
-.rpt-analysis-row{display:flex;gap:8px;padding:4px 0;font-size:12px;color:var(--text-secondary);line-height:1.6}
-.rpt-analysis-label{font-weight:600;white-space:nowrap;flex-shrink:0}
-.rpt-evidence{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
-.rpt-evidence.strong{background:#DCFCE7;color:#16A34A}
-.rpt-evidence.moderate{background:#FEF9C3;color:#CA8A04}
-.rpt-evidence.weak{background:#FEE2E2;color:#DC2626}
-.rpt-footer{padding:12px 20px;border-top:1px solid var(--border);font-size:10px;color:var(--text-light)}
-.sc-s{margin-bottom:14px}
-.sc-k{color:rgba(255,255,255,0.3);font-size:10px;margin-bottom:3px;font-family:'JetBrains Mono',monospace;letter-spacing:0.5px}
-.sc-tag{display:inline-block;background:rgba(74,122,239,0.15);color:var(--blue-light);padding:2px 10px;border-radius:6px;font-size:12px;margin-right:4px}
-.sc-req{display:flex;align-items:center;gap:8px;padding:4px 0;color:rgba(255,255,255,0.7);font-size:12px}
-.sc-chk{width:18px;height:18px;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;background:rgba(34,197,94,0.15);color:#34d399}
+.rpt-chk{display:flex;align-items:flex-start;gap:8px;padding:8px 0;margin-bottom:2px}
+.rpt-chk-icon{width:6px;height:6px;border-radius:50%;background:#16A34A;flex-shrink:0;margin-top:7px}
+.rpt-action{display:flex;align-items:flex-start;gap:8px;padding:8px 0;margin-bottom:2px}
+.rpt-action-pri{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:7px}
+.rpt-action-pri.high{background:#DC2626}
+.rpt-action-pri.medium{background:#D97706}
+.rpt-action-pri.low{background:var(--blue)}
+.rpt-footer{padding:12px 20px;border-top:1px solid var(--border);font-size:10px;color:var(--text-light);display:flex;justify-content:space-between;align-items:center}
+.rpt-gen-time{font-family:'JetBrains Mono',monospace;color:var(--blue)}
+.demo-cta{text-align:center;margin-top:24px;font-size:14px;color:var(--text-secondary)}
+.demo-cta a{color:var(--blue);text-decoration:none;font-weight:500}
 
-.phone-flow{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px}
-.pf-step{display:flex;gap:14px;align-items:flex-start;padding:12px 0}
-.pf-step+.pf-step{border-top:1px solid var(--border)}
-.pf-num{width:28px;height:28px;border-radius:8px;background:var(--blue-bg);color:var(--blue);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'JetBrains Mono',monospace}
-.pf-step h4{font-size:13px;font-weight:600;margin-bottom:2px}
-.pf-step p{font-size:12px;color:var(--text-light);line-height:1.6}
+/* ===== FEATURES ===== */
+.features{padding:80px 0;border-top:1px solid var(--border)}
+.features .section-label,.features .section-title{text-align:center}
+.features .section-title{margin-bottom:48px}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.feat-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px 24px;transition:all .3s}
+.feat-card:hover{border-color:var(--blue);transform:translateY(-3px);box-shadow:0 12px 32px rgba(74,122,239,0.06)}
+.feat-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;font-size:20px}
+.feat-card h4{font-size:15px;font-weight:600;margin-bottom:6px}
+.feat-card p{font-size:13px;color:var(--text-secondary);line-height:1.7}
 
-.kakao-mock{background:#FEE500;border-radius:16px;padding:24px}
-.kakao-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
-.kakao-header span{font-size:14px;font-weight:600;color:#3C1E1E}
-.kakao-msgs{display:flex;flex-direction:column;gap:8px}
-.k-bot{background:#fff;padding:10px 14px;border-radius:12px 12px 12px 4px;font-size:12.5px;color:#333;max-width:85%;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
-.k-user{background:rgba(255,255,255,0.7);padding:10px 14px;border-radius:12px 12px 4px 12px;font-size:12.5px;color:#333;max-width:80%;align-self:flex-end}
-
-.how{padding:80px 0;background:var(--surface-dark);color:#fff}
-.how .section-label{color:rgba(107,148,245,0.5);text-align:center}
-.how .section-title{color:#fff;text-align:center;margin-bottom:48px}
-.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
-.step{text-align:center;padding:24px 16px}
-.step-num{font-family:'Source Serif 4',serif;font-size:42px;font-weight:700;color:rgba(255,255,255,0.05);line-height:1;margin-bottom:12px}
-.step h4{font-size:14px;font-weight:600;margin-bottom:6px}
-.step p{font-size:12px;color:rgba(255,255,255,0.35);line-height:1.7}
-
+/* ===== PRICING ===== */
 .pricing{padding:80px 0;background:var(--bg-alt);border-top:1px solid var(--border)}
 .pricing .section-label,.pricing .section-title{text-align:center}
-.pricing .section-title{margin-bottom:40px}
-.pricing-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;max-width:640px;margin:0 auto}
+.pricing .section-title{margin-bottom:8px}
+.pricing .section-desc{text-align:center;margin-bottom:40px}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:900px;margin:0 auto}
 .price-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px 24px;text-align:center;transition:transform .3s}
 .price-card:hover{transform:translateY(-3px)}
 .price-card.featured{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue),0 12px 40px rgba(74,122,239,0.08);position:relative}
-.price-card.featured::before{content:'추천';position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--blue);color:#fff;font-size:11px;font-weight:600;padding:3px 14px;border-radius:100px}
+.price-card.featured::before{content:'인기';position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--blue);color:#fff;font-size:11px;font-weight:600;padding:3px 14px;border-radius:100px}
 .price-name{font-size:14px;font-weight:500;color:var(--text-secondary);margin-bottom:6px}
-.price-amount{font-family:'Source Serif 4',serif;font-size:36px;font-weight:700;color:var(--navy);margin-bottom:4px}
+.price-amount{font-family:'Source Serif 4',serif;font-size:32px;font-weight:700;color:var(--navy);margin-bottom:2px}
 .price-amount span{font-size:15px;color:var(--text-light);font-family:'DM Sans',sans-serif}
-.price-features{text-align:left;list-style:none;margin:16px 0 24px}
+.price-minutes{font-size:12px;color:var(--blue);font-weight:500;margin-bottom:16px}
+.price-features{text-align:left;list-style:none;margin:0 0 24px}
 .price-features li{font-size:13px;color:var(--text-secondary);padding:5px 0;display:flex;gap:8px;align-items:center}
 .price-features li::before{content:'✓';color:var(--blue);font-weight:700;font-size:12px}
-.price-btn{display:block;width:100%;padding:12px;border-radius:10px;border:1px solid var(--border-dark);background:transparent;color:var(--text);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .2s}
+.price-btn{display:block;width:100%;padding:12px;border-radius:10px;border:1px solid var(--border-dark);background:transparent;color:var(--text);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .2s;text-decoration:none;text-align:center}
 .price-btn:hover{background:var(--bg-alt)}
 .price-card.featured .price-btn{background:var(--navy);color:#fff;border-color:var(--navy)}
 .price-card.featured .price-btn:hover{background:var(--navy-light)}
+.pricing-note{text-align:center;margin-top:24px;font-size:12px;color:var(--text-light);line-height:1.8}
 
+/* ===== FAQ ===== */
+.faq{padding:80px 0;border-top:1px solid var(--border)}
+.faq .section-label,.faq .section-title{text-align:center}
+.faq .section-title{margin-bottom:40px}
+.faq-list{max-width:680px;margin:0 auto}
+.faq-item{border-bottom:1px solid var(--border);overflow:hidden}
+.faq-q{padding:18px 0;font-size:15px;font-weight:600;color:var(--text);cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:color .2s}
+.faq-q:hover{color:var(--blue)}
+.faq-q svg{width:18px;height:18px;transition:transform .3s;flex-shrink:0;color:var(--text-light)}
+.faq-item.open .faq-q svg{transform:rotate(180deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease-out}
+.faq-item.open .faq-a{max-height:200px}
+.faq-a p{padding:0 0 18px;font-size:13px;color:var(--text-secondary);line-height:1.8}
+
+/* ===== FINAL CTA ===== */
+.final-cta{padding:80px 0;background:var(--surface-dark);color:#fff;text-align:center}
+.final-cta h2{font-family:'Source Serif 4',serif;font-size:clamp(26px,3.5vw,38px);font-weight:700;margin-bottom:12px;line-height:1.3}
+.final-cta p{font-size:15px;color:rgba(255,255,255,0.45);margin-bottom:32px}
+.final-cta .btn-primary{background:#fff;color:var(--navy);font-weight:600}
+.final-cta .btn-primary:hover{box-shadow:0 8px 24px rgba(255,255,255,0.15)}
+.final-cta .btn-secondary{border-color:rgba(255,255,255,0.15);color:rgba(255,255,255,0.7)}
+.final-cta .btn-secondary:hover{background:rgba(255,255,255,0.05)}
+
+/* ===== FOOTER ===== */
 footer{padding:32px 0;border-top:1px solid var(--border);text-align:center}
-footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',monospace}
+footer p{font-size:12px;color:var(--text-light)}
+footer a{color:var(--text-light);text-decoration:none;transition:color .2s}
+footer a:hover{color:var(--text)}
 
+/* ===== ANIMATIONS ===== */
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.5)}}
-@media(max-width:900px){.hub-grid{grid-template-columns:repeat(2,1fr)}.svc-inner{grid-template-columns:1fr}.steps{grid-template-columns:1fr 1fr}.pricing-grid{grid-template-columns:1fr;max-width:360px}}
-@media(max-width:640px){.hub-grid{grid-template-columns:1fr 1fr}.steps{grid-template-columns:1fr}.nav-links a:not(.nav-cta){display:none}}
+@keyframes recPulse{0%,100%{box-shadow:0 4px 20px rgba(224,112,64,0.35)}50%{box-shadow:0 4px 32px rgba(224,112,64,0.55),0 0 0 8px rgba(224,112,64,0.08)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes waveform{0%,100%{height:8px}50%{height:24px}}
+
+/* Waveform animation bars */
+.waveform-bars{display:flex;gap:2px;align-items:center;height:28px}
+.waveform-bars span{width:3px;border-radius:2px;background:var(--warm-orange);animation:waveform 0.8s ease-in-out infinite}
+.waveform-bars span:nth-child(1){animation-delay:0s;height:12px}
+.waveform-bars span:nth-child(2){animation-delay:0.1s;height:20px}
+.waveform-bars span:nth-child(3){animation-delay:0.2s;height:8px}
+.waveform-bars span:nth-child(4){animation-delay:0.3s;height:24px}
+.waveform-bars span:nth-child(5){animation-delay:0.15s;height:16px}
+.waveform-bars span:nth-child(6){animation-delay:0.25s;height:10px}
+.waveform-bars span:nth-child(7){animation-delay:0.05s;height:18px}
+
+/* Scroll reveal */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity 0.6s ease-out,transform 0.6s ease-out}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:900px){
+  .hero-inner{grid-template-columns:1fr;text-align:center}
+  .hero-sub{margin:0 auto 32px}
+  .hero-actions{justify-content:center}
+  .hero-stats{justify-content:center}
+  .hero-visual{margin-top:40px}
+  .hero-float{display:none}
+  .problem-grid{grid-template-columns:1fr}
+  .flow-grid{grid-template-columns:1fr;max-width:400px;margin:0 auto}
+  .feat-grid{grid-template-columns:1fr}
+  .pricing-grid{grid-template-columns:1fr;max-width:360px}
+  .rpt-body{grid-template-columns:1fr}
+  .rpt-card.full{grid-column:1}
+}
+@media(max-width:640px){
+  .nav-links a:not(.nav-cta){display:none}
+  .hero-stats{flex-direction:row;gap:20px}
+  .demo-tabs{flex-wrap:wrap}
+  .phone-mockup{width:240px;height:480px}
+}
 </style>
 </head>
 <body>
 
+<!-- ===== NAV ===== -->
 <nav id="nav"><div class="nav-inner">
   <a href="#" class="nav-logo">
     <svg width="22" height="24" viewBox="0 0 44 48" fill="none"><path d="M13 4H7C5.34 4 4 5.34 4 7V41C4 42.66 5.34 44 7 44H13" stroke="#1a2b5a" stroke-width="3" stroke-linecap="round"/><path d="M31 4H37C38.66 4 40 5.34 40 7V41C40 42.66 38.66 44 37 44H31" stroke="#1a2b5a" stroke-width="3" stroke-linecap="round"/><line x1="14" y1="17" x2="30" y2="17" stroke="#1a2b5a" stroke-width="2" stroke-linecap="round"/><line x1="14" y1="24" x2="26" y2="24" stroke="#4a7aef" stroke-width="1.5" stroke-linecap="round" opacity="0.45"/></svg>
     <span class="nav-logo-text">CaseFront</span>
   </a>
   <div class="nav-links">
-    <a href="#svc-chat">Services</a>
-    <a href="#how">How it works</a>
-    <a href="#pricing">Pricing</a>
-    <a href="#inquiry">도입 문의</a>
-    <a href="https://my.casefront.app/signup" class="nav-cta">시작하기</a>
+    <a href="#how">작동 방식</a>
+    <a href="#demo">리포트 데모</a>
+    <a href="#pricing">가격</a>
+    <a href="#faq">FAQ</a>
+    <a href="https://my.casefront.app/signup" class="nav-cta">무료체험</a>
   </div>
 </div></nav>
 
-<!-- ========== HERO ========== -->
+<!-- ===== HERO ===== -->
 <section class="hero">
   <div class="container">
-    <div class="hero-badge"><span class="pulse"></span>법률사무소 전용 AI</div>
-    <h1>모든 상담, 빠짐없이.<br>AI가 정리하고 변호사가 판단합니다.</h1>
-    <p class="hero-sub">AI가 기본 정보를 접수하고, 요건사실 기준으로 구조화된 수임 검토 리포트를 만들어 드립니다.</p>
-    <div class="hub-grid" style="grid-template-columns:repeat(2,1fr);max-width:600px;">
-      <a href="#svc-chat" class="hub-card">
-        <div class="hub-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4a7aef" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
-        <h3>AI 웹챗 접수</h3>
-        <p>링크 하나로 24시간<br>사건 접수 자동화</p>
-        <span class="hub-tag">웹사이트</span>
-      </a>
-      <a href="#svc-phone" class="hub-card">
-        <div class="hub-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4a7aef" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
-        <h3>부재중 전화 AI</h3>
-        <p>못 받은 전화를<br>AI가 대신 접수</p>
-        <span class="hub-tag">전화</span>
-      </a>
-    </div>
-    <div class="hero-actions">
-      <a href="https://my.casefront.app/signup" class="btn-primary">시작하기</a>
-      <a href="#inquiry" class="btn-secondary">도입 문의</a>
+    <div class="hero-inner">
+      <div class="hero-text">
+        <div class="hero-badge"><span class="pulse"></span>변호사 전용 녹음 앱</div>
+        <h1>녹음 한 번으로,<br>상담이 <span class="accent">리포트</span>가 됩니다.</h1>
+        <p class="hero-sub">대면, 통화, 회의 — 녹음 버튼 하나면<br>사실관계, 요건사실 정리부터 다음 단계까지. AI가 전부 정리합니다.</p>
+        <div class="hero-actions">
+          <a href="https://my.casefront.app/signup" class="btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            무료체험 시작
+          </a>
+          <a href="#demo" class="btn-secondary">데모 리포트 보기</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <!-- Phone mockup -->
+        <div class="phone-mockup">
+          <div class="phone-screen">
+            <div class="phone-notch"></div>
+            <div class="phone-status-bar">
+              <span>9:41</span>
+              <span style="display:flex;gap:4px;align-items:center;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--text)" opacity="0.5"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.237 4.237 0 00-6 0zm-4-4l2 2a7.074 7.074 0 0110 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--text)" opacity="0.5"><rect x="2" y="6" width="18" height="12" rx="2" stroke="currentColor" fill="none" stroke-width="1.5"/><rect x="20" y="10" width="2" height="4" rx="1" fill="currentColor"/><rect x="4" y="8" width="10" height="8" rx="1" fill="var(--green)"/></svg>
+              </span>
+            </div>
+            <div class="phone-content">
+              <div class="phone-greeting">안녕하세요, 김변호사님</div>
+              <div class="phone-title">상담 기록</div>
+              
+              <div class="phone-rec-card">
+                <div class="phone-rec-top">
+                  <span class="phone-rec-label">박○○ · 재산분할</span>
+                  <span class="phone-rec-badge done">완료</span>
+                </div>
+                <div class="phone-rec-sub">오늘 14:30 · 32분</div>
+                <span class="phone-rec-type">민사</span>
+              </div>
+              
+              <div class="phone-rec-card">
+                <div class="phone-rec-top">
+                  <span class="phone-rec-label">이○○ · 교통사고 합의</span>
+                  <span class="phone-rec-badge processing">분석중</span>
+                </div>
+                <div class="phone-rec-sub">오늘 11:00 · 18분</div>
+                <span class="phone-rec-type">민사</span>
+              </div>
+              
+              <div class="phone-rec-card">
+                <div class="phone-rec-top">
+                  <span class="phone-rec-label">김○○ · 폭행 피해</span>
+                  <span class="phone-rec-badge done">완료</span>
+                </div>
+                <div class="phone-rec-sub">어제 16:20 · 45분</div>
+                <span class="phone-rec-type">형사</span>
+              </div>
+
+              <div class="phone-rec-btn-wrap">
+                <div class="phone-rec-btn">
+                  <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Floating badges -->
+        <div class="hero-float hero-float-1">
+          <div class="waveform-bars"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          <strong>녹음중 · 14:32</strong>
+        </div>
+        <div class="hero-float hero-float-2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          <strong>음성 텍스트 변환</strong>
+          <span style="font-size:10px;color:var(--text-light);">전문 용어 자동 인식</span>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
-<div class="proof"><div class="container"><div class="proof-nums">
-  <div class="proof-num"><strong>24/7</strong><span>무중단 접수</span></div>
-  <div class="proof-num"><strong>5분</strong><span>리포트 전달</span></div>
-  <div class="proof-num"><strong>10분</strong><span>설치 완료</span></div>
-</div></div></div>
-
-<!-- ========== SVC 1: 웹챗 (긴 대화) ========== -->
-<section class="svc" id="svc-chat">
-  <div class="container"><div class="svc-inner">
-    <!-- LEFT: title + chat -->
-    <div>
-      <div class="section-label">Service 01 — Webchat</div>
-      <h2 class="section-title">AI 웹챗 접수</h2>
-      <p class="section-desc">웹사이트에 접수 링크 하나만 추가하세요. AI가 고객과 자연스럽게 대화하며 사건 내용을 파악하고 요건사실 기준으로 정리합니다.</p>
-      <div style="margin-top:20px;display:flex;gap:8px;flex-wrap:wrap;">
-        <span class="hub-tag">24시간 무중단</span>
-        <span class="hub-tag">링크 하나로 설치</span>
-        <span class="hub-tag">사건유형 자동 분류</span>
-      </div>
-      <div class="chat-preview" style="margin-top:24px;">
-        <div class="chat-header">
-          <div class="chat-avatar" style="background:#2d5016;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><line x1="12" y1="3" x2="12" y2="21"/><line x1="4" y1="7" x2="20" y2="7"/><path d="M4 7L6 14H10L8 7"/><path d="M20 7L18 14H14L16 7"/><line x1="9" y1="21" x2="15" y2="21"/></svg>
-          </div>
-          <div><div class="chat-header-text">김철수 변호사사무소</div><div class="chat-header-sub">웹챗 접수 · 대여금</div></div>
-        </div>
-        <div class="chat-bubbles">
-          <div class="b-ai"><div class="b-ai-avatar"><svg width="16" height="16" viewBox="0 0 120 120" fill="none"><rect width="120" height="120" rx="28" fill="#1a2b5a"/><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><circle cx="46" cy="50" r="6" fill="#fff"/><circle cx="74" cy="50" r="6" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="4" stroke-linecap="round" fill="none"/></svg></div><span>안녕하세요, 김철수 변호사사무소 AI 접수 도우미입니다. 어떤 일로 연락 주셨나요?</span></div>
-          <div class="b-user">지인한테 돈을 빌려줬는데 안 갚아서요.</div>
-          <div class="b-ai"><div class="b-ai-avatar"><svg width="16" height="16" viewBox="0 0 120 120" fill="none"><rect width="120" height="120" rx="28" fill="#1a2b5a"/><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><circle cx="46" cy="50" r="6" fill="#fff"/><circle cx="74" cy="50" r="6" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="4" stroke-linecap="round" fill="none"/></svg></div><span>많이 속상하시겠어요. 변호사님께 잘 전달드릴게요. 먼저 성함을 알려주시겠어요?</span></div>
-          <div class="b-user">홍길동이요.</div>
-          <div class="b-ai"><div class="b-ai-avatar"><svg width="16" height="16" viewBox="0 0 120 120" fill="none"><rect width="120" height="120" rx="28" fill="#1a2b5a"/><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><circle cx="46" cy="50" r="6" fill="#fff"/><circle cx="74" cy="50" r="6" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="4" stroke-linecap="round" fill="none"/></svg></div><span>감사합니다, 홍길동 님. 연락 가능한 전화번호와 이메일도 부탁드려요.</span></div>
-          <div class="b-user">010-1234-5678, hong@email.com이요.</div>
-          <div class="b-ai"><div class="b-ai-avatar"><svg width="16" height="16" viewBox="0 0 120 120" fill="none"><rect width="120" height="120" rx="28" fill="#1a2b5a"/><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><circle cx="46" cy="50" r="6" fill="#fff"/><circle cx="74" cy="50" r="6" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="4" stroke-linecap="round" fill="none"/></svg></div><span>확인했습니다. 이제 사건에 대해 좀 더 여쭤볼게요. 얼마를 빌려주셨나요?</span></div>
-          <div class="b-user">5천만 원이요. 2022년 1월에 계좌이체로 보냈어요.</div>
-          <div class="b-ai"><div class="b-ai-avatar"><svg width="16" height="16" viewBox="0 0 120 120" fill="none"><rect width="120" height="120" rx="28" fill="#1a2b5a"/><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><circle cx="46" cy="50" r="6" fill="#fff"/><circle cx="74" cy="50" r="6" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="4" stroke-linecap="round" fill="none"/></svg></div><span>차용증이나 갚겠다는 약속이 있었나요?</span></div>
-          <div class="b-user">네, 차용증 쓰고 2024년 1월까지 갚기로 했어요. 중간에 500만 원만 갚고 연락이 끊겼어요.</div>
-          <div class="b-ai"><div class="b-ai-avatar"><svg width="16" height="16" viewBox="0 0 120 120" fill="none"><rect width="120" height="120" rx="28" fill="#1a2b5a"/><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><circle cx="46" cy="50" r="6" fill="#fff"/><circle cx="74" cy="50" r="6" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="4" stroke-linecap="round" fill="none"/></svg></div><span>혹시 갚으라고 연락하신 기록이 있으신가요? 카톡이나 문자 등이요.</span></div>
-          <div class="b-user">카톡으로 보냈는데 읽고 답이 없어요. 캡처해뒀어요.</div>
-          <div class="b-ai"><div class="b-ai-avatar"><svg width="16" height="16" viewBox="0 0 120 120" fill="none"><rect width="120" height="120" rx="28" fill="#1a2b5a"/><path d="M42 30H34C31.24 30 29 32.24 29 35V85C29 87.76 31.24 90 34 90H42" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><path d="M78 30H86C88.76 30 91 32.24 91 35V85C91 87.76 88.76 90 86 90H78" stroke="#e8ecf4" stroke-width="7" stroke-linecap="round"/><circle cx="46" cy="50" r="6" fill="#fff"/><circle cx="74" cy="50" r="6" fill="#fff"/><path d="M46 66C50 73 70 73 74 66" stroke="#8aa4cc" stroke-width="4" stroke-linecap="round" fill="none"/></svg></div><span>접수가 완료되었습니다. 변호사님께 내용을 전달드릴게요. 상담 시 차용증 사본, 계좌이체 내역, 카톡 캡처를 준비해주시면 됩니다.</span></div>
-        </div>
-      </div>
-    </div>
-    <!-- RIGHT: report (제품 UI 스타일) -->
-    <div>
-      <div class="rpt">
-        <div class="rpt-header">
-          <span class="rpt-badge normal">민사</span>
-          <span class="rpt-title">대여금 사건</span>
-          <span style="margin-left:auto;font-size:11px;color:var(--text-light);">접수일 2026. 2. 25.</span>
-        </div>
-        <div class="rpt-body">
-          <!-- 고객 정보 -->
-          <div class="rpt-card">
-            <div class="rpt-lbl">고객 정보</div>
-            <div class="rpt-val">
-              <div style="font-weight:600;">홍길동</div>
-              <div><small>010-1234-5678</small></div>
-              <div><small>hong@email.com</small></div>
-            </div>
-          </div>
-          <!-- 요청 증빙자료 -->
-          <div class="rpt-card">
-            <div class="rpt-lbl">요청 증빙자료</div>
-            <div class="rpt-val">
-              <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><span style="width:5px;height:5px;border-radius:50%;background:var(--blue);flex-shrink:0;"></span> 차용증 사본</div>
-              <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><span style="width:5px;height:5px;border-radius:50%;background:var(--blue);flex-shrink:0;"></span> 계좌이체 내역</div>
-              <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><span style="width:5px;height:5px;border-radius:50%;background:var(--blue);flex-shrink:0;"></span> 변제 독촉 카톡 캡처</div>
-            </div>
-          </div>
-          <!-- 접수 요약 -->
-          <div class="rpt-card full">
-            <div class="rpt-lbl">접수 요약</div>
-            <div class="rpt-val">대여금 4,500만 원 미회수 — 차용증 있음, 변제기 경과, 채무자 연락 두절 상태</div>
-          </div>
-          <!-- 요건사실 체크리스트 -->
-          <div class="rpt-card full">
-            <div class="rpt-lbl">요건사실 체크리스트</div>
-            <div class="rpt-chk"><span class="rpt-chk-icon">✓</span><div><div style="font-weight:600;">금전교부 <span style="color:#16A34A;font-size:11px;">충족</span></div><div style="font-size:12px;color:var(--text-secondary);">5,000만 원 계좌이체 (2022. 1. 15.)</div></div></div>
-            <div class="rpt-chk"><span class="rpt-chk-icon">✓</span><div><div style="font-weight:600;">반환약정 <span style="color:#16A34A;font-size:11px;">충족</span></div><div style="font-size:12px;color:var(--text-secondary);">차용증 작성, 변제기 2024. 1. 15.</div></div></div>
-            <div class="rpt-chk"><span class="rpt-chk-icon">✓</span><div><div style="font-weight:600;">변제기 도래 <span style="color:#16A34A;font-size:11px;">충족</span></div><div style="font-size:12px;color:var(--text-secondary);">1년 초과 경과</div></div></div>
-            <div class="rpt-chk rpt-chk-miss"><span class="rpt-chk-icon">?</span><div><div style="font-weight:600;">이자 약정 <span style="color:#CA8A04;font-size:11px;">미확인</span></div><div style="font-size:12px;color:var(--text-secondary);">이자 청구 가능 여부 추가 확인 필요</div></div></div>
-          </div>
-          <!-- 사건 경위 -->
-          <div class="rpt-card full">
-            <div class="rpt-lbl">사건 경위</div>
-            <div class="rpt-timeline">
-              <div class="rpt-tl-item"><div class="rpt-tl-date">2022-01-15</div>홍○○은 김XX에게 5,000만 원을 계좌이체로 대여하였다</div>
-              <div class="rpt-tl-item"><div class="rpt-tl-date">2022-01-15</div>김XX는 차용증을 작성하여 교부하였다 (변제기 2024. 1. 15.)</div>
-              <div class="rpt-tl-item"><div class="rpt-tl-date">2023-06-15</div>김XX는 500만 원을 변제하였다</div>
-              <div class="rpt-tl-item"><div class="rpt-tl-date">2024-01-15</div>변제기 도래, 잔금 4,500만 원 미변제</div>
-              <div class="rpt-tl-item"><div class="rpt-tl-date">2024-03</div>홍○○은 카톡으로 변제를 최고하였으나 김XX 무응답</div>
-            </div>
-          </div>
-          <!-- 사건 검토 분석 -->
-          <div class="rpt-card full">
-            <div class="rpt-lbl">사건 검토 분석 <span style="color:var(--text-light);font-size:10px;font-weight:400;">참고용 추정</span></div>
-            <div class="rpt-analysis">
-              <div class="rpt-analysis-row"><span class="rpt-analysis-label" style="color:var(--blue);">소멸시효</span> 10년 (민법 162조 1항) · 만료 추정 2034.01.15 · 잔여 약 8년</div>
-              <div class="rpt-analysis-row"><span class="rpt-analysis-label" style="color:#16A34A;">증거 확보</span> 차용증 + 이체내역 확보 시 입증에 유리</div>
-              <div class="rpt-analysis-row"><span class="rpt-analysis-label" style="color:#CA8A04;">추가 확인</span> 이자 약정 여부 · 채무자 연락 가능 여부 · 재산 상태</div>
-              <div class="rpt-analysis-row"><span class="rpt-analysis-label" style="color:var(--text-secondary);">다음 액션</span> 이체내역 확보 → 채무자 주소 확인 → 지급명령 vs 소송 검토</div>
-            </div>
-          </div>
-        </div>
-        <div class="rpt-footer">※ 본 리포트는 접수 단계의 참고 자료이며, 법률 자문을 대체하지 않습니다.</div>
-      </div>
-    </div>
-  </div></div>
-</section>
-
-<!-- ========== SVC 2: 부재중 전화 ========== -->
-<section class="svc" id="svc-phone">
-  <div class="container"><div class="svc-inner">
-    <div>
-      <div class="section-label">Service 02 — AI Phone</div>
-      <h2 class="section-title">부재중 전화 AI 접수</h2>
-      <p class="section-desc">재판 중, 상담 중, 퇴근 후 — 변호사가 전화를 받지 못하면 AI가 대신 접수합니다. 사건 내용을 파악하고 정리된 리포트를 즉시 전달합니다.</p>
-      <div style="margin-top:20px;display:flex;gap:8px;flex-wrap:wrap;">
-        <span class="hub-tag">부재중 · 통화중 · 퇴근 후</span>
-        <span class="hub-tag">AI 음성 접수</span>
-        <span class="hub-tag">리포트 즉시 전달</span>
-      </div>
-    </div>
-    <div class="phone-flow">
-      <div style="font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',monospace;margin-bottom:16px;">부재중 전화 처리 흐름</div>
-      <div class="pf-step"><div class="pf-num">1</div><div><h4>고객이 사무소에 전화</h4><p>부재중 · 통화중 · 업무시간 외 — 자동으로 AI 접수 전환</p></div></div>
-      <div class="pf-step"><div class="pf-num">2</div><div><h4>AI가 접수 시작</h4><p>"안녕하세요, 김철수 변호사사무소입니다. 문의 내용을 미리 접수해드릴게요."</p></div></div>
-      <div class="pf-step"><div class="pf-num">3</div><div><h4>사건 정보 수집</h4><p>사건유형 파악 · 긴급도 판단 · 연락처 확인 · 핵심 사실관계 질문</p></div></div>
-      <div class="pf-step"><div class="pf-num">4</div><div><h4>요약 리포트 전달</h4><p>요건사실 기준으로 정리된 접수 요약이 이메일/푸시로 즉시 전달</p></div></div>
-      <!-- 음성 데모 -->
-      <div style="margin-top:20px;border-radius:12px;overflow:hidden;position:relative;cursor:pointer;" id="demo-trigger" onclick="document.getElementById('demo-script').style.display=document.getElementById('demo-script').style.display==='none'?'block':'none'">
-        <img src="demo-phone.png" alt="AI 전화 접수 데모" style="width:100%;display:block;border-radius:12px;">
-        <div style="position:absolute;inset:0;background:rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;transition:background .2s;" onmouseover="this.style.background='rgba(0,0,0,0.35)'" onmouseout="this.style.background='rgba(0,0,0,0.25)'">
-          <div style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.95);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,0.15);">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="var(--navy)"><polygon points="8,5 20,12 8,19"/></svg>
-          </div>
-        </div>
-        <div style="position:absolute;bottom:12px;left:12px;background:rgba(0,0,0,0.6);color:#fff;font-size:11px;padding:4px 10px;border-radius:6px;font-family:'JetBrains Mono',monospace;">AI 통화 데모 듣기</div>
-      </div>
-      <!-- 통화 스크립트 (클릭 시 토글) -->
-      <div id="demo-script" style="display:none;margin-top:14px;background:var(--bg-alt);border:1px solid var(--border);border-radius:12px;padding:20px;font-size:12.5px;line-height:1.9;color:var(--text-secondary);">
-        <div style="font-size:11px;color:var(--text-light);font-family:'JetBrains Mono',monospace;margin-bottom:12px;">통화 스크립트 · 2분 34초</div>
-        <p style="margin-bottom:8px;"><span style="color:var(--navy);font-weight:600;font-size:11px;">AI</span> 안녕하세요, 김철수 변호사사무소입니다. 변호사님이 자리를 비우셔서 제가 문의 내용을 미리 접수해드릴게요. 어떤 일로 연락 주셨나요?</p>
-        <p style="margin-bottom:8px;"><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 중고거래에서 사기를 당했어요. 300만 원 보냈는데 물건도 안 보내고 연락이 끊겼어요.</p>
-        <p style="margin-bottom:8px;"><span style="color:var(--navy);font-weight:600;font-size:11px;">AI</span> 많이 당황스러우셨겠어요. 변호사님께 잘 전달드릴게요. 먼저 성함을 알려주시겠어요?</p>
-        <p style="margin-bottom:8px;"><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 박지훈이요.</p>
-        <p style="margin-bottom:8px;"><span style="color:var(--navy);font-weight:600;font-size:11px;">AI</span> 감사합니다. 연락 가능한 전화번호도 부탁드려요.</p>
-        <p style="margin-bottom:8px;"><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 010-5562-8833이요.</p>
-        <p style="margin-bottom:8px;"><span style="color:var(--navy);font-weight:600;font-size:11px;">AI</span> 확인했습니다. 거래가 언제, 어디서 이루어졌나요?</p>
-        <p style="margin-bottom:8px;"><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 1월 20일에 당근마켓에서요. 명품가방 판매글 보고 연락했는데, 계좌이체 하니까 바로 잠수 탔어요.</p>
-        <p style="margin-bottom:8px;"><span style="color:var(--navy);font-weight:600;font-size:11px;">AI</span> 송금 내역이나 대화 캡처를 갖고 계신가요?</p>
-        <p style="margin-bottom:8px;"><span style="color:var(--blue);font-weight:600;font-size:11px;">고객</span> 네, 송금 내역이랑 당근 채팅 캡처 다 있어요.</p>
-        <p><span style="color:var(--navy);font-weight:600;font-size:11px;">AI</span> 접수가 완료되었습니다. 변호사님께 즉시 전달드릴게요. 송금 내역, 판매 게시글 캡처, 대화 기록 캡처를 준비해주시면 상담이 원활합니다.</p>
-      </div>
-    </div>
-  </div></div>
-  <p style="text-align:center;font-size:11px;color:var(--text-light);margin-top:24px;padding-bottom:8px;">※ CaseFront는 법률 자문을 제공하지 않으며, 상담 접수 및 요약 전달을 지원합니다.</p>
-</section>
-<section class="svc" style="background:var(--bg-alt);">
+<!-- ===== PROBLEM ===== -->
+<section class="problem reveal">
   <div class="container">
-    <div class="section-label" style="text-align:center;">Why CaseFront</div>
-    <h2 class="section-title" style="text-align:center;">부재중 1건 = 수임 1건 손실</h2>
-    <p style="text-align:center;font-size:15px;color:var(--text-secondary);max-width:520px;margin:0 auto 40px;line-height:1.8;">광고로 유입된 고객일수록 콜백이 늦으면 이탈합니다. CaseFront는 접수 내용을 즉시 전달해 빠른 콜백을 만듭니다.</p>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:720px;margin:0 auto;">
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px 20px;text-align:center;">
-        <div style="font-family:'Source Serif 4',serif;font-size:28px;font-weight:700;color:var(--navy);margin-bottom:8px;">긴급 표시</div>
-        <p style="font-size:13px;color:var(--text-secondary);line-height:1.7;">구속/체포, 시한 임박 건은 긴급 표시로 콜백 우선순위 결정</p>
+    <div class="section-label" style="text-align:center;">Problem</div>
+    <h2 class="section-title" style="text-align:center;">매일 하는 상담 정리, 불편하지 않으셨나요?</h2>
+    <div class="problem-grid">
+      <div class="problem-card">
+        <div class="problem-icon" style="background:#FEF2F2;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+        </div>
+        <h4>수기 정리</h4>
+        <p>상담 끝나고 기억에 의존해서 메모...<br>놓친 내용이 나중에 문제됩니다.</p>
       </div>
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px 20px;text-align:center;">
-        <div style="font-family:'Source Serif 4',serif;font-size:28px;font-weight:700;color:var(--navy);margin-bottom:8px;">연락처 확보</div>
-        <p style="font-size:13px;color:var(--text-secondary);line-height:1.7;">AI가 이름, 전화번호, 이메일을 빠짐없이 수집하고 재확인</p>
+      <div class="problem-card">
+        <div class="problem-icon" style="background:#FEF3C7;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18.01"/></svg>
+        </div>
+        <h4>통화 요약 앱</h4>
+        <p>월 30건 제한, 통신사 종속, 선택 요약 불가.<br>법률 용어는 제대로 못 잡습니다.</p>
       </div>
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px 20px;text-align:center;">
-        <div style="font-family:'Source Serif 4',serif;font-size:28px;font-weight:700;color:var(--navy);margin-bottom:8px;">즉시 전달</div>
-        <p style="font-size:13px;color:var(--text-secondary);line-height:1.7;">접수 완료 즉시 이메일 알림. 리포트를 보고 바로 콜백</p>
+      <div class="problem-card">
+        <div class="problem-icon" style="background:var(--blue-bg);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+        </div>
+        <h4>녹음 파일 재청취</h4>
+        <p>확인하고 싶은 부분 찾으려고 처음부터 다시 듣기...<br>30분 상담이면 30분을 또 써야 합니다.</p>
       </div>
+    </div>
+    <div style="text-align:center;margin-top:36px;">
+      <p class="problem-punchline">CaseFront는 녹음을 <span>전체 스크립트 + 리포트</span>로 만들어 드립니다.</p>
+      <p style="font-family:'Source Serif 4',serif;font-size:24px;font-weight:700;color:var(--navy);margin-top:12px;">상담이 끝나는 순간, 리포트가 완성됩니다.</p>
     </div>
   </div>
 </section>
 
-<!-- ========== HOW ========== -->
-<section class="how" id="how">
+<!-- ===== HOW IT WORKS ===== -->
+<section class="how reveal" id="how">
   <div class="container">
     <div class="section-label">How it works</div>
-    <h2 class="section-title">10분이면 시작합니다</h2>
-    <div class="steps">
-      <div class="step"><div class="step-num">01</div><h4>가입</h4><p>사무소 정보와 취급 분야 입력</p></div>
-      <div class="step"><div class="step-num">02</div><h4>채널 연결</h4><p>웹챗 링크 설치 + 부재중 전화 착신전환 (2분 가이드 제공)</p></div>
-      <div class="step"><div class="step-num">03</div><h4>AI가 접수</h4><p>고객이 연락하면 AI가 사건 정보 수집</p></div>
-      <div class="step"><div class="step-num">04</div><h4>리포트 수신</h4><p>요건사실 + 소멸시효 + 다음 액션이 포함된 수임 검토 리포트 전달</p></div>
+    <h2 class="section-title">녹음 하나로, 세 가지를 받습니다.</h2>
+    <p class="section-desc">녹음 원본, 전체 스크립트, AI 사건 리포트. 한 번에.</p>
+    <div class="flow-grid">
+      <div class="flow-card">
+        <div class="flow-num flow-num-1">①</div>
+        <h4>녹음 원본</h4>
+        <p>앱에서 버튼 한 번으로 녹음.<br>이미 있는 파일도 업로드만 하면 동일하게 분석됩니다.</p>
+        <div class="flow-detail">
+          <strong>실시간 녹음</strong><br>
+          앱에서 바로 녹음 시작<br>
+          <strong>기존 파일 업로드</strong><br>
+          mp3 · m4a · wav — 이전 상담 녹음도 OK
+        </div>
+      </div>
+      <div class="flow-card">
+        <div class="flow-num flow-num-2">②</div>
+        <h4>전체 스크립트</h4>
+        <p>녹음 전체를 텍스트로 변환.<br>타임스탬프로 원하는 구간을 바로 찾습니다.</p>
+        <div class="flow-detail">
+          <strong>법률 특화 음성 인식</strong><br>
+          일실수입 · 전치 3주 · 비보호 좌회전<br>
+          <strong>타임스탬프</strong><br>
+          텍스트 클릭 → 해당 녹음 구간 재생
+        </div>
+      </div>
+      <div class="flow-card">
+        <div class="flow-num flow-num-3">③</div>
+        <h4>AI 사건 리포트</h4>
+        <p>사실관계, 요건사실, 핵심 쟁점, 증거 현황, 다음 단계까지<br>바로 쓸 수 있는 리포트.</p>
+        <div class="flow-detail">
+          <strong>리포트 섹션</strong><br>
+          사건 개요 · 사실관계 타임라인<br>
+          요건사실 체크리스트 · 핵심 쟁점<br>
+          증거 현황 · 다음 단계
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ========== PRICING ========== -->
-<section class="pricing" id="pricing">
+<!-- ===== DASHBOARD ===== -->
+<section class="dashboard reveal" style="padding:80px 0;border-top:1px solid var(--border);background:var(--bg-alt);">
+  <div class="container">
+    <div class="section-label" style="text-align:center;">Dashboard</div>
+    <h2 class="section-title" style="text-align:center;margin-bottom:14px;">모든 상담을 한눈에 관리합니다</h2>
+    <p style="text-align:center;font-size:15px;color:var(--text-secondary);max-width:480px;margin:0 auto 40px;">앱에서 녹음하면 대시보드에 자동 정리. 사건별로 녹음 원본, 스크립트, 리포트를 바로 확인할 수 있습니다.</p>
+    
+    <!-- Dashboard mockup -->
+    <div style="max-width:860px;margin:0 auto;background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.06);display:grid;grid-template-columns:180px 1fr;">
+      <!-- Sidebar -->
+      <div style="background:var(--surface-dark);padding:20px 14px;display:flex;flex-direction:column;gap:4px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;">
+          <svg width="14" height="16" viewBox="0 0 44 48" fill="none"><path d="M13 4H7C5.34 4 4 5.34 4 7V41C4 42.66 5.34 44 7 44H13" stroke="rgba(255,255,255,0.5)" stroke-width="3" stroke-linecap="round"/><path d="M31 4H37C38.66 4 40 5.34 40 7V41C40 42.66 38.66 44 37 44H31" stroke="rgba(255,255,255,0.5)" stroke-width="3" stroke-linecap="round"/><line x1="14" y1="17" x2="30" y2="17" stroke="rgba(255,255,255,0.5)" stroke-width="2" stroke-linecap="round"/><line x1="14" y1="24" x2="26" y2="24" stroke="rgba(107,148,245,0.5)" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <span style="font-size:13px;font-weight:600;color:#fff;">CaseFront</span>
+        </div>
+        <div style="padding:8px 10px;border-radius:8px;background:rgba(74,122,239,0.15);font-size:12px;color:var(--blue-light);display:flex;align-items:center;gap:6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+          녹음 상담
+        </div>
+        <div style="padding:8px 10px;border-radius:8px;font-size:12px;color:rgba(255,255,255,0.35);display:flex;align-items:center;gap:6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          사건 목록
+        </div>
+        <div style="padding:8px 10px;border-radius:8px;font-size:12px;color:rgba(255,255,255,0.35);display:flex;align-items:center;gap:6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          고객 목록
+        </div>
+        <div style="padding:8px 10px;border-radius:8px;font-size:12px;color:rgba(255,255,255,0.35);display:flex;align-items:center;gap:6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          사무소 설정
+        </div>
+      </div>
+      <!-- Main content -->
+      <div style="padding:20px 24px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <div>
+            <div style="font-family:'Source Serif 4',serif;font-size:18px;font-weight:700;color:var(--navy);">녹음 상담</div>
+            <div style="font-size:11px;color:var(--text-light);">총 8건 · <span style="color:var(--blue);">분석중 1건</span></div>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <span style="font-size:10px;padding:4px 12px;border-radius:6px;background:var(--navy);color:#fff;font-weight:500;">전체 8</span>
+            <span style="font-size:10px;padding:4px 12px;border-radius:6px;border:1px solid var(--border);color:var(--text-light);">완료 7</span>
+            <span style="font-size:10px;padding:4px 12px;border-radius:6px;border:1px solid var(--border);color:var(--text-light);">분석중 1</span>
+          </div>
+        </div>
+        <!-- Table -->
+        <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+          <div style="display:grid;grid-template-columns:1.5fr 1.2fr 1fr 0.8fr 0.8fr;padding:10px 14px;background:var(--bg-alt);font-size:10px;color:var(--text-light);font-weight:500;border-bottom:1px solid var(--border);">
+            <span>고객명</span><span>사건 요약</span><span>유형</span><span>상태</span><span>접수</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1.5fr 1.2fr 1fr 0.8fr 0.8fr;padding:10px 14px;border-bottom:1px solid var(--border);font-size:12px;align-items:center;">
+            <span style="font-weight:600;color:var(--text);">박○○</span>
+            <span style="color:var(--text-secondary);">재산분할 청구</span>
+            <span style="font-size:11px;color:var(--text-secondary);">민사</span>
+            <span style="font-size:11px;color:#16A34A;">완료</span>
+            <span style="color:var(--text-light);font-size:11px;">오늘</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1.5fr 1.2fr 1fr 0.8fr 0.8fr;padding:10px 14px;border-bottom:1px solid var(--border);font-size:12px;align-items:center;background:rgba(74,122,239,0.03);border-left:2px solid var(--blue);">
+            <span style="font-weight:600;color:var(--navy);">김○○</span>
+            <span style="color:var(--text-secondary);">폭행 피해</span>
+            <span style="font-size:11px;color:var(--text-secondary);">형사</span>
+            <span style="font-size:11px;color:#16A34A;">완료</span>
+            <span style="color:var(--text-light);font-size:11px;">오늘</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1.5fr 1.2fr 1fr 0.8fr 0.8fr;padding:10px 14px;border-bottom:1px solid var(--border);font-size:12px;align-items:center;">
+            <span style="font-weight:600;color:var(--text);">이○○</span>
+            <span style="color:var(--text-secondary);">교통사고 합의</span>
+            <span style="font-size:11px;color:var(--text-secondary);">민사</span>
+            <span style="font-size:11px;color:#D97706;">분석중</span>
+            <span style="color:var(--text-light);font-size:11px;">어제</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1.5fr 1.2fr 1fr 0.8fr 0.8fr;padding:10px 14px;font-size:12px;align-items:center;">
+            <span style="font-weight:600;color:var(--text);">홍○○</span>
+            <span style="color:var(--text-secondary);">대여금 반환</span>
+            <span style="font-size:11px;color:var(--text-secondary);">민사</span>
+            <span style="font-size:11px;color:#16A34A;">완료</span>
+            <span style="color:var(--text-light);font-size:11px;">3일 전</span>
+          </div>
+        </div>
+        <!-- Detail panel -->
+        <div style="margin-top:14px;border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+          <div style="display:flex;border-bottom:1px solid var(--border);background:var(--bg-alt);">
+            <div style="padding:9px 16px;font-size:11px;font-weight:600;color:var(--blue);border-bottom:2px solid var(--blue);">리포트</div>
+            <div style="padding:9px 16px;font-size:11px;color:var(--text-light);cursor:pointer;">스크립트</div>
+            <div style="padding:9px 16px;font-size:11px;color:var(--text-light);cursor:pointer;">녹음 원본</div>
+          </div>
+          <div style="padding:14px;font-size:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div style="background:var(--bg-alt);border:1px solid var(--border);border-radius:8px;padding:12px;">
+              <div style="font-size:10px;color:var(--blue);font-weight:500;margin-bottom:6px;">사건 개요</div>
+              <div style="color:var(--text-secondary);line-height:1.7;">직장 내 동료에 의한 폭행 피해 사건. 회식 후 동료에게 일방적으로 폭행당함.</div>
+            </div>
+            <div style="background:var(--bg-alt);border:1px solid var(--border);border-radius:8px;padding:12px;">
+              <div style="font-size:10px;color:var(--blue);font-weight:500;margin-bottom:6px;">요건사실</div>
+              <div style="font-size:12px;color:var(--text-secondary);margin-bottom:3px;">폭행 행위 — <span style="color:#16A34A;">충족</span></div>
+              <div style="font-size:12px;color:var(--text-secondary);margin-bottom:3px;">상해 결과 — <span style="color:#16A34A;">충족</span></div>
+              <div style="font-size:12px;color:var(--text-secondary);">피해자 과실 — <span style="color:#D97706;">미확인</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p style="text-align:center;font-size:13px;color:var(--text-light);margin-top:20px;">앱에서 녹음 · PC에서 대시보드 확인 — 자동 동기화</p>
+  </div>
+<section class="demo reveal" id="demo">
+  <div class="container">
+    <div class="section-label">Demo</div>
+    <h2 class="section-title">실제 상담 녹음으로 만든 AI 리포트</h2>
+    <p class="section-desc">아래는 모의 상담을 녹음하여 생성한 실제 리포트입니다.</p>
+    <div class="demo-tabs">
+      <button class="demo-tab active" onclick="switchDemo('assault')">폭행 사건</button>
+      <button class="demo-tab" onclick="switchDemo('traffic')">교통사고</button>
+    </div>
+
+    <!-- 폭행 사건 리포트 -->
+    <div id="demo-assault" class="rpt">
+      <div class="rpt-watermark">SAMPLE</div>
+      <div class="rpt-header">
+        <span class="rpt-badge criminal">형사</span>
+        <span class="rpt-title">폭행 피해 — AI 사건 리포트</span>
+      </div>
+      <div class="rpt-body">
+        <div class="rpt-card">
+          <div class="rpt-lbl">사건 개요</div>
+          <div class="rpt-val">
+            직장 내 동료에 의한 폭행 피해 사건.<br>
+            피해자는 2026. 2. 15. 회식 후 동료 B에게 일방적으로 폭행당함.<br>
+            <small>상담일: 2026.02.20 · 녹음시간: 28분</small>
+          </div>
+        </div>
+        <div class="rpt-card">
+          <div class="rpt-lbl">의뢰인 정보</div>
+          <div class="rpt-val">
+            성명: 김○○ (30대 남성)<br>
+            연락처: 010-XXXX-XXXX<br>
+            <small>이메일: kim○○@naver.com</small>
+          </div>
+        </div>
+        <div class="rpt-card full">
+          <div class="rpt-lbl">사실관계 타임라인</div>
+          <div class="rpt-timeline">
+            <div class="rpt-tl-item"><div class="rpt-tl-date">2026-02-15 21:30</div>회사 회식 2차 술집에서 동료 B와 업무 관련 말다툼 발생</div>
+            <div class="rpt-tl-item"><div class="rpt-tl-date">2026-02-15 21:45</div>동료 B가 일방적으로 김○○의 안면부를 주먹으로 2회 가격</div>
+            <div class="rpt-tl-item"><div class="rpt-tl-date">2026-02-15 22:00</div>주변 동료 C, D가 말리고 김○○ 귀가</div>
+            <div class="rpt-tl-item"><div class="rpt-tl-date">2026-02-16</div>병원 방문, 전치 2주 진단서 발급</div>
+            <div class="rpt-tl-item"><div class="rpt-tl-date">2026-02-18</div>경찰서 방문하여 피해 사실 신고 접수</div>
+          </div>
+        </div>
+        <div class="rpt-card">
+          <div class="rpt-lbl">핵심 쟁점</div>
+          <div class="rpt-val">
+            <div class="rpt-chk"><span class="rpt-chk-icon"></span><div><span style="font-weight:600;">폭행 사실 입증</span><br><small>목격자 2명 + CCTV 가능성</small></div></div>
+            <div class="rpt-chk"><span class="rpt-chk-icon"></span><div><span style="font-weight:600;">상해 정도</span><br><small>전치 2주 진단서 확보</small></div></div>
+          </div>
+        </div>
+        <div class="rpt-card">
+          <div class="rpt-lbl">증거 현황</div>
+          <div class="rpt-val">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></span> <a href="#" style="color:var(--text);text-decoration:underline;text-underline-offset:2px;">전치 2주 진단서</a></div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></span> <a href="#" style="color:var(--text);text-decoration:underline;text-underline-offset:2px;">목격자 진술 (동료 C, D)</a></div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--amber);flex-shrink:0;"></span> 술집 CCTV <small style="color:var(--amber);">(확인 필요)</small></div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></span> <a href="#" style="color:var(--text);text-decoration:underline;text-underline-offset:2px;">경찰 신고 접수 확인서</a></div>
+          </div>
+        </div>
+        <div class="rpt-card full">
+          <div class="rpt-lbl">요건사실 체크리스트</div>
+          <div class="rpt-chk"><span class="rpt-chk-icon"></span><div><div style="font-weight:600;">폭행 행위 <span style="color:#16A34A;font-size:11px;">충족</span></div><div style="font-size:12px;color:var(--text-secondary);">안면부 주먹 가격 2회 (형법 제260조)</div></div></div>
+          <div class="rpt-chk"><span class="rpt-chk-icon"></span><div><div style="font-weight:600;">상해 결과 <span style="color:#16A34A;font-size:11px;">충족</span></div><div style="font-size:12px;color:var(--text-secondary);">전치 2주 진단서 확보 (형법 제257조)</div></div></div>
+          <div class="rpt-chk"><span class="rpt-chk-icon"></span><div><div style="font-weight:600;">고의성 <span style="color:#16A34A;font-size:11px;">충족</span></div><div style="font-size:12px;color:var(--text-secondary);">일방적 가격, 우발적 정당방위 주장 어려움</div></div></div>
+          <div class="rpt-chk"><span class="rpt-chk-icon" style="background:#D97706;"></span><div><div style="font-weight:600;">피해자 과실 여부 <span style="color:#CA8A04;font-size:11px;">미확인</span></div><div style="font-size:12px;color:var(--text-secondary);">말다툼 중 도발 행위 여부 추가 확인 필요</div></div></div>
+        </div>
+        <div class="rpt-card full">
+          <div class="rpt-lbl">다음 단계</div>
+          <div class="rpt-action"><span class="rpt-action-pri high"></span><div><span style="font-weight:600;">술집 CCTV 확보</span><br><small>보존기간 경과 전 영상 확보 요청 (1주 내)</small></div></div>
+          <div class="rpt-action"><span class="rpt-action-pri high"></span><div><span style="font-weight:600;">목격자 진술서 확보</span><br><small>동료 C, D 진술서 작성 요청</small></div></div>
+          <div class="rpt-action"><span class="rpt-action-pri medium"></span><div><span style="font-weight:600;">합의 vs 형사고소 검토</span><br><small>피해자 의향 확인 후 방향 결정</small></div></div>
+          <div class="rpt-action"><span class="rpt-action-pri low"></span><div><span style="font-weight:600;">산재 적용 가능성 검토</span><br><small>회식 중 발생 → 업무관련성 판단 필요</small></div></div>
+        </div>
+      </div>
+      <div class="rpt-footer">
+        <span>※ 본 리포트는 AI가 생성한 참고 자료이며, 법률 자문을 대체하지 않습니다.</span>
+      </div>
+    </div>
+
+    <!-- 교통사고 리포트 -->
+    <div id="demo-traffic" class="rpt" style="display:none;">
+      <div class="rpt-watermark">SAMPLE</div>
+      <div class="rpt-header">
+        <span class="rpt-badge civil">민사</span>
+        <span class="rpt-title">교통사고 합의 — AI 사건 리포트</span>
+      </div>
+      <div class="rpt-body">
+        <div class="rpt-card">
+          <div class="rpt-lbl">사건 개요</div>
+          <div class="rpt-val">
+            비보호 좌회전 교차로에서 발생한 차량 충돌 사고.<br>
+            의뢰인 차량이 직진 중 상대방 좌회전 차량과 충돌.<br>
+            <small>상담일: 2026.02.25 · 녹음시간: 18분</small>
+          </div>
+        </div>
+        <div class="rpt-card">
+          <div class="rpt-lbl">의뢰인 정보</div>
+          <div class="rpt-val">
+            성명: 박○○ (40대 여성)<br>
+            연락처: 010-XXXX-XXXX<br>
+            <small>이메일: park○○@gmail.com</small>
+          </div>
+        </div>
+        <div class="rpt-card full">
+          <div class="rpt-lbl">사실관계 타임라인</div>
+          <div class="rpt-timeline">
+            <div class="rpt-tl-item"><div class="rpt-tl-date">2026-02-22 08:40</div>출근길, 강남대로 교차로에서 직진 중</div>
+            <div class="rpt-tl-item"><div class="rpt-tl-date">2026-02-22 08:40</div>반대편 차량이 비보호 좌회전하며 의뢰인 차량 운전석 측면 충돌</div>
+            <div class="rpt-tl-item"><div class="rpt-tl-date">2026-02-22 09:15</div>119 신고, 응급실 이송</div>
+            <div class="rpt-tl-item"><div class="rpt-tl-date">2026-02-22</div>경추 염좌 전치 3주 진단</div>
+            <div class="rpt-tl-item"><div class="rpt-tl-date">2026-02-24</div>상대방 보험사에서 합의 제안 (300만원)</div>
+          </div>
+        </div>
+        <div class="rpt-card">
+          <div class="rpt-lbl">핵심 쟁점</div>
+          <div class="rpt-val">
+            <div class="rpt-chk"><span class="rpt-chk-icon"></span><div><span style="font-weight:600;">과실 비율</span><br><small>비보호 좌회전 기본 과실: 상대방 70~80%</small></div></div>
+            <div class="rpt-chk"><span class="rpt-chk-icon"></span><div><span style="font-weight:600;">일실수입 산정</span><br><small>3주 치료 + 향후 통원치료 기간 산정</small></div></div>
+          </div>
+        </div>
+        <div class="rpt-card">
+          <div class="rpt-lbl">증거 현황</div>
+          <div class="rpt-val">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></span> <a href="#" style="color:var(--text);text-decoration:underline;text-underline-offset:2px;">블랙박스 영상 (의뢰인 차량)</a></div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></span> <a href="#" style="color:var(--text);text-decoration:underline;text-underline-offset:2px;">전치 3주 진단서</a></div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></span> <a href="#" style="color:var(--text);text-decoration:underline;text-underline-offset:2px;">교통사고 사실확인원</a></div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--amber);flex-shrink:0;"></span> 상대방 블랙박스 <small style="color:var(--amber);">(미확보)</small></div>
+          </div>
+        </div>
+        <div class="rpt-card full">
+          <div class="rpt-lbl">요건사실 체크리스트</div>
+          <div class="rpt-chk"><span class="rpt-chk-icon"></span><div><div style="font-weight:600;">사고 발생 사실 <span style="color:#16A34A;font-size:11px;">충족</span></div><div style="font-size:12px;color:var(--text-secondary);">교통사고 사실확인원 + 블랙박스 영상 확보</div></div></div>
+          <div class="rpt-chk"><span class="rpt-chk-icon"></span><div><div style="font-weight:600;">상대방 과실 <span style="color:#16A34A;font-size:11px;">충족</span></div><div style="font-size:12px;color:var(--text-secondary);">비보호 좌회전 신호 위반 (도로교통법 제25조)</div></div></div>
+          <div class="rpt-chk"><span class="rpt-chk-icon"></span><div><div style="font-weight:600;">상해 발생 <span style="color:#16A34A;font-size:11px;">충족</span></div><div style="font-size:12px;color:var(--text-secondary);">경추 염좌 전치 3주 진단서 발급</div></div></div>
+          <div class="rpt-chk"><span class="rpt-chk-icon" style="background:#D97706;"></span><div><div style="font-weight:600;">후유장해 여부 <span style="color:#CA8A04;font-size:11px;">미확인</span></div><div style="font-size:12px;color:var(--text-secondary);">치료 종결 후 후유장해 진단 필요</div></div></div>
+        </div>
+        <div class="rpt-card full">
+          <div class="rpt-lbl">다음 단계</div>
+          <div class="rpt-action"><span class="rpt-action-pri high"></span><div><span style="font-weight:600;">보험사 합의 제안 거절</span><br><small>300만원은 전치 3주 기준 현저히 부족</small></div></div>
+          <div class="rpt-action"><span class="rpt-action-pri high"></span><div><span style="font-weight:600;">적정 합의금 산정</span><br><small>일실수입 + 위자료 + 치료비 기준 재산정</small></div></div>
+          <div class="rpt-action"><span class="rpt-action-pri medium"></span><div><span style="font-weight:600;">통원치료 완료 후 후유장해 평가</span><br><small>치료 종결 후 최종 합의 진행</small></div></div>
+        </div>
+      </div>
+      <div class="rpt-footer">
+        <span>※ 본 리포트는 AI가 생성한 참고 자료이며, 법률 자문을 대체하지 않습니다.</span>
+      </div>
+    </div>
+
+    <p class="demo-cta">가입하면 내 상담으로 리포트를 만들어 보세요. <a href="https://my.casefront.app/signup">무료체험 시작 →</a></p>
+  </div>
+</section>
+
+<!-- ===== FEATURES ===== -->
+<section class="features reveal" id="features">
+  <div class="container">
+    <div class="section-label">Features</div>
+    <h2 class="section-title">변호사를 위해 만들었습니다</h2>
+    <div class="feat-grid">
+      <div class="feat-card">
+        <div class="feat-icon" style="background:rgba(224,112,64,0.08);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E07040" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+        </div>
+        <h4>원터치 녹음</h4>
+        <p>앱 열고 버튼 한 번. 백그라운드 녹음 지원.<br>상담 중 폰을 꺼내지 않아도 됩니다.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon" style="background:var(--blue-bg);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <h4>타임스탬프 텍스트</h4>
+        <p>"이 부분 뭐라고 했지?" — 시간대별로<br>텍스트를 보고 바로 해당 녹음 구간 재생.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon" style="background:rgba(34,197,94,0.08);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+        </div>
+        <h4>법률 특화 음성 인식</h4>
+        <p>일실수입, 전치 3주, 비보호 좌회전 —<br>법률 전문 용어를 정확하게 인식합니다.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon" style="background:#FEF2F2;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="13" y2="13"/></svg>
+        </div>
+        <h4>AI 사건 리포트</h4>
+        <p>사실관계, 요건사실, 핵심 쟁점, 증거 현황, 다음 단계.<br>사건 유형을 자동 분류하고 구조화합니다.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon" style="background:#F0FDF4;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <h4>데이터 보안</h4>
+        <p>녹음 파일은 암호화 저장, 사무소별 완전 격리.<br>변호사만 접근 가능합니다.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon" style="background:#EFF6FF;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+        </div>
+        <h4>어디서든 확인</h4>
+        <p>앱에서 녹음하고, 사무실 PC에서 웹으로 확인.<br>앱과 웹 대시보드가 자동 동기화됩니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PRICING ===== -->
+<section class="pricing reveal" id="pricing">
   <div class="container">
     <div class="section-label">Pricing</div>
-    <div class="pricing-grid" style="margin-top:20px;">
+    <h2 class="section-title">7일 무료체험으로 시작하세요</h2>
+    <p class="section-desc">녹음과 저장은 무제한. 리포트 생성에만 분 제한이 적용됩니다.</p>
+    <div class="pricing-grid">
       <div class="price-card">
-        <div class="price-name">Basic</div>
-        <div class="price-amount">₩99,000<span>/월</span></div>
+        <div class="price-name">Starter</div>
+        <div class="price-amount">₩59,000<span>/월</span></div>
+        <div class="price-minutes">월 500분</div>
         <ul class="price-features">
-          <li>AI 웹챗 접수 (24시간)</li>
-          <li>주요 사건유형 자동 분류</li>
-          <li>요건사실 체크리스트</li>
-          <li>소멸시효 참고 계산</li>
-          <li>증거 확보 상태 분석</li>
-          <li>다음 액션 제안</li>
-          <li>재방문 고객 자동 인식</li>
-          <li>이메일 알림 + 대시보드</li>
+          <li>AI 사건 리포트 생성</li>
+          <li>타임스탬프 텍스트</li>
+          <li>녹음 파일 90일 보관</li>
+          <li>음성 텍스트 영구 보관</li>
+          <li>리포트 영구 보관</li>
+          <li>웹 대시보드</li>
         </ul>
-        <a href="https://my.casefront.app/signup" class="price-btn" style="text-decoration:none;text-align:center;">시작하기</a>
+        <a href="https://my.casefront.app/signup" class="price-btn">무료체험 시작</a>
       </div>
       <div class="price-card featured">
-        <div class="price-name">Pro</div>
-        <div class="price-amount">₩199,000<span>/월</span></div>
+        <div class="price-name">Standard</div>
+        <div class="price-amount">₩99,000<span>/월</span></div>
+        <div class="price-minutes">월 2,000분</div>
         <ul class="price-features">
-          <li>Basic 전부 포함</li>
-          <li>부재중 전화 AI 접수 (Early Access)</li>
-          <li>착신전환 설정 가이드 제공</li>
-          <li>우선 지원</li>
+          <li>Starter 전부 포함</li>
+          <li>녹음 파일 1년 보관</li>
+          <li>우선 처리</li>
+          <li>이메일 지원</li>
         </ul>
-        <a href="https://my.casefront.app/signup" class="price-btn" style="text-decoration:none;text-align:center;">시작하기</a>
-        <p style="font-size:11px;color:var(--text-light);margin-top:12px;">현재: 웹챗 + 부재중 전화 / 추후: 카카오 채널 연동</p>
+        <a href="https://my.casefront.app/signup" class="price-btn">무료체험 시작</a>
+      </div>
+      <div class="price-card">
+        <div class="price-name">Pro</div>
+        <div class="price-amount">₩149,000<span>/월</span></div>
+        <div class="price-minutes">월 5,000분</div>
+        <ul class="price-features">
+          <li>Standard 전부 포함</li>
+          <li>녹음 파일 무제한 보관</li>
+          <li>리포트 우선 처리</li>
+          <li>전담 지원</li>
+        </ul>
+        <a href="https://my.casefront.app/signup" class="price-btn">무료체험 시작</a>
+      </div>
+    </div>
+    <p class="pricing-note">7일 무료체험 중 언제든 취소 가능 · 부가세 별도</p>
+  </div>
+</section>
+
+<!-- ===== FAQ ===== -->
+<section class="faq reveal" id="faq">
+  <div class="container">
+    <div class="section-label">FAQ</div>
+    <h2 class="section-title">자주 묻는 질문</h2>
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">앱에서는 뭘 하고, 대시보드에서는 뭘 하나요?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a"><p>앱에서는 녹음과 업로드를 합니다. 녹음이 끝나면 자동으로 스크립트와 리포트가 생성됩니다. 대시보드(my.casefront.app)에서는 PC로 사건별 리포트 확인, 스크립트 검색, 녹음 재생 등 상세 관리를 할 수 있습니다.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">음성 인식 정확도는 어떤가요?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a"><p>법률 전문 용어 사전을 적용한 AI 음성 인식을 사용하며, 높은 수준의 정확도를 제공합니다. AI가 자동 보정하여 리포트에 반영합니다.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">기존 녹음 파일도 분석되나요?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a"><p>네, mp3/m4a/wav 파일을 업로드하면 동일하게 텍스트 변환 + 리포트가 생성됩니다.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">데이터는 안전한가요?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a"><p>녹음 파일은 암호화 저장되며, 사무소별로 완전히 격리됩니다. AI 처리 후 외부 서버에 별도 저장되지 않습니다.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">웹에서도 리포트를 볼 수 있나요?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a"><p>네, my.casefront.app에서 PC로도 확인 가능합니다. 앱과 자동 동기화됩니다.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">여러 변호사가 같이 쓸 수 있나요?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a"><p>네, 같은 사무소 계정으로 여러 변호사가 사용 가능합니다. 팀 플랜은 추후 지원 예정입니다.</p></div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ========== INQUIRY ========== -->
-<section id="inquiry" style="padding:80px 0;border-top:1px solid var(--border);">
-  <div class="container" style="max-width:480px;">
-    <div class="section-label" style="text-align:center;">Contact</div>
-    <h2 class="section-title" style="text-align:center;margin-bottom:12px;">도입 문의</h2>
-    <p style="text-align:center;font-size:14px;color:var(--text-secondary);margin-bottom:32px;">이메일을 남겨주시면 빠르게 안내드리겠습니다.</p>
-    <div style="display:flex;flex-direction:column;gap:14px;">
-      <input type="text" id="inq-name" placeholder="이름" style="padding:12px 16px;border:1px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;outline:none;transition:border .2s;" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'">
-      <input type="email" id="inq-email" placeholder="이메일" style="padding:12px 16px;border:1px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;outline:none;transition:border .2s;" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'">
-      <input type="text" id="inq-firm" placeholder="사무소명" style="padding:12px 16px;border:1px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;outline:none;transition:border .2s;" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'">
-      <button id="inq-btn" onclick="submitInquiry()" class="btn-primary" style="width:100%;text-align:center;">문의하기</button>
-      <p id="inq-msg" style="text-align:center;font-size:13px;color:var(--green);display:none;">접수되었습니다. 빠르게 연락드리겠습니다.</p>
+<!-- ===== FINAL CTA ===== -->
+<section class="final-cta">
+  <div class="container">
+    <h2>상담 정리, 이제 직접 하지 않아도 됩니다.</h2>
+    <p>7일 무료체험. 카드 등록 후 바로 시작.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <a href="https://my.casefront.app/signup" class="btn-primary">무료체험 시작하기</a>
+      <a href="#demo" class="btn-secondary">데모 리포트 보기</a>
     </div>
   </div>
 </section>
 
-<footer><div class="container"><p>© 2026 CaseFront</p></div></footer>
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="container">
+    <div style="display:flex;justify-content:center;align-items:center;gap:24px;margin-bottom:12px;">
+      <a href="#" class="nav-logo" style="display:inline-flex;">
+        <svg width="18" height="20" viewBox="0 0 44 48" fill="none"><path d="M13 4H7C5.34 4 4 5.34 4 7V41C4 42.66 5.34 44 7 44H13" stroke="#8b93ab" stroke-width="3" stroke-linecap="round"/><path d="M31 4H37C38.66 4 40 5.34 40 7V41C40 42.66 38.66 44 37 44H31" stroke="#8b93ab" stroke-width="3" stroke-linecap="round"/><line x1="14" y1="17" x2="30" y2="17" stroke="#8b93ab" stroke-width="2" stroke-linecap="round"/><line x1="14" y1="24" x2="26" y2="24" stroke="#8b93ab" stroke-width="1.5" stroke-linecap="round" opacity="0.45"/></svg>
+      </a>
+    </div>
+    <p style="margin-bottom:8px;">
+      <a href="/privacy" style="margin:0 8px;">개인정보처리방침</a> · 
+      <a href="/terms" style="margin:0 8px;">이용약관</a> · 
+      <a href="mailto:casefront.official@gmail.com" style="margin:0 8px;">casefront.official@gmail.com</a>
+    </p>
+    <p>© 2026 CaseFront. All rights reserved.</p>
+  </div>
+</footer>
 
 <script>
 // Nav scroll effect
-window.addEventListener('scroll',()=>{document.getElementById('nav').classList.toggle('scrolled',window.scrollY>20)});
+window.addEventListener('scroll',()=>{
+  document.getElementById('nav').classList.toggle('scrolled',window.scrollY>20);
+});
 
-// Inquiry form
-function submitInquiry(){
-  const name=document.getElementById('inq-name').value.trim();
-  const email=document.getElementById('inq-email').value.trim();
-  const firm=document.getElementById('inq-firm').value.trim();
-  if(!name||!email){alert('이름과 이메일을 입력해주세요.');return;}
-  // TODO: 실제 API 연동 (Supabase insert 또는 Resend 이메일)
-  document.getElementById('inq-btn').disabled=true;
-  document.getElementById('inq-btn').textContent='접수 완료';
-  document.getElementById('inq-btn').style.opacity='0.6';
-  document.getElementById('inq-msg').style.display='block';
+// Demo tab switch
+function switchDemo(type){
+  document.querySelectorAll('.demo-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('demo-assault').style.display = type==='assault'?'block':'none';
+  document.getElementById('demo-traffic').style.display = type==='traffic'?'block':'none';
+  event.target.classList.add('active');
 }
+
+// FAQ accordion
+function toggleFaq(el){
+  const item = el.parentElement;
+  // Close others
+  document.querySelectorAll('.faq-item').forEach(i=>{
+    if(i!==item) i.classList.remove('open');
+  });
+  item.classList.toggle('open');
+}
+
+// Scroll reveal
+const observer = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.classList.add('visible');
+    }
+  });
+},{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
 </script>
 </body>
 </html>
