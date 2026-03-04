@@ -19,9 +19,16 @@ type CaseRow = {
 }
 
 const STATUS_CONFIG = {
-  new:       { label: '신규',  badge: 'bg-yellow-100 text-yellow-700' },
-  reviewing: { label: '검토중', badge: 'bg-blue-100 text-blue-700' },
-  done:      { label: '완료',  badge: 'bg-green-100 text-green-700' },
+  new:       { label: '신규',  color: '#4a7aef' },
+  reviewing: { label: '검토중', color: '#D97706' },
+  done:      { label: '완료',  color: '#16A34A' },
+}
+
+function caseCategory(caseType: string): '민사' | '형사' | '행정' {
+  const t = caseType ?? ''
+  if (/형사|폭행|상해|절도|사기|횡령|배임|음주|살인|강도|성범죄|마약|협박|공갈|명예훼손/.test(t)) return '형사'
+  if (/행정소송|행정처분|행정심판|조세|국세|지방세|행정/.test(t)) return '행정'
+  return '민사'
 }
 
 function formatDate(dateStr: string) {
@@ -41,15 +48,14 @@ export default function DashboardPage() {
   const router = useRouter()
   const [cases, setCases] = useState<CaseRow[]>([])
   const [statusFilter, setStatusFilter] = useState<'all' | 'new' | 'reviewing' | 'done'>('all')
+  const [categoryFilter, setCategoryFilter] = useState<'all' | '민사' | '형사' | '행정'>('all')
   const [fetching, setFetching] = useState(true)
 
-  // Text paste modal state
   const [modalOpen, setModalOpen] = useState(false)
   const [pasteText, setPasteText] = useState('')
   const [importing, setImporting] = useState(false)
   const [importError, setImportError] = useState('')
 
-  // Delete confirm state
   const [deleteTarget, setDeleteTarget] = useState<CaseRow | null>(null)
   const [deleting, setDeleting] = useState(false)
 
@@ -67,39 +73,23 @@ export default function DashboardPage() {
   }, [session])
 
   async function handleImport() {
-    if (!pasteText.trim()) {
-      setImportError('텍스트를 입력해 주세요.')
-      return
-    }
+    if (!pasteText.trim()) { setImportError('텍스트를 입력해 주세요.'); return }
     if (!session) return
     setImporting(true)
     setImportError('')
     try {
       const res = await fetch('/api/dashboard/cases/text-import', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-        },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
         body: JSON.stringify({ text: pasteText }),
       })
       const data = await res.json()
-      if (!res.ok) {
-        setImportError(data.error ?? '구조화 중 오류가 발생했습니다.')
-        setImporting(false)
-        return
-      }
+      if (!res.ok) { setImportError(data.error ?? '구조화 중 오류가 발생했습니다.'); setImporting(false); return }
       router.push(`/dashboard/cases/${data.session_id}`)
     } catch {
       setImportError('네트워크 오류가 발생했습니다.')
       setImporting(false)
     }
-  }
-
-  function openModal() {
-    setPasteText('')
-    setImportError('')
-    setModalOpen(true)
   }
 
   async function handleDelete() {
@@ -129,7 +119,8 @@ export default function DashboardPage() {
 
   const filtered = cases.filter((c) => {
     const statusOk = statusFilter === 'all' || (c.status ?? 'new') === statusFilter
-    return statusOk
+    const catOk = categoryFilter === 'all' || caseCategory(c.case_type) === categoryFilter
+    return statusOk && catOk
   })
 
   const newCount = cases.filter((c) => !c.status || c.status === 'new').length
@@ -143,12 +134,12 @@ export default function DashboardPage() {
           <p className="text-slate-500 text-sm mt-0.5">
             총 {cases.length}건
             {newCount > 0 && (
-              <span className="ml-2 text-yellow-600 font-medium">• 신규 {newCount}건</span>
+              <span className="ml-2 font-medium" style={{ color: '#4a7aef' }}>• 신규 {newCount}건</span>
             )}
           </p>
         </div>
         <button
-          onClick={openModal}
+          onClick={() => { setPasteText(''); setImportError(''); setModalOpen(true) }}
           className="hidden md:flex items-center gap-2 px-4 h-9 rounded-lg text-white text-sm font-medium"
           style={{ background: '#1a2b5a' }}
         >
@@ -159,25 +150,42 @@ export default function DashboardPage() {
         </button>
       </div>
 
-      {/* Filters */}
-      <div className="flex gap-1.5 mb-4 flex-wrap">
+      {/* Status filters */}
+      <div className="flex gap-1.5 mb-2 flex-wrap">
         {(['all', 'new', 'reviewing', 'done'] as const).map((f) => (
           <button
             key={f}
             onClick={() => setStatusFilter(f)}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
-              statusFilter === f
-                ? 'text-white border border-transparent'
-                : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'
+              statusFilter === f ? 'text-white border border-transparent' : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'
             }`}
             style={statusFilter === f ? { background: '#4a7aef' } : {}}
           >
             {f === 'all' ? '전체' : STATUS_CONFIG[f].label}
             <span className="ml-1.5 opacity-70">
-              {f === 'all'
-                ? cases.length
-                : cases.filter((c) => (c.status ?? 'new') === f).length}
+              {f === 'all' ? cases.length : cases.filter((c) => (c.status ?? 'new') === f).length}
             </span>
+          </button>
+        ))}
+      </div>
+
+      {/* Category filters */}
+      <div className="flex gap-1.5 mb-4 flex-wrap">
+        {(['all', '민사', '형사', '행정'] as const).map((f) => (
+          <button
+            key={f}
+            onClick={() => setCategoryFilter(f)}
+            className={`px-3 py-1.5 rounded-lg text-sm transition-colors whitespace-nowrap ${
+              categoryFilter === f ? 'font-medium text-white border border-transparent' : 'text-slate-500 bg-white border border-slate-100 hover:border-slate-200'
+            }`}
+            style={categoryFilter === f ? { background: '#1a2b5a' } : {}}
+          >
+            {f === 'all' ? '전체 유형' : f}
+            {f !== 'all' && (
+              <span className="ml-1.5 opacity-60">
+                {cases.filter((c) => caseCategory(c.case_type) === f).length}
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -197,16 +205,17 @@ export default function DashboardPage() {
           <div className="md:hidden space-y-3 pb-24">
             {filtered.map((c) => {
               const s = STATUS_CONFIG[c.status ?? 'new']
+              const isPast = (c.status ?? 'new') === 'done'
               return (
                 <div
                   key={c.session_id}
                   className="bg-white rounded-xl p-4 border border-slate-200 active:bg-slate-50"
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${s.badge}`}>{s.label}</span>
+                    <span className="text-xs font-medium" style={{ color: s.color }}>{s.label}</span>
                     <button
                       onClick={(e) => { e.stopPropagation(); setDeleteTarget(c) }}
-                      className="p-1 text-slate-400 hover:text-red-500 transition-colors"
+                      className="p-1 text-slate-300 hover:text-red-400 transition-colors"
                     >
                       <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
@@ -217,15 +226,18 @@ export default function DashboardPage() {
                     onClick={() => router.push(`/dashboard/cases/${c.session_id}`)}
                     className="cursor-pointer"
                   >
-                    <div className="font-semibold text-slate-900 text-base leading-snug mb-0.5">
+                    <div className={`font-semibold text-base leading-snug mb-0.5 ${isPast ? 'text-slate-400' : 'text-slate-900'}`}>
                       {c.client_name}
                       {c.is_proxy && c.contact_name && (
                         <span className="ml-1.5 text-xs font-normal text-slate-400">(대리: {c.contact_name})</span>
                       )}
                     </div>
-                    <div className="text-sm text-slate-600 mb-0.5">{c.case_type}</div>
-                    <div className="text-sm text-slate-500 mb-0.5">{c.client_phone}</div>
-                    <div className="text-xs text-slate-400">{formatDate(c.created_at)}</div>
+                    <div className="text-sm text-slate-500 mb-0.5">{c.case_type}</div>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-xs text-slate-400">{caseCategory(c.case_type)}</span>
+                      <span className="text-xs text-slate-300">·</span>
+                      <span className="text-xs text-slate-400">{formatDate(c.created_at)}</span>
+                    </div>
                   </div>
                 </div>
               )
@@ -238,16 +250,18 @@ export default function DashboardPage() {
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
                   <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">고객명</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">사건유형</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">연락처</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">사건</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">유형</th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">상태</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">접수</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">접수일</th>
                   <th className="px-4 py-3" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filtered.map((c) => {
                   const s = STATUS_CONFIG[c.status ?? 'new']
+                  const cat = caseCategory(c.case_type)
+                  const isPast = (c.status ?? 'new') === 'done'
                   const proxyLabel = c.is_proxy && c.contact_name
                     ? `(대리: ${c.contact_name}${c.contact_relation ? `/${c.contact_relation}` : ''})`
                     : null
@@ -258,23 +272,19 @@ export default function DashboardPage() {
                       className="hover:bg-slate-50 cursor-pointer transition-colors group"
                     >
                       <td className="px-4 py-3">
-                        <span className="text-sm font-medium text-slate-900">{c.client_name}</span>
-                        {proxyLabel && (
-                          <span className="ml-1.5 text-xs text-slate-400">{proxyLabel}</span>
-                        )}
+                        <span className={`text-sm font-medium ${isPast ? 'text-slate-400' : 'text-slate-900'}`}>{c.client_name}</span>
+                        {proxyLabel && <span className="ml-1.5 text-xs text-slate-400">{proxyLabel}</span>}
                       </td>
-                      <td className="px-4 py-3 text-sm text-slate-600">{c.case_type}</td>
-                      <td className="px-4 py-3 text-sm text-slate-500">{c.client_phone}</td>
+                      <td className="px-4 py-3 text-sm text-slate-600 max-w-xs truncate">{c.case_type}</td>
+                      <td className="px-4 py-3 text-sm text-slate-400">{cat}</td>
                       <td className="px-4 py-3">
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${s.badge}`}>
-                          {s.label}
-                        </span>
+                        <span className="text-sm font-medium" style={{ color: s.color }}>{s.label}</span>
                       </td>
                       <td className="px-4 py-3 text-sm text-slate-500">{formatDate(c.created_at)}</td>
                       <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                         <button
                           onClick={() => setDeleteTarget(c)}
-                          className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                          className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-300 hover:text-red-400 hover:bg-red-50 rounded-lg transition-all"
                           title="사건 삭제"
                         >
                           <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -293,7 +303,7 @@ export default function DashboardPage() {
 
       {/* FAB — mobile only */}
       <button
-        onClick={openModal}
+        onClick={() => { setPasteText(''); setImportError(''); setModalOpen(true) }}
         className="md:hidden fixed bottom-6 right-6 flex items-center gap-2 px-4 h-12 rounded-full text-white shadow-lg text-sm font-medium"
         style={{ background: '#1a2b5a' }}
       >
@@ -318,16 +328,12 @@ export default function DashboardPage() {
                 onClick={() => setDeleteTarget(null)}
                 className="flex-1 h-11 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50"
                 disabled={deleting}
-              >
-                취소
-              </button>
+              >취소</button>
               <button
                 onClick={handleDelete}
                 disabled={deleting}
                 className="flex-1 h-11 rounded-xl text-white text-sm font-medium bg-red-500 hover:bg-red-600 disabled:opacity-50 transition-colors"
-              >
-                {deleting ? '삭제 중...' : '삭제'}
-              </button>
+              >{deleting ? '삭제 중...' : '삭제'}</button>
             </div>
           </div>
         </div>
@@ -340,10 +346,7 @@ export default function DashboardPage() {
             <div className="px-5 pt-5 pb-4 border-b border-slate-100">
               <div className="flex items-center justify-between">
                 <h2 className="text-base font-semibold text-slate-900">텍스트로 사건 추가</h2>
-                <button
-                  onClick={() => setModalOpen(false)}
-                  className="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-100"
-                >
+                <button onClick={() => setModalOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-100">
                   <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
                     <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
                   </svg>
@@ -362,18 +365,14 @@ export default function DashboardPage() {
                 className="w-full text-sm text-slate-800 placeholder-slate-400 border border-slate-200 rounded-xl px-3 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 disabled={importing}
               />
-              {importError && (
-                <p className="mt-2 text-sm text-red-600">{importError}</p>
-              )}
+              {importError && <p className="mt-2 text-sm text-red-600">{importError}</p>}
             </div>
             <div className="px-5 pb-5 flex gap-3">
               <button
                 onClick={() => setModalOpen(false)}
                 className="flex-1 h-11 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50"
                 disabled={importing}
-              >
-                취소
-              </button>
+              >취소</button>
               <button
                 onClick={handleImport}
                 disabled={importing || !pasteText.trim()}

@@ -37,13 +37,36 @@ type ClientCase = {
   created_at: string
 }
 
+type Appointment = {
+  id: string
+  title: string
+  appointment_type: 'consultation' | 'hearing' | 'deadline' | 'other'
+  scheduled_at: string
+  memo: string | null
+  created_at: string
+}
+
 type EditEvent = { date: string; summary: string }
 type EditRequirement = { element: string; status: 'confirmed' | 'denied' | 'unknown'; detail: string }
+type TabKey = 'report' | 'transcript' | 'recording' | 'schedule'
 
 const STATUS_CONFIG = {
-  new:       { label: '신규',  style: 'text-yellow-700 bg-yellow-50 border-yellow-200', next: 'reviewing' as const, nextLabel: '검토 시작' },
-  reviewing: { label: '검토중', style: 'text-blue-700 bg-blue-50 border-blue-200',     next: 'done' as const,       nextLabel: '완료 처리' },
-  done:      { label: '완료',  style: 'text-green-700 bg-green-50 border-green-200',   next: null,                  nextLabel: null },
+  new:       { label: '신규',  color: '#4a7aef', next: 'reviewing' as const, nextLabel: '검토 시작' },
+  reviewing: { label: '검토중', color: '#D97706', next: 'done' as const,       nextLabel: '완료 처리' },
+  done:      { label: '완료',  color: '#16A34A', next: null,                  nextLabel: null },
+}
+
+const REQ_STATUS_CONFIG = {
+  confirmed: { label: '충족',  color: '#16A34A' },
+  denied:    { label: '불충족', color: '#DC2626' },
+  unknown:   { label: '미확인', color: '#D97706' },
+}
+
+const APPT_TYPE_LABEL: Record<string, string> = {
+  consultation: '상담',
+  hearing: '기일',
+  deadline: '기한',
+  other: '기타',
 }
 
 function formatPhone(raw: string | null | undefined): string {
@@ -54,10 +77,9 @@ function formatPhone(raw: string | null | undefined): string {
   return raw
 }
 
-const REQ_STATUS_CONFIG = {
-  confirmed: { icon: '✓', bg: '#f0fdf4', border: '#bbf7d0', text: '#15803d', label: '충족' },
-  denied:    { icon: '✗', bg: '#fef2f2', border: '#fecaca', text: '#dc2626', label: '불충족' },
-  unknown:   { icon: '?', bg: '#f8fafc', border: '#e2e8f0', text: '#64748b', label: '미확인' },
+function formatScheduledAt(iso: string) {
+  const d = new Date(iso)
+  return d.toLocaleString('ko-KR', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false })
 }
 
 export default function CaseDetailPage() {
@@ -68,10 +90,12 @@ export default function CaseDetailPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [parentMessages, setParentMessages] = useState<Message[]>([])
   const [clientCases, setClientCases] = useState<ClientCase[]>([])
-  const [recordingUrl, setRecordingUrl] = useState<string | null>(null)
   const [fetching, setFetching] = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [statusUpdating, setStatusUpdating] = useState(false)
+
+  // Tabs
+  const [activeTab, setActiveTab] = useState<TabKey>('report')
 
   // Edit mode
   const [editMode, setEditMode] = useState(false)
@@ -92,6 +116,18 @@ export default function CaseDetailPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
+  // Appointments
+  const [appointments, setAppointments] = useState<Appointment[]>([])
+  const [aptLoading, setAptLoading] = useState(false)
+  const [showAptModal, setShowAptModal] = useState(false)
+  const [editingApt, setEditingApt] = useState<Appointment | null>(null)
+  const [aptTitle, setAptTitle] = useState('')
+  const [aptType, setAptType] = useState<Appointment['appointment_type']>('consultation')
+  const [aptDate, setAptDate] = useState('')
+  const [aptTime, setAptTime] = useState('')
+  const [aptMemo, setAptMemo] = useState('')
+  const [aptSaving, setAptSaving] = useState(false)
+
   const sessionId = params?.id as string
 
   useEffect(() => {
@@ -109,11 +145,21 @@ export default function CaseDetailPage() {
         setMessages(data.messages ?? [])
         setParentMessages(data.parentMessages ?? [])
         setClientCases(data.clientCases ?? [])
-        setRecordingUrl(data.recordingUrl ?? null)
         setFetching(false)
       })
       .catch(() => setFetching(false))
   }, [session, sessionId])
+
+  useEffect(() => {
+    if (!session || !sessionId || activeTab !== 'schedule') return
+    setAptLoading(true)
+    fetch(`/api/dashboard/cases/${sessionId}/appointments`, {
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    })
+      .then((r) => r.json())
+      .then((data) => setAppointments(data.appointments ?? []))
+      .finally(() => setAptLoading(false))
+  }, [session, sessionId, activeTab])
 
   function openEditMode() {
     if (!caseData) return
@@ -122,19 +168,12 @@ export default function CaseDetailPage() {
     setEditClientEmail(caseData.client_email ?? '')
     setEditCaseType(caseData.case_type ?? '')
     setEditSummaryText(caseData.summary?.summary_text ?? '')
-    setEditEvents(
-      (caseData.summary?.events ?? []).map((e) => ({
-        date: e.date ?? '',
-        summary: e.summary ?? '',
-      }))
-    )
-    setEditRequirements(
-      (caseData.summary?.requirements ?? []).map((r) => ({
-        element: r.element ?? '',
-        status: (r.status as 'confirmed' | 'denied' | 'unknown') ?? 'unknown',
-        detail: r.detail ?? '',
-      }))
-    )
+    setEditEvents((caseData.summary?.events ?? []).map((e) => ({ date: e.date ?? '', summary: e.summary ?? '' })))
+    setEditRequirements((caseData.summary?.requirements ?? []).map((r) => ({
+      element: r.element ?? '',
+      status: (r.status as 'confirmed' | 'denied' | 'unknown') ?? 'unknown',
+      detail: r.detail ?? '',
+    })))
     setEditMode(true)
   }
 
@@ -147,9 +186,7 @@ export default function CaseDetailPage() {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
         body: JSON.stringify({ status: nextStatus }),
       })
-      if (res.ok) {
-        setCaseData((prev) => prev ? { ...prev, status: nextStatus } : prev)
-      }
+      if (res.ok) setCaseData((prev) => prev ? { ...prev, status: nextStatus } : prev)
     } finally {
       setStatusUpdating(false)
     }
@@ -169,11 +206,7 @@ export default function CaseDetailPage() {
           case_type: editCaseType,
           summary_patch: {
             summary_text: editSummaryText,
-            events: editEvents.map((e) => ({
-              date: e.date,
-              summary: e.summary,
-              subject: '', object: '', action: e.summary,
-            })),
+            events: editEvents.map((e) => ({ date: e.date, summary: e.summary, subject: '', object: '', action: e.summary })),
             requirements: editRequirements,
           },
         }),
@@ -181,10 +214,8 @@ export default function CaseDetailPage() {
       if (res.ok) {
         setCaseData((prev) => prev ? {
           ...prev,
-          client_name: editClientName,
-          client_phone: editClientPhone,
-          client_email: editClientEmail,
-          case_type: editCaseType,
+          client_name: editClientName, client_phone: editClientPhone,
+          client_email: editClientEmail, case_type: editCaseType,
           summary: {
             ...prev.summary,
             summary_text: editSummaryText,
@@ -208,10 +239,7 @@ export default function CaseDetailPage() {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
         body: JSON.stringify({ parent_case_id: parentId }),
       })
-      if (res.ok) {
-        setCaseData((prev) => prev ? { ...prev, parent_case_id: parentId } : prev)
-        setShowConnectModal(false)
-      }
+      if (res.ok) { setCaseData((prev) => prev ? { ...prev, parent_case_id: parentId } : prev); setShowConnectModal(false) }
     } finally {
       setConnectSaving(false)
     }
@@ -229,6 +257,70 @@ export default function CaseDetailPage() {
     } finally {
       setDeleting(false)
     }
+  }
+
+  function openAddApt() {
+    setEditingApt(null)
+    setAptTitle('')
+    setAptType('consultation')
+    const now = new Date()
+    setAptDate(now.toISOString().slice(0, 10))
+    setAptTime('10:00')
+    setAptMemo('')
+    setShowAptModal(true)
+  }
+
+  function openEditApt(apt: Appointment) {
+    setEditingApt(apt)
+    setAptTitle(apt.title)
+    setAptType(apt.appointment_type)
+    const d = new Date(apt.scheduled_at)
+    setAptDate(d.toISOString().slice(0, 10))
+    setAptTime(`${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`)
+    setAptMemo(apt.memo ?? '')
+    setShowAptModal(true)
+  }
+
+  async function handleSaveApt() {
+    if (!session || !aptTitle.trim() || !aptDate || aptSaving) return
+    setAptSaving(true)
+    const scheduled_at = new Date(`${aptDate}T${aptTime || '00:00'}`).toISOString()
+    try {
+      if (editingApt) {
+        const res = await fetch(`/api/dashboard/appointments/${editingApt.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+          body: JSON.stringify({ title: aptTitle, appointment_type: aptType, scheduled_at, memo: aptMemo }),
+        })
+        if (res.ok) {
+          const data = await res.json()
+          setAppointments((prev) => prev.map((a) => a.id === editingApt.id ? data.appointment : a).sort((a, b) => a.scheduled_at.localeCompare(b.scheduled_at)))
+          setShowAptModal(false)
+        }
+      } else {
+        const res = await fetch(`/api/dashboard/cases/${sessionId}/appointments`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+          body: JSON.stringify({ title: aptTitle, appointment_type: aptType, scheduled_at, memo: aptMemo }),
+        })
+        if (res.ok) {
+          const data = await res.json()
+          setAppointments((prev) => [...prev, data.appointment].sort((a, b) => a.scheduled_at.localeCompare(b.scheduled_at)))
+          setShowAptModal(false)
+        }
+      }
+    } finally {
+      setAptSaving(false)
+    }
+  }
+
+  async function handleDeleteApt(apt: Appointment) {
+    if (!session) return
+    await fetch(`/api/dashboard/appointments/${apt.id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    })
+    setAppointments((prev) => prev.filter((a) => a.id !== apt.id))
   }
 
   if (loading || fetching) {
@@ -252,13 +344,19 @@ export default function CaseDetailPage() {
 
   const status = STATUS_CONFIG[caseData.status ?? 'new']
   const summary = caseData.summary
-
   const inputCls = 'w-full border border-blue-200 rounded-lg px-3 py-2 text-sm text-slate-900 bg-white focus:outline-none focus:border-blue-400'
 
+  const TABS: { key: TabKey; label: string }[] = [
+    { key: 'report', label: '리포트' },
+    { key: 'transcript', label: '스크립트' },
+    { key: 'recording', label: '녹음 원본' },
+    { key: 'schedule', label: '일정' },
+  ]
+
   return (
-    <div className="p-6 max-w-5xl">
+    <div className="p-4 md:p-6 max-w-5xl">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
         <div className="flex items-center gap-3">
           <button
             onClick={() => router.back()}
@@ -268,22 +366,37 @@ export default function CaseDetailPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <h1 className="text-xl font-bold text-slate-900">
-            {editMode ? (
-              <input
-                value={editCaseType}
-                onChange={(e) => setEditCaseType(e.target.value)}
-                placeholder="사건유형"
-                className="border border-blue-200 rounded-lg px-2 py-0.5 text-base font-bold text-slate-900 bg-white focus:outline-none focus:border-blue-400 w-40"
-              />
-            ) : (
-              `${caseData.case_type} 사건`
+          <div>
+            <h1 className="text-xl font-bold text-slate-900">
+              {editMode ? (
+                <input
+                  value={editCaseType}
+                  onChange={(e) => setEditCaseType(e.target.value)}
+                  placeholder="사건유형"
+                  className="border border-blue-200 rounded-lg px-2 py-0.5 text-base font-bold text-slate-900 bg-white focus:outline-none focus:border-blue-400 w-40"
+                />
+              ) : caseData.client_name}
+            </h1>
+            {!editMode && (
+              <p className="text-sm text-slate-500 mt-0.5">{caseData.case_type}</p>
             )}
-          </h1>
+          </div>
         </div>
+
         <div className="flex items-center gap-2 flex-wrap">
           {!editMode && (
             <>
+              <span className="text-sm font-medium" style={{ color: status.color }}>{status.label}</span>
+              {status.next && (
+                <button
+                  onClick={() => handleStatusChange(status.next!)}
+                  disabled={statusUpdating}
+                  className="px-3 py-1.5 text-sm font-medium text-white rounded-lg disabled:opacity-50 transition-colors"
+                  style={{ background: '#1a2b5a' }}
+                >
+                  {statusUpdating ? '처리 중...' : status.nextLabel}
+                </button>
+              )}
               <a
                 href={`tel:${caseData.client_phone}`}
                 className="px-3 py-1.5 text-sm font-medium text-white rounded-lg flex items-center gap-1.5 hover:opacity-90 transition-opacity"
@@ -297,16 +410,12 @@ export default function CaseDetailPage() {
               <button
                 onClick={openEditMode}
                 className="px-3 py-1.5 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
-              >
-                수정
-              </button>
+              >수정</button>
               {clientCases.length > 0 && (
                 <button
                   onClick={() => setShowConnectModal(true)}
                   className="px-3 py-1.5 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
-                >
-                  기존 사건에 연결
-                </button>
+                >기존 사건에 연결</button>
               )}
               <button
                 onClick={() => setShowDeleteConfirm(true)}
@@ -321,412 +430,528 @@ export default function CaseDetailPage() {
           )}
           {editMode && (
             <>
-              <button
-                onClick={() => setEditMode(false)}
-                className="px-3 py-1.5 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg"
-              >
-                취소
-              </button>
+              <button onClick={() => setEditMode(false)} className="px-3 py-1.5 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg">취소</button>
               <button
                 onClick={handleSaveEdit}
                 disabled={editSaving}
                 className="px-3 py-1.5 text-sm font-medium text-white rounded-lg disabled:opacity-50"
                 style={{ background: '#1a2b5a' }}
-              >
-                {editSaving ? '저장 중...' : '저장'}
-              </button>
-            </>
-          )}
-          {!editMode && (
-            <>
-              <span className={`px-2.5 py-1 rounded-lg text-sm font-medium border ${status.style}`}>
-                {status.label}
-              </span>
-              {status.next && (
-                <button
-                  onClick={() => handleStatusChange(status.next!)}
-                  disabled={statusUpdating}
-                  className="px-3 py-1.5 text-sm font-medium text-white rounded-lg disabled:opacity-50 transition-colors"
-                  style={{ background: '#1a2b5a' }}
-                >
-                  {statusUpdating ? '처리 중...' : status.nextLabel}
-                </button>
-              )}
+              >{editSaving ? '저장 중...' : '저장'}</button>
             </>
           )}
         </div>
       </div>
 
-      {/* Parent case linked indicator */}
+      {/* Parent case linked */}
       {caseData.parent_case_id && (
-        <div className="mb-4 px-4 py-2.5 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
+        <div className="mb-3 px-4 py-2.5 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
           기존 사건에 연결됨
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Left: main info */}
-        <div className="lg:col-span-2 space-y-4">
-
-          {/* Client info */}
-          <div className="bg-white rounded-xl border border-slate-200 p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                {caseData.is_proxy ? '당사자 정보' : '고객 정보'}
-              </h2>
-              {caseData.client_id && !editMode && (
-                <button
-                  onClick={() => router.push(`/dashboard/clients/${caseData.client_id}`)}
-                  className="text-xs font-medium hover:underline flex items-center gap-1"
-                  style={{ color: '#4a7aef' }}
-                >
-                  고객 상세 보기
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-              )}
-            </div>
-            {editMode ? (
-              <div className="space-y-2.5">
-                <div className="flex items-center gap-3">
-                  <span className="text-slate-400 text-sm w-14 flex-shrink-0">이름</span>
-                  <input value={editClientName} onChange={(e) => setEditClientName(e.target.value)} className={inputCls} placeholder="이름" />
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-slate-400 text-sm w-14 flex-shrink-0">연락처</span>
-                  <input value={editClientPhone} onChange={(e) => setEditClientPhone(e.target.value)} className={inputCls} placeholder="010-0000-0000" />
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-slate-400 text-sm w-14 flex-shrink-0">이메일</span>
-                  <input value={editClientEmail} onChange={(e) => setEditClientEmail(e.target.value)} className={inputCls} placeholder="email@example.com" />
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-2.5">
-                <InfoRow label="이름" value={caseData.client_name} />
-                <InfoRow label="연락처" value={caseData.client_phone} isPhone />
-                {caseData.client_email && <InfoRow label="이메일" value={caseData.client_email} isEmail />}
-                <InfoRow label="접수일" value={new Date(caseData.created_at).toLocaleString('ko-KR', {
-                  year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
-                })} />
-              </div>
+      {/* Tab bar */}
+      <div className="flex border-b border-slate-200 mb-4">
+        {TABS.map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+              activeTab === tab.key
+                ? 'border-current text-current'
+                : 'border-transparent text-slate-400 hover:text-slate-600'
+            }`}
+            style={activeTab === tab.key ? { color: '#1a2b5a', borderColor: '#1a2b5a' } : {}}
+          >
+            {tab.label}
+            {tab.key === 'schedule' && appointments.length > 0 && (
+              <span className="ml-1.5 text-xs opacity-60">{appointments.length}</span>
             )}
-          </div>
+          </button>
+        ))}
+      </div>
 
-          {/* Proxy contact info */}
-          {caseData.is_proxy && caseData.contact_name && (
-            <div className="bg-white rounded-xl border border-slate-200 p-4">
-              <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">문의자 정보 (대리)</h2>
-              <div className="space-y-2.5">
-                <InfoRow label="이름" value={`${caseData.contact_name}${caseData.contact_relation ? ` (${caseData.contact_relation})` : ''}`} />
-                {caseData.contact_phone && <InfoRow label="연락처" value={caseData.contact_phone} isPhone />}
-                {caseData.contact_email && <InfoRow label="이메일" value={caseData.contact_email} isEmail />}
-              </div>
-            </div>
-          )}
+      {/* ── 리포트 탭 ── */}
+      {activeTab === 'report' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Left: main info */}
+          <div className="lg:col-span-2 space-y-4">
 
-          {/* Summary */}
-          <div className="bg-white rounded-xl border border-slate-200 p-4">
-            <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">접수 요약</h2>
-            {editMode ? (
-              <textarea
-                value={editSummaryText}
-                onChange={(e) => setEditSummaryText(e.target.value)}
-                rows={3}
-                className={`${inputCls} resize-none`}
-                placeholder="한 줄 요약"
-              />
-            ) : (
-              <>
-                <p className="text-slate-700 text-sm leading-relaxed">{summary?.summary_text}</p>
-                {summary?.ai_notes && (
-                  <div className="mt-3 p-3 bg-slate-50 border border-slate-100 rounded-lg">
-                    <p className="text-xs font-medium text-slate-400 mb-1">AI 참고 메모</p>
-                    <p className="text-sm text-slate-600">{summary.ai_notes}</p>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-
-          {/* Requirements */}
-          {(editMode || (summary?.requirements?.length > 0)) && (
-            <div className="bg-white rounded-xl border border-slate-200 p-4">
-              <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">요건사실 체크리스트</h2>
-              {editMode ? (
-                <div className="space-y-3">
-                  {editRequirements.map((req, i) => (
-                    <div key={i} className="border border-slate-200 rounded-lg p-3 space-y-2">
-                      <div className="flex items-center gap-2">
-                        <input
-                          value={req.element}
-                          onChange={(e) => setEditRequirements((prev) => prev.map((r, j) => j === i ? { ...r, element: e.target.value } : r))}
-                          className={`${inputCls} flex-1`}
-                          placeholder="요건사실 (예: 금전교부)"
-                        />
-                        <select
-                          value={req.status}
-                          onChange={(e) => setEditRequirements((prev) => prev.map((r, j) => j === i ? { ...r, status: e.target.value as EditRequirement['status'] } : r))}
-                          className="border border-blue-200 rounded-lg px-2 py-2 text-sm focus:outline-none focus:border-blue-400 flex-shrink-0"
-                        >
-                          <option value="confirmed">충족</option>
-                          <option value="denied">불충족</option>
-                          <option value="unknown">미확인</option>
-                        </select>
-                        <button
-                          onClick={() => setEditRequirements((prev) => prev.filter((_, j) => j !== i))}
-                          className="p-1.5 text-slate-300 hover:text-red-400 flex-shrink-0"
-                        >
-                          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
-                            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                          </svg>
-                        </button>
-                      </div>
-                      <input
-                        value={req.detail}
-                        onChange={(e) => setEditRequirements((prev) => prev.map((r, j) => j === i ? { ...r, detail: e.target.value } : r))}
-                        className={inputCls}
-                        placeholder="상세 내용"
-                      />
-                    </div>
-                  ))}
-                  <button
-                    onClick={() => setEditRequirements((prev) => [...prev, { element: '', status: 'unknown', detail: '' }])}
-                    className="w-full py-2 border border-dashed border-slate-300 rounded-lg text-sm text-slate-500 hover:border-blue-300 hover:text-blue-500 transition-colors"
-                  >
-                    + 요건 추가
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {(summary?.requirements ?? []).map((req, i) => {
-                    const cfg = REQ_STATUS_CONFIG[req.status ?? 'unknown'] ?? REQ_STATUS_CONFIG.unknown
-                    return (
-                      <div key={i} className="flex items-start gap-2.5 p-2.5 rounded-lg border" style={{ background: cfg.bg, borderColor: cfg.border }}>
-                        <span className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold mt-0.5" style={{ background: cfg.text, color: '#fff' }}>
-                          {cfg.icon}
-                        </span>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-sm font-semibold text-slate-800">{req.element}</span>
-                            <span className="text-xs font-medium" style={{ color: cfg.text }}>{cfg.label}</span>
-                          </div>
-                          <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{req.detail}</p>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Legal Analysis */}
-          {!editMode && summary?.legal_analysis && (
+            {/* Client info */}
             <div className="bg-white rounded-xl border border-slate-200 p-4">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">사건 검토 분석</h2>
-                <span className="text-xs text-slate-400">참고용 추정</span>
-              </div>
-              <p className="text-xs text-slate-400 mb-4">※ 본 리포트는 접수 단계의 참고 자료이며, 법률 자문을 대체하지 않습니다.</p>
-              <div className="space-y-4">
-
-                {/* Statute of limitations */}
-                {summary.legal_analysis.statute_of_limitations && (
-                  <div className="p-3 bg-blue-50 border border-blue-100 rounded-lg">
-                    <p className="text-xs font-semibold text-blue-700 mb-1">소멸시효 (참고)</p>
-                    <p className="text-sm text-blue-800 leading-relaxed">{summary.legal_analysis.statute_of_limitations}</p>
-                  </div>
-                )}
-
-                {/* Evidence analysis */}
-                {summary.legal_analysis.evidence_analysis && (
-                  <div>
-                    <p className="text-xs font-medium text-slate-500 mb-1">증거 확보 상태</p>
-                    <p className="text-sm text-slate-600">{summary.legal_analysis.evidence_analysis}</p>
-                  </div>
-                )}
-
-                {/* Missing info */}
-                {(summary.legal_analysis.missing_info?.length ?? 0) > 0 && (
-                  <div>
-                    <p className="text-xs font-medium text-slate-500 mb-1.5">추가 확인 필요</p>
-                    <ul className="space-y-1">
-                      {summary.legal_analysis.missing_info!.map((item, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
-                          <span className="flex-shrink-0 mt-0.5 text-amber-500">?</span>
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Next actions */}
-                {(summary.legal_analysis.next_actions?.length ?? 0) > 0 && (
-                  <div>
-                    <p className="text-xs font-medium text-slate-500 mb-1.5">다음 액션 제안</p>
-                    <ul className="space-y-1">
-                      {summary.legal_analysis.next_actions!.map((action, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
-                          <span className="flex-shrink-0 mt-0.5" style={{ color: '#4a7aef' }}>→</span>
-                          {action}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Risk factors */}
-                {(summary.legal_analysis.risk_factors?.length ?? 0) > 0 && (
-                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                    <p className="text-xs font-semibold text-amber-700 mb-1.5">⚠ 위험 요소</p>
-                    <ul className="space-y-1">
-                      {summary.legal_analysis.risk_factors!.map((risk, i) => (
-                        <li key={i} className="text-sm text-amber-700">{risk}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Events timeline */}
-          {(editMode || (summary?.events?.length > 0)) && (
-            <div className="bg-white rounded-xl border border-slate-200 p-4">
-              <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">사건 경위</h2>
-              {editMode ? (
-                <div className="space-y-3">
-                  {editEvents.map((ev, i) => (
-                    <div key={i} className="border border-slate-200 rounded-lg p-3 space-y-2">
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="date"
-                          value={ev.date}
-                          onChange={(e) => setEditEvents((prev) => prev.map((v, j) => j === i ? { ...v, date: e.target.value } : v))}
-                          className={`${inputCls} w-40 flex-shrink-0`}
-                        />
-                        <button
-                          onClick={() => setEditEvents((prev) => prev.filter((_, j) => j !== i))}
-                          className="ml-auto p-1.5 text-slate-300 hover:text-red-400 flex-shrink-0"
-                        >
-                          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
-                            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                          </svg>
-                        </button>
-                      </div>
-                      <textarea
-                        value={ev.summary}
-                        onChange={(e) => setEditEvents((prev) => prev.map((v, j) => j === i ? { ...v, summary: e.target.value } : v))}
-                        rows={2}
-                        className={`${inputCls} resize-none`}
-                        placeholder="사건 경위 내용"
-                      />
-                    </div>
-                  ))}
+                <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                  {caseData.is_proxy ? '당사자 정보' : '고객 정보'}
+                </h2>
+                {caseData.client_id && !editMode && (
                   <button
-                    onClick={() => setEditEvents((prev) => [...prev, { date: '', summary: '' }])}
-                    className="w-full py-2 border border-dashed border-slate-300 rounded-lg text-sm text-slate-500 hover:border-blue-300 hover:text-blue-500 transition-colors"
+                    onClick={() => router.push(`/dashboard/clients/${caseData.client_id}`)}
+                    className="text-xs font-medium hover:underline flex items-center gap-1"
+                    style={{ color: '#4a7aef' }}
                   >
-                    + 경위 추가
+                    고객 상세 보기
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
                   </button>
+                )}
+              </div>
+              {editMode ? (
+                <div className="space-y-2.5">
+                  <div className="flex items-center gap-3">
+                    <span className="text-slate-400 text-sm w-14 flex-shrink-0">이름</span>
+                    <input value={editClientName} onChange={(e) => setEditClientName(e.target.value)} className={inputCls} placeholder="이름" />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-slate-400 text-sm w-14 flex-shrink-0">연락처</span>
+                    <input value={editClientPhone} onChange={(e) => setEditClientPhone(e.target.value)} className={inputCls} placeholder="010-0000-0000" />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-slate-400 text-sm w-14 flex-shrink-0">이메일</span>
+                    <input value={editClientEmail} onChange={(e) => setEditClientEmail(e.target.value)} className={inputCls} placeholder="email@example.com" />
+                  </div>
                 </div>
               ) : (
-                <div className="space-y-0">
-                  {(summary?.events ?? []).map((event, i) => (
-                    <div key={i} className="flex gap-3">
-                      <div className="flex flex-col items-center">
-                        <div className="w-2 h-2 rounded-full mt-1 flex-shrink-0" style={{ background: '#4a7aef' }} />
-                        {i < (summary?.events ?? []).length - 1 && (
-                          <div className="w-px flex-1 bg-slate-200 my-1" />
-                        )}
-                      </div>
-                      <div className="pb-4">
-                        <p className="text-xs text-slate-400 font-medium">{event.date}</p>
-                        <p className="text-sm text-slate-700 mt-0.5">{event.summary}</p>
-                      </div>
-                    </div>
-                  ))}
+                <div className="space-y-2.5">
+                  <InfoRow label="이름" value={caseData.client_name} />
+                  <InfoRow label="연락처" value={caseData.client_phone} isPhone />
+                  {caseData.client_email && <InfoRow label="이메일" value={caseData.client_email} isEmail />}
+                  <InfoRow label="접수일" value={new Date(caseData.created_at).toLocaleString('ko-KR', {
+                    year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
+                  })} />
                 </div>
               )}
             </div>
-          )}
 
-          {/* Unconfirmed items */}
-          {!editMode && summary?.unconfirmed?.length > 0 && (
+            {/* Proxy contact */}
+            {caseData.is_proxy && caseData.contact_name && (
+              <div className="bg-white rounded-xl border border-slate-200 p-4">
+                <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">문의자 정보 (대리)</h2>
+                <div className="space-y-2.5">
+                  <InfoRow label="이름" value={`${caseData.contact_name}${caseData.contact_relation ? ` (${caseData.contact_relation})` : ''}`} />
+                  {caseData.contact_phone && <InfoRow label="연락처" value={caseData.contact_phone} isPhone />}
+                  {caseData.contact_email && <InfoRow label="이메일" value={caseData.contact_email} isEmail />}
+                </div>
+              </div>
+            )}
+
+            {/* Summary */}
             <div className="bg-white rounded-xl border border-slate-200 p-4">
-              <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">미확인 사항</h2>
-              <ul className="space-y-1.5">
-                {summary.unconfirmed.map((item, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
-                    <span className="flex-shrink-0 mt-0.5 text-orange-400">?</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
+              <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">접수 요약</h2>
+              {editMode ? (
+                <textarea value={editSummaryText} onChange={(e) => setEditSummaryText(e.target.value)} rows={3} className={`${inputCls} resize-none`} placeholder="한 줄 요약" />
+              ) : (
+                <>
+                  <p className="text-slate-700 text-sm leading-relaxed">{summary?.summary_text}</p>
+                  {summary?.ai_notes && (
+                    <div className="mt-3 p-3 bg-slate-50 border border-slate-100 rounded-lg">
+                      <p className="text-xs font-medium text-slate-400 mb-1">AI 참고 메모</p>
+                      <p className="text-sm text-slate-600">{summary.ai_notes}</p>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
-          )}
-        </div>
 
-        {/* Right: documents + chat */}
-        <div className="space-y-4">
-          {summary?.evidence?.length > 0 && !editMode && (
-            <div className="bg-white rounded-xl border border-slate-200 p-4">
-              <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">보유 증거</h2>
-              <ul className="space-y-2">
-                {summary.evidence.map((e, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
-                    <span className="flex-shrink-0 mt-0.5 text-green-500">✓</span>
-                    {e}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+            {/* Requirements */}
+            {(editMode || (summary?.requirements?.length > 0)) && (
+              <div className="bg-white rounded-xl border border-slate-200 p-4">
+                <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">요건사실 체크리스트</h2>
+                {editMode ? (
+                  <div className="space-y-3">
+                    {editRequirements.map((req, i) => (
+                      <div key={i} className="border border-slate-200 rounded-lg p-3 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <input
+                            value={req.element}
+                            onChange={(e) => setEditRequirements((prev) => prev.map((r, j) => j === i ? { ...r, element: e.target.value } : r))}
+                            className={`${inputCls} flex-1`}
+                            placeholder="요건사실 (예: 금전교부)"
+                          />
+                          <select
+                            value={req.status}
+                            onChange={(e) => setEditRequirements((prev) => prev.map((r, j) => j === i ? { ...r, status: e.target.value as EditRequirement['status'] } : r))}
+                            className="border border-blue-200 rounded-lg px-2 py-2 text-sm focus:outline-none focus:border-blue-400 flex-shrink-0"
+                          >
+                            <option value="confirmed">충족</option>
+                            <option value="denied">불충족</option>
+                            <option value="unknown">미확인</option>
+                          </select>
+                          <button
+                            onClick={() => setEditRequirements((prev) => prev.filter((_, j) => j !== i))}
+                            className="p-1.5 text-slate-300 hover:text-red-400 flex-shrink-0"
+                          >
+                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+                              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                          </button>
+                        </div>
+                        <input
+                          value={req.detail}
+                          onChange={(e) => setEditRequirements((prev) => prev.map((r, j) => j === i ? { ...r, detail: e.target.value } : r))}
+                          className={inputCls}
+                          placeholder="상세 내용"
+                        />
+                      </div>
+                    ))}
+                    <button
+                      onClick={() => setEditRequirements((prev) => [...prev, { element: '', status: 'unknown', detail: '' }])}
+                      className="w-full py-2 border border-dashed border-slate-300 rounded-lg text-sm text-slate-500 hover:border-blue-300 hover:text-blue-500 transition-colors"
+                    >+ 요건 추가</button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {(summary?.requirements ?? []).map((req, i) => {
+                      const cfg = REQ_STATUS_CONFIG[req.status ?? 'unknown'] ?? REQ_STATUS_CONFIG.unknown
+                      return (
+                        <div key={i} className="flex items-start gap-2.5 py-2 border-b border-slate-100 last:border-0">
+                          <span className="flex-shrink-0 text-sm mt-0.5" style={{ color: cfg.color }}>
+                            {req.status === 'confirmed' ? '✓' : req.status === 'denied' ? '✗' : '?'}
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-baseline gap-2 flex-wrap">
+                              <span className="text-sm font-semibold text-slate-800">{req.element}</span>
+                              <span className="text-xs font-medium" style={{ color: cfg.color }}>{cfg.label}</span>
+                            </div>
+                            {req.detail && <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{req.detail}</p>}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
 
-          {summary?.document_request?.length > 0 && !editMode && (
-            <div className="bg-white rounded-xl border border-slate-200 p-4">
-              <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">요청 증빙자료</h2>
-              <ul className="space-y-2">
-                {summary.document_request.map((doc, i) => {
-                  const isObj = typeof doc === 'object' && doc !== null && 'name' in doc
-                  const name = isObj ? (doc as { name: string; required: boolean }).name : doc as string
-                  const required = isObj ? (doc as { name: string; required: boolean }).required : null
-                  return (
-                    <li key={i} className="flex items-center gap-2 text-sm text-slate-700">
-                      <span className="flex-shrink-0" style={{ color: '#4a7aef' }}>•</span>
-                      <span className="flex-1">{name}</span>
-                      {required === true && (
-                        <span className="flex-shrink-0 px-1.5 py-0.5 text-xs font-semibold rounded bg-red-50 border border-red-200 text-red-600">필수</span>
-                      )}
-                      {required === false && (
-                        <span className="flex-shrink-0 px-1.5 py-0.5 text-xs font-semibold rounded bg-slate-50 border border-slate-200 text-slate-500">권장</span>
-                      )}
+            {/* Legal Analysis */}
+            {!editMode && summary?.legal_analysis && (
+              <div className="bg-white rounded-xl border border-slate-200 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">사건 검토 분석</h2>
+                  <span className="text-xs text-slate-400">참고용 추정</span>
+                </div>
+                <p className="text-xs text-slate-400 mb-4">※ 본 리포트는 접수 단계의 참고 자료이며, 법률 자문을 대체하지 않습니다.</p>
+                <div className="space-y-4">
+                  {summary.legal_analysis.statute_of_limitations && (
+                    <div className="p-3 bg-blue-50 border border-blue-100 rounded-lg">
+                      <p className="text-xs font-semibold text-blue-700 mb-1">소멸시효 (참고)</p>
+                      <p className="text-sm text-blue-800 leading-relaxed">{summary.legal_analysis.statute_of_limitations}</p>
+                    </div>
+                  )}
+                  {summary.legal_analysis.evidence_analysis && (
+                    <div>
+                      <p className="text-xs font-medium text-slate-500 mb-1">증거 확보 상태</p>
+                      <p className="text-sm text-slate-600">{summary.legal_analysis.evidence_analysis}</p>
+                    </div>
+                  )}
+                  {(summary.legal_analysis.missing_info?.length ?? 0) > 0 && (
+                    <div>
+                      <p className="text-xs font-medium text-slate-500 mb-1.5">추가 확인 필요</p>
+                      <ul className="space-y-1">
+                        {summary.legal_analysis.missing_info!.map((item, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
+                            <span className="flex-shrink-0 mt-0.5 text-amber-500">?</span>{item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {(summary.legal_analysis.next_actions?.length ?? 0) > 0 && (
+                    <div>
+                      <p className="text-xs font-medium text-slate-500 mb-1.5">다음 액션 제안</p>
+                      <ul className="space-y-1">
+                        {summary.legal_analysis.next_actions!.map((action, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
+                            <span className="flex-shrink-0 mt-0.5" style={{ color: '#4a7aef' }}>→</span>{action}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {(summary.legal_analysis.risk_factors?.length ?? 0) > 0 && (
+                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                      <p className="text-xs font-semibold text-amber-700 mb-1.5">⚠ 위험 요소</p>
+                      <ul className="space-y-1">
+                        {summary.legal_analysis.risk_factors!.map((risk, i) => (
+                          <li key={i} className="text-sm text-amber-700">{risk}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Events timeline */}
+            {(editMode || (summary?.events?.length > 0)) && (
+              <div className="bg-white rounded-xl border border-slate-200 p-4">
+                <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">사건 경위</h2>
+                {editMode ? (
+                  <div className="space-y-3">
+                    {editEvents.map((ev, i) => (
+                      <div key={i} className="border border-slate-200 rounded-lg p-3 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <input type="date" value={ev.date} onChange={(e) => setEditEvents((prev) => prev.map((v, j) => j === i ? { ...v, date: e.target.value } : v))} className={`${inputCls} w-40 flex-shrink-0`} />
+                          <button onClick={() => setEditEvents((prev) => prev.filter((_, j) => j !== i))} className="ml-auto p-1.5 text-slate-300 hover:text-red-400 flex-shrink-0">
+                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+                              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                          </button>
+                        </div>
+                        <textarea value={ev.summary} onChange={(e) => setEditEvents((prev) => prev.map((v, j) => j === i ? { ...v, summary: e.target.value } : v))} rows={2} className={`${inputCls} resize-none`} placeholder="사건 경위 내용" />
+                      </div>
+                    ))}
+                    <button onClick={() => setEditEvents((prev) => [...prev, { date: '', summary: '' }])} className="w-full py-2 border border-dashed border-slate-300 rounded-lg text-sm text-slate-500 hover:border-blue-300 hover:text-blue-500 transition-colors">
+                      + 경위 추가
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-0">
+                    {(summary?.events ?? []).map((event, i) => (
+                      <div key={i} className="flex gap-3">
+                        <div className="flex flex-col items-center">
+                          <div className="w-2 h-2 rounded-full mt-1 flex-shrink-0" style={{ background: '#4a7aef' }} />
+                          {i < (summary?.events ?? []).length - 1 && <div className="w-px flex-1 bg-slate-200 my-1" />}
+                        </div>
+                        <div className="pb-4">
+                          <p className="text-xs text-slate-400 font-medium">{event.date}</p>
+                          <p className="text-sm text-slate-700 mt-0.5">{event.summary}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Unconfirmed */}
+            {!editMode && summary?.unconfirmed?.length > 0 && (
+              <div className="bg-white rounded-xl border border-slate-200 p-4">
+                <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">미확인 사항</h2>
+                <ul className="space-y-1.5">
+                  {summary.unconfirmed.map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
+                      <span className="flex-shrink-0 mt-0.5 text-orange-400">?</span>{item}
                     </li>
-                  )
-                })}
-              </ul>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          {/* Right column */}
+          <div className="space-y-4">
+            {summary?.evidence?.length > 0 && !editMode && (
+              <div className="bg-white rounded-xl border border-slate-200 p-4">
+                <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">보유 증거</h2>
+                <ul className="space-y-2">
+                  {summary.evidence.map((e, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
+                      <span className="flex-shrink-0 mt-0.5 text-green-500">✓</span>{e}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {summary?.document_request?.length > 0 && !editMode && (
+              <div className="bg-white rounded-xl border border-slate-200 p-4">
+                <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">요청 증빙자료</h2>
+                <ul className="space-y-2">
+                  {summary.document_request.map((doc, i) => {
+                    const isObj = typeof doc === 'object' && doc !== null && 'name' in doc
+                    const name = isObj ? (doc as { name: string; required: boolean }).name : doc as string
+                    const required = isObj ? (doc as { name: string; required: boolean }).required : null
+                    return (
+                      <li key={i} className="flex items-center gap-2 text-sm text-slate-700">
+                        <span className="flex-shrink-0" style={{ color: '#4a7aef' }}>•</span>
+                        <span className="flex-1">{name}</span>
+                        {required === true && <span className="flex-shrink-0 text-xs font-medium text-red-500">필수</span>}
+                        {required === false && <span className="flex-shrink-0 text-xs text-slate-400">권장</span>}
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
+            )}
+
+            {summary?.client_request && !editMode && (
+              <div className="bg-white rounded-xl border border-slate-200 p-4">
+                <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">고객 요청사항</h2>
+                <p className="text-sm text-slate-700">{summary.client_request}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── 스크립트 탭 ── */}
+      {activeTab === 'transcript' && (
+        <div className="space-y-4 max-w-2xl">
+          {messages.length === 0 && parentMessages.length === 0 ? (
+            <div className="text-center py-16 text-slate-400">
+              <p className="text-sm">대화 내역이 없습니다.</p>
             </div>
-          )}
-
-          {summary?.client_request && !editMode && (
-            <div className="bg-white rounded-xl border border-slate-200 p-4">
-              <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">고객 요청사항</h2>
-              <p className="text-sm text-slate-700">{summary.client_request}</p>
-            </div>
-          )}
-
-          {!editMode && (
-            <ChatHistory label={`대화 내역 (${messages.length}개)`} messages={messages} />
-          )}
-
-          {!editMode && parentMessages.length > 0 && (
-            <ChatHistory label={`이전 사건 대화 (${parentMessages.length}개)`} messages={parentMessages} />
+          ) : (
+            <>
+              <ChatHistory label={`대화 내역 (${messages.length}개)`} messages={messages} defaultOpen />
+              {parentMessages.length > 0 && (
+                <ChatHistory label={`이전 사건 대화 (${parentMessages.length}개)`} messages={parentMessages} defaultOpen={false} />
+              )}
+            </>
           )}
         </div>
-      </div>
+      )}
+
+      {/* ── 녹음 원본 탭 ── */}
+      {activeTab === 'recording' && (
+        <div className="text-center py-20 text-slate-400">
+          <svg className="w-12 h-12 mx-auto mb-4 text-slate-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+          </svg>
+          <p className="text-sm font-medium text-slate-500 mb-1">녹음 원본 없음</p>
+          <p className="text-sm">CaseFront 앱에서 녹음한 상담만 여기에 표시됩니다.</p>
+        </div>
+      )}
+
+      {/* ── 일정 탭 ── */}
+      {activeTab === 'schedule' && (
+        <div className="max-w-2xl">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-semibold text-slate-700">
+              일정 <span className="font-normal text-slate-400">{appointments.length}개</span>
+            </h2>
+            <button
+              onClick={openAddApt}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-white text-sm font-medium"
+              style={{ background: '#1a2b5a' }}
+            >
+              <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              일정 추가
+            </button>
+          </div>
+
+          {aptLoading ? (
+            <div className="flex items-center justify-center h-32">
+              <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#1a2b5a', borderTopColor: 'transparent' }} />
+            </div>
+          ) : appointments.length === 0 ? (
+            <div className="text-center py-16 text-slate-400">
+              <svg className="w-10 h-10 mx-auto mb-3 text-slate-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <p className="text-sm">등록된 일정이 없습니다.</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {appointments.map((apt) => {
+                const isPast = new Date(apt.scheduled_at) < new Date()
+                return (
+                  <div
+                    key={apt.id}
+                    className={`bg-white rounded-xl border border-slate-200 p-4 ${isPast ? 'opacity-50' : ''}`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-baseline gap-2 flex-wrap mb-1">
+                          <span className="text-xs text-slate-400">{APPT_TYPE_LABEL[apt.appointment_type] ?? apt.appointment_type}</span>
+                          <span className="text-sm font-semibold text-slate-900">{apt.title}</span>
+                        </div>
+                        <p className="text-sm text-slate-500">{formatScheduledAt(apt.scheduled_at)}</p>
+                        {apt.memo && <p className="text-xs text-slate-400 mt-1">{apt.memo}</p>}
+                      </div>
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <button onClick={() => openEditApt(apt)} className="p-1.5 text-slate-300 hover:text-slate-500 transition-colors">
+                          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                          </svg>
+                        </button>
+                        <button onClick={() => handleDeleteApt(apt)} className="p-1.5 text-slate-300 hover:text-red-400 transition-colors">
+                          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── 일정 추가/수정 모달 ── */}
+      {showAptModal && (
+        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.5)' }}>
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl">
+            <div className="px-5 pt-5 pb-4 border-b border-slate-100 flex items-center justify-between">
+              <h2 className="text-base font-semibold text-slate-900">{editingApt ? '일정 수정' : '일정 추가'}</h2>
+              <button onClick={() => setShowAptModal(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-100">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+            <div className="px-5 py-4 space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1.5">유형</label>
+                <div className="flex gap-2 flex-wrap">
+                  {(['consultation', 'hearing', 'deadline', 'other'] as const).map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => setAptType(t)}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
+                        aptType === t ? 'text-white border-transparent' : 'text-slate-600 border-slate-200 hover:border-slate-300'
+                      }`}
+                      style={aptType === t ? { background: '#1a2b5a' } : {}}
+                    >{APPT_TYPE_LABEL[t]}</button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1.5">제목 *</label>
+                <input
+                  value={aptTitle}
+                  onChange={(e) => setAptTitle(e.target.value)}
+                  placeholder="예: 1차 변론기일"
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 bg-white focus:outline-none focus:border-blue-400"
+                />
+              </div>
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <label className="block text-xs font-medium text-slate-500 mb-1.5">날짜 *</label>
+                  <input type="date" value={aptDate} onChange={(e) => setAptDate(e.target.value)} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 bg-white focus:outline-none focus:border-blue-400" />
+                </div>
+                <div className="w-28">
+                  <label className="block text-xs font-medium text-slate-500 mb-1.5">시간</label>
+                  <input type="time" value={aptTime} onChange={(e) => setAptTime(e.target.value)} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 bg-white focus:outline-none focus:border-blue-400" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1.5">메모 (선택)</label>
+                <textarea
+                  value={aptMemo}
+                  onChange={(e) => setAptMemo(e.target.value)}
+                  rows={2}
+                  placeholder="추가 메모..."
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 bg-white focus:outline-none focus:border-blue-400 resize-none"
+                />
+              </div>
+            </div>
+            <div className="px-5 pb-5 flex gap-3">
+              <button onClick={() => setShowAptModal(false)} className="flex-1 h-11 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50" disabled={aptSaving}>취소</button>
+              <button
+                onClick={handleSaveApt}
+                disabled={aptSaving || !aptTitle.trim() || !aptDate}
+                className="flex-1 h-11 rounded-xl text-white text-sm font-medium disabled:opacity-50 transition-opacity"
+                style={{ background: '#1a2b5a' }}
+              >{aptSaving ? '저장 중...' : '저장'}</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Connect modal */}
       {showConnectModal && (
@@ -746,18 +971,11 @@ export default function CaseDetailPage() {
                   <span className="ml-2 text-xs text-slate-400">
                     {new Date(cc.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: 'short', day: 'numeric' })}
                   </span>
-                  {caseData.parent_case_id === cc.id && (
-                    <span className="ml-2 text-xs text-blue-600">✓ 현재 연결됨</span>
-                  )}
+                  {caseData.parent_case_id === cc.id && <span className="ml-2 text-xs text-blue-600">✓ 현재 연결됨</span>}
                 </button>
               ))}
             </div>
-            <button
-              onClick={() => setShowConnectModal(false)}
-              className="mt-4 w-full py-2 text-sm text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50"
-            >
-              닫기
-            </button>
+            <button onClick={() => setShowConnectModal(false)} className="mt-4 w-full py-2 text-sm text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50">닫기</button>
           </div>
         </div>
       )}
@@ -773,18 +991,8 @@ export default function CaseDetailPage() {
             </p>
             <p className="text-xs text-red-500 mb-6">삭제된 사건은 복구할 수 없습니다.</p>
             <div className="flex gap-3">
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 h-11 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50"
-                disabled={deleting}
-              >
-                취소
-              </button>
-              <button
-                onClick={handleDelete}
-                disabled={deleting}
-                className="flex-1 h-11 rounded-xl text-white text-sm font-medium bg-red-500 hover:bg-red-600 disabled:opacity-50 transition-colors"
-              >
+              <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 h-11 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50" disabled={deleting}>취소</button>
+              <button onClick={handleDelete} disabled={deleting} className="flex-1 h-11 rounded-xl text-white text-sm font-medium bg-red-500 hover:bg-red-600 disabled:opacity-50 transition-colors">
                 {deleting ? '삭제 중...' : '삭제'}
               </button>
             </div>
@@ -809,8 +1017,8 @@ function InfoRow({ label, value, isPhone, isEmail }: { label: string; value: str
   )
 }
 
-function ChatHistory({ label, messages }: { label: string; messages: Message[] }) {
-  const [show, setShow] = useState(false)
+function ChatHistory({ label, messages, defaultOpen }: { label: string; messages: Message[]; defaultOpen: boolean }) {
+  const [show, setShow] = useState(defaultOpen)
   return (
     <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
       <button
