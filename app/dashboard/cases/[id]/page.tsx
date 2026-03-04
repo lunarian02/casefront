@@ -37,6 +37,14 @@ type ClientCase = {
   created_at: string
 }
 
+type LinkedRecording = {
+  id: string
+  title: string
+  status: string
+  duration_seconds: number | null
+  created_at: string
+}
+
 type Appointment = {
   id: string
   title: string
@@ -90,6 +98,7 @@ export default function CaseDetailPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [parentMessages, setParentMessages] = useState<Message[]>([])
   const [clientCases, setClientCases] = useState<ClientCase[]>([])
+  const [linkedRecordings, setLinkedRecordings] = useState<LinkedRecording[]>([])
   const [fetching, setFetching] = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [statusUpdating, setStatusUpdating] = useState(false)
@@ -148,6 +157,14 @@ export default function CaseDetailPage() {
         setFetching(false)
       })
       .catch(() => setFetching(false))
+
+    // Fetch linked recordings separately
+    fetch(`/api/dashboard/cases/${sessionId}/recordings`, {
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    })
+      .then((r) => r.json())
+      .then((d) => setLinkedRecordings(d.recordings ?? []))
+      .catch(() => {})
   }, [session, sessionId])
 
   useEffect(() => {
@@ -778,6 +795,44 @@ export default function CaseDetailPage() {
               <div className="bg-white rounded-xl border border-slate-200 p-4">
                 <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">고객 요청사항</h2>
                 <p className="text-sm text-slate-700">{summary.client_request}</p>
+              </div>
+            )}
+
+            {/* Linked recordings */}
+            {linkedRecordings.length > 0 && !editMode && (
+              <div className="bg-white rounded-xl border border-slate-200 p-4">
+                <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">연결된 녹음 상담</h2>
+                <ul className="space-y-2">
+                  {linkedRecordings.map((rec) => (
+                    <li key={rec.id}>
+                      <a
+                        href={`/dashboard/recordings/${rec.id}`}
+                        className="flex items-center justify-between gap-2 p-2 rounded-lg hover:bg-slate-50 transition-colors group"
+                      >
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-slate-800 truncate group-hover:text-blue-600 transition-colors">
+                            {rec.title || '제목 없음'}
+                          </p>
+                          <p className="text-xs text-slate-400 mt-0.5">
+                            {rec.status === 'completed' ? (
+                              <span style={{ color: '#16A34A' }}>완료</span>
+                            ) : (
+                              <span style={{ color: '#D97706' }}>분석중</span>
+                            )}
+                            {rec.duration_seconds != null && (
+                              <span className="ml-1.5">
+                                · {Math.floor(rec.duration_seconds / 60)}분
+                              </span>
+                            )}
+                          </p>
+                        </div>
+                        <svg className="w-4 h-4 text-slate-300 group-hover:text-blue-400 flex-shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
           </div>
