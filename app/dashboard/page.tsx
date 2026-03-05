@@ -29,15 +29,8 @@ const STATUS_CONFIG = {
 }
 
 function formatDate(dateStr: string) {
-  const diffMs = Date.now() - new Date(dateStr).getTime()
-  const diffMin = Math.floor(diffMs / 60000)
-  const diffHour = Math.floor(diffMin / 60)
-  const diffDay = Math.floor(diffHour / 24)
-  if (diffMin < 1) return '방금 전'
-  if (diffMin < 60) return `${diffMin}분 전`
-  if (diffHour < 24) return `${diffHour}시간 전`
-  if (diffDay < 7) return `${diffDay}일 전`
-  return new Date(dateStr).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })
+  const d = new Date(dateStr)
+  return d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
 const PAGE_SIZE = 20
