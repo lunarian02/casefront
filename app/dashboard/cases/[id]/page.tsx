@@ -6,13 +6,7 @@ import type { CaseSummary } from '@/types'
 
 type CaseDetail = {
   id: number
-  session_id: string
   client_id: string | null
-  is_proxy: boolean | null
-  contact_name?: string | null
-  contact_phone?: string | null
-  contact_email?: string | null
-  contact_relation?: string | null
   case_type: string
   status: 'new' | 'reviewing' | 'done' | null
   parent_case_id: number | null
@@ -23,7 +17,6 @@ type CaseDetail = {
 
 type ClientCase = {
   id: number
-  session_id: string
   case_type: string
   created_at: string
 }
@@ -531,7 +524,7 @@ export default function CaseDetailPage() {
             <div className="bg-white rounded-xl border border-slate-200 p-4">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                  {caseData.is_proxy ? '당사자 정보' : '고객 정보'}
+                  고객 정보
                 </h2>
                 {caseData.client_id && (
                   <button
@@ -558,18 +551,6 @@ export default function CaseDetailPage() {
                 })} />
               </div>
             </div>
-
-            {/* Proxy contact */}
-            {caseData.is_proxy && caseData.contact_name && (
-              <div className="bg-white rounded-xl border border-slate-200 p-4">
-                <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">문의자 정보 (대리)</h2>
-                <div className="space-y-2.5">
-                  <InfoRow label="이름" value={`${caseData.contact_name}${caseData.contact_relation ? ` (${caseData.contact_relation})` : ''}`} />
-                  {caseData.contact_phone && <InfoRow label="연락처" value={caseData.contact_phone} isPhone />}
-                  {caseData.contact_email && <InfoRow label="이메일" value={caseData.contact_email} isEmail />}
-                </div>
-              </div>
-            )}
 
             {/* Summary — section edit */}
             <div className="bg-white rounded-xl border border-slate-200 p-4">

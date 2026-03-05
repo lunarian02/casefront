@@ -16,7 +16,6 @@ type ClientDetail = {
 
 type CaseRow = {
   id: string
-  session_id: string
   case_type: string
   status: 'new' | 'reviewing' | 'done' | 'completed' | null
   summary: CaseSummary
@@ -235,8 +234,8 @@ export default function ClientDetailPage() {
                   const status = STATUS_CONFIG[c.status ?? 'new'] ?? STATUS_CONFIG.new
                   return (
                     <div
-                      key={c.session_id}
-                      onClick={() => router.push(`/dashboard/cases/${c.session_id}`)}
+                      key={c.id}
+                      onClick={() => router.push(`/dashboard/cases/${c.id}`)}
                       className="flex items-center justify-between p-3 rounded-lg border border-slate-100 hover:border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors"
                     >
                       <span className="text-sm font-medium text-slate-800">{c.case_type}</span>

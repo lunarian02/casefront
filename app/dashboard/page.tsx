@@ -6,7 +6,6 @@ import Pagination from '@/components/Pagination'
 
 type CaseRow = {
   id: string
-  session_id: string
   client?: {
     id: string
     name: string
@@ -16,9 +15,6 @@ type CaseRow = {
   } | null
   case_type: string
   status: 'new' | 'reviewing' | 'done' | null
-  is_proxy: boolean | null
-  contact_name: string | null
-  contact_relation: string | null
   created_at: string
 }
 
@@ -69,12 +65,12 @@ export default function DashboardPage() {
     if (!deleteTarget || !session || deleting) return
     setDeleting(true)
     try {
-      const res = await fetch(`/api/dashboard/cases/${deleteTarget.session_id}`, {
+      const res = await fetch(`/api/dashboard/cases/${deleteTarget.id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${session.access_token}` },
       })
       if (res.ok) {
-        setCases((prev) => prev.filter((c) => c.session_id !== deleteTarget.session_id))
+        setCases((prev) => prev.filter((c) => c.id !== deleteTarget.id))
         setDeleteTarget(null)
       }
     } finally {
@@ -146,7 +142,7 @@ export default function DashboardPage() {
               const isPast = (c.status ?? 'new') === 'done'
               return (
                 <div
-                  key={c.session_id}
+                  key={c.id}
                   className="bg-white rounded-xl p-4 border border-slate-200 active:bg-slate-50"
                 >
                   <div className="flex items-center justify-between mb-2">
@@ -161,14 +157,11 @@ export default function DashboardPage() {
                     </button>
                   </div>
                   <div
-                    onClick={() => router.push(`/dashboard/cases/${c.session_id}`)}
+                    onClick={() => router.push(`/dashboard/cases/${c.id}`)}
                     className="cursor-pointer"
                   >
                     <div className={`font-semibold text-base leading-snug mb-0.5 ${isPast ? 'text-slate-400' : 'text-slate-900'}`}>
                       {c.client?.name ?? '고객 정보 없음'}
-                      {c.is_proxy && c.contact_name && (
-                        <span className="ml-1.5 text-xs font-normal text-slate-400">(대리: {c.contact_name})</span>
-                      )}
                     </div>
                     <div className="text-sm text-slate-500 mb-0.5">{c.case_type}</div>
                     <div className="flex items-center gap-2 mt-1">
@@ -196,18 +189,14 @@ export default function DashboardPage() {
                 {filtered.map((c) => {
                   const s = STATUS_CONFIG[c.status ?? 'new']
                   const isPast = (c.status ?? 'new') === 'done'
-                  const proxyLabel = c.is_proxy && c.contact_name
-                    ? `(대리: ${c.contact_name}${c.contact_relation ? `/${c.contact_relation}` : ''})`
-                    : null
                   return (
                     <tr
-                      key={c.session_id}
-                      onClick={() => router.push(`/dashboard/cases/${c.session_id}`)}
+                      key={c.id}
+                      onClick={() => router.push(`/dashboard/cases/${c.id}`)}
                       className="hover:bg-slate-50 cursor-pointer transition-colors group"
                     >
                       <td className="px-4 py-3">
                         <span className={`text-sm font-medium ${isPast ? 'text-slate-400' : 'text-slate-900'}`}>{c.client?.name ?? '고객 정보 없음'}</span>
-                        {proxyLabel && <span className="ml-1.5 text-xs text-slate-400">{proxyLabel}</span>}
                       </td>
                       <td className="px-4 py-3 text-sm text-slate-600 max-w-xs truncate">{c.case_type}</td>
                       <td className="px-4 py-3">

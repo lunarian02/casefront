@@ -55,14 +55,12 @@ type Appointment = {
 type LinkedCase = {
   id: string
   case_id: number
-  session_id: string | null  // from JOIN on cases, for navigation
   case_client_name: string | null
   case_type: string | null
 }
 
 type CaseRow = {
   id: number
-  session_id: string
   client?: {
     id: string
     name: string
@@ -640,7 +638,7 @@ export default function RecordingDetailPage() {
         {linkedCases.map((lc) => (
           <div key={lc.id} className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 rounded-lg text-sm">
             <button
-              onClick={() => router.push(`/dashboard/cases/${lc.session_id}`)}
+              onClick={() => router.push(`/dashboard/cases/${lc.case_id}`)}
               className="font-medium hover:underline"
               style={{ color: '#4a7aef' }}
             >
