@@ -56,8 +56,7 @@ export async function DELETE(
   const firmId = await getAuthFirmId(request)
   if (!firmId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // Unlink client from sessions and case_summaries before deleting
-  await supabaseAdmin.from('sessions').update({ client_id: null }).eq('client_id', clientId)
+  // Unlink client from case_summaries before deleting
   await supabaseAdmin.from('case_summaries').update({ client_id: null }).eq('client_id', clientId).eq('firm_id', firmId)
 
   const { error } = await supabaseAdmin

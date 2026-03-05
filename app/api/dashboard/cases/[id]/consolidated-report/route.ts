@@ -48,10 +48,21 @@ export async function GET(
   const firm = await getAuthFirm(request)
   if (!firm) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  // Look up case integer ID
+  const { data: caseRow } = await supabaseAdmin
+    .from('case_summaries')
+    .select('id')
+    .eq('session_id', sessionId)
+    .eq('firm_id', firm.id)
+    .maybeSingle()
+
+  if (!caseRow) return NextResponse.json({ report: null })
+  const caseId = caseRow.id
+
   const { data: report } = await supabaseAdmin
     .from('reports')
     .select('id, content, case_type, llm_model, created_at')
-    .eq('case_session_id', sessionId)
+    .eq('case_id', caseId)
     .eq('report_type', 'consolidated')
     .order('created_at', { ascending: false })
     .limit(1)
@@ -68,11 +79,22 @@ export async function POST(
   const firm = await getAuthFirm(request)
   if (!firm) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  // Look up case integer ID
+  const { data: caseRow } = await supabaseAdmin
+    .from('case_summaries')
+    .select('id')
+    .eq('session_id', sessionId)
+    .eq('firm_id', firm.id)
+    .maybeSingle()
+
+  if (!caseRow) return NextResponse.json({ error: 'Case not found' }, { status: 404 })
+  const caseId = caseRow.id
+
   // Fetch all linked recording IDs
   const { data: links, error: linkErr } = await supabaseAdmin
     .from('recording_case_links')
     .select('recording_id')
-    .eq('case_session_id', sessionId)
+    .eq('case_id', caseId)
     .eq('user_id', firm.id)
 
   if (linkErr || !links || links.length < 2) {
@@ -127,7 +149,7 @@ export async function POST(
   const { data: report, error: insertErr } = await supabaseAdmin
     .from('reports')
     .insert({
-      case_session_id: sessionId,
+      case_id: caseId,
       recording_id: null,
       transcript_id: null,
       content: reportContent,

@@ -42,39 +42,18 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     return NextResponse.json({ error: 'Case not found' }, { status: 404 })
   }
 
-  // Fetch session channel
-  const { data: sessionData } = await supabaseAdmin
-    .from('sessions')
-    .select('channel')
-    .eq('id', sessionId)
-    .maybeSingle()
+  const channel = 'web'
 
-  const channel = sessionData?.channel ?? 'web'
-
-  const { data: messages } = await supabaseAdmin
-    .from('messages')
-    .select('role, content, created_at')
-    .eq('session_id', sessionId)
-    .order('created_at', { ascending: true })
-
-  // If there's a parent case, fetch its messages too
-  let parentMessages: typeof messages = null
-  if (caseData.parent_case_id) {
-    const { data: parentCase } = await supabaseAdmin
-      .from('case_summaries')
-      .select('session_id')
-      .eq('id', caseData.parent_case_id)
+  // Fetch live client data (latest from clients table)
+  let liveClient = null
+  if (caseData.client_id) {
+    const { data: clientData } = await supabaseAdmin
+      .from('clients')
+      .select('id, name, phone, email, referrer')
+      .eq('id', caseData.client_id)
       .eq('firm_id', firm.id)
       .maybeSingle()
-
-    if (parentCase?.session_id) {
-      const { data: pMsgs } = await supabaseAdmin
-        .from('messages')
-        .select('role, content, created_at')
-        .eq('session_id', parentCase.session_id)
-        .order('created_at', { ascending: true })
-      parentMessages = pMsgs
-    }
+    liveClient = clientData ?? null
   }
 
   // Fetch other cases for the same client (for connect modal)
@@ -93,8 +72,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
   return NextResponse.json({
     case: { ...caseData, channel },
-    messages: messages ?? [],
-    parentMessages: parentMessages ?? [],
+    client: liveClient,
     clientCases,
   })
 }

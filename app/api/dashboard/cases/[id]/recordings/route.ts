@@ -22,11 +22,22 @@ export async function GET(
   const firm = await getAuthFirm(request)
   if (!firm) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // Get recording IDs linked to this case session
+  // Look up case integer ID from session_id
+  const { data: caseRow } = await supabaseAdmin
+    .from('case_summaries')
+    .select('id')
+    .eq('session_id', sessionId)
+    .eq('firm_id', firm.id)
+    .maybeSingle()
+
+  if (!caseRow) return NextResponse.json({ recordings: [] })
+  const caseId = caseRow.id
+
+  // Get recording IDs linked to this case
   const { data: links, error: linkErr } = await supabaseAdmin
     .from('recording_case_links')
     .select('recording_id')
-    .eq('case_session_id', sessionId)
+    .eq('case_id', caseId)
     .eq('user_id', firm.id)
 
   if (linkErr) return NextResponse.json({ error: linkErr.message }, { status: 500 })

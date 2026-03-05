@@ -14,6 +14,8 @@ type Recording = {
   duration_seconds: number | null
   created_at: string
   firm_id: string
+  client_id: string | null
+  client_name: string | null
 }
 
 type Report = {
@@ -46,12 +48,14 @@ type Appointment = {
 
 type LinkedCase = {
   id: string
-  case_session_id: string
+  case_id: number
+  session_id: string | null  // from JOIN on case_summaries, for navigation
   case_client_name: string | null
   case_type: string | null
 }
 
 type CaseRow = {
+  id: number
   session_id: string
   client_name: string
   case_type: string
@@ -284,6 +288,12 @@ export default function RecordingDetailPage() {
   const [cases, setCases] = useState<CaseRow[]>([])
   const [casesLoading, setCasesLoading] = useState(false)
   const [linkSaving, setLinkSaving] = useState(false)
+  // New case creation inside link modal
+  const [linkModalTab, setLinkModalTab] = useState<'link' | 'create'>('link')
+  const [newCaseName, setNewCaseName] = useState('')
+  const [newCasePhone, setNewCasePhone] = useState('')
+  const [newCaseType, setNewCaseType] = useState('')
+  const [createSaving, setCreateSaving] = useState(false)
 
   const fetchDetail = useCallback(() => {
     if (!session || !recordingId) return
@@ -400,6 +410,10 @@ export default function RecordingDetailPage() {
   // Case link handlers
   async function openLinkModal() {
     if (!session) return
+    setLinkModalTab('link')
+    setNewCaseName(recording?.client_name ?? '')
+    setNewCasePhone('')
+    setNewCaseType('')
     setShowLinkModal(true)
     setCasesLoading(true)
     const res = await fetch('/api/dashboard/cases', { headers: { Authorization: `Bearer ${session.access_token}` } })
@@ -408,13 +422,45 @@ export default function RecordingDetailPage() {
     setCasesLoading(false)
   }
 
+  async function handleCreateNewCase() {
+    if (!session || createSaving) return
+    setCreateSaving(true)
+    try {
+      // 1. Create new case
+      const res = await fetch('/api/dashboard/cases', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ client_name: newCaseName, client_phone: newCasePhone, case_type: newCaseType }),
+      })
+      if (!res.ok) {
+        const err = await res.json()
+        alert(err.error ?? '사건 생성 실패')
+        return
+      }
+      const { case: newCase } = await res.json()
+      // 2. Link recording to new case
+      const linkRes = await fetch(`/api/dashboard/recordings/${recordingId}/links`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ case_id: newCase.id, case_client_name: newCase.client_name, case_type: newCase.case_type }),
+      })
+      if (linkRes.ok) {
+        const linkData = await linkRes.json()
+        setLinkedCases((prev) => [...prev, linkData.link])
+        setShowLinkModal(false)
+      }
+    } finally {
+      setCreateSaving(false)
+    }
+  }
+
   async function handleLink(c: CaseRow) {
     if (!session || linkSaving) return
     setLinkSaving(true)
     const res = await fetch(`/api/dashboard/recordings/${recordingId}/links`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
-      body: JSON.stringify({ case_session_id: c.session_id, case_client_name: c.client_name, case_type: c.case_type }),
+      body: JSON.stringify({ case_id: c.id, case_client_name: c.client_name, case_type: c.case_type }),
     })
     if (res.ok) {
       const data = await res.json()
@@ -484,12 +530,28 @@ export default function RecordingDetailPage() {
         </div>
       </div>
 
+      {/* Client link */}
+      {recording.client_id && (
+        <div className="mb-2">
+          <button
+            onClick={() => router.push(`/dashboard/clients/${recording.client_id}`)}
+            className="flex items-center gap-1.5 text-sm font-medium hover:underline"
+            style={{ color: '#4a7aef' }}
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            {recording.client_name ?? '고객 상세'} →
+          </button>
+        </div>
+      )}
+
       {/* Linked cases */}
       <div className="flex items-center gap-2 mb-4 flex-wrap">
         {linkedCases.map((lc) => (
           <div key={lc.id} className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 rounded-lg text-sm">
             <button
-              onClick={() => router.push(`/dashboard/cases/${lc.case_session_id}`)}
+              onClick={() => router.push(`/dashboard/cases/${lc.session_id}`)}
               className="font-medium hover:underline"
               style={{ color: '#4a7aef' }}
             >
@@ -784,37 +846,97 @@ export default function RecordingDetailPage() {
                 </svg>
               </button>
             </div>
-            <div className="px-5 py-4 max-h-80 overflow-y-auto">
-              {casesLoading ? (
-                <div className="flex items-center justify-center h-24">
-                  <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#1a2b5a', borderTopColor: 'transparent' }} />
-                </div>
-              ) : cases.length === 0 ? (
-                <p className="text-center text-sm text-slate-400 py-8">연결할 수 있는 사건이 없습니다.</p>
-              ) : (
-                <div className="space-y-2">
-                  {cases.map((c) => {
-                    const alreadyLinked = linkedCases.some((l) => l.case_session_id === c.session_id)
-                    return (
-                      <button
-                        key={c.session_id}
-                        onClick={() => !alreadyLinked && handleLink(c)}
-                        disabled={alreadyLinked || linkSaving}
-                        className={`w-full text-left px-4 py-3 rounded-lg border transition-colors ${
-                          alreadyLinked ? 'border-blue-200 bg-blue-50 cursor-default' : 'border-slate-200 hover:bg-slate-50 disabled:opacity-50'
-                        }`}
-                      >
-                        <span className="text-sm font-medium text-slate-800">{c.client_name}</span>
-                        <span className="ml-2 text-sm text-slate-500">{c.case_type}</span>
-                        {alreadyLinked && <span className="ml-2 text-xs text-blue-600">✓ 연결됨</span>}
-                      </button>
-                    )
-                  })}
-                </div>
-              )}
+            {/* Tabs */}
+            <div className="flex border-b border-slate-100">
+              {(['link', 'create'] as const).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setLinkModalTab(tab)}
+                  className={`flex-1 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+                    linkModalTab === tab ? 'border-current' : 'border-transparent text-slate-400 hover:text-slate-600'
+                  }`}
+                  style={linkModalTab === tab ? { color: '#1a2b5a', borderColor: '#1a2b5a' } : {}}
+                >
+                  {tab === 'link' ? '기존 사건에 연결' : '새 사건 만들기'}
+                </button>
+              ))}
             </div>
-            <div className="px-5 pb-5">
-              <button onClick={() => setShowLinkModal(false)} className="w-full h-11 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50">닫기</button>
+
+            {linkModalTab === 'link' ? (
+              <div className="px-5 py-4 max-h-72 overflow-y-auto">
+                {casesLoading ? (
+                  <div className="flex items-center justify-center h-24">
+                    <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#1a2b5a', borderTopColor: 'transparent' }} />
+                  </div>
+                ) : cases.length === 0 ? (
+                  <p className="text-center text-sm text-slate-400 py-8">연결할 수 있는 사건이 없습니다.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {cases.map((c) => {
+                      const alreadyLinked = linkedCases.some((l) => l.case_id === c.id)
+                      return (
+                        <button
+                          key={c.session_id}
+                          onClick={() => !alreadyLinked && handleLink(c)}
+                          disabled={alreadyLinked || linkSaving}
+                          className={`w-full text-left px-4 py-3 rounded-lg border transition-colors ${
+                            alreadyLinked ? 'border-blue-200 bg-blue-50 cursor-default' : 'border-slate-200 hover:bg-slate-50 disabled:opacity-50'
+                          }`}
+                        >
+                          <span className="text-sm font-medium text-slate-800">{c.client_name}</span>
+                          <span className="ml-2 text-sm text-slate-500">{c.case_type}</span>
+                          {alreadyLinked && <span className="ml-2 text-xs text-blue-600">✓ 연결됨</span>}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="px-5 py-4 space-y-3">
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">이름 *</label>
+                  <input
+                    value={newCaseName}
+                    onChange={(e) => setNewCaseName(e.target.value)}
+                    placeholder="고객 이름"
+                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">전화번호 *</label>
+                  <input
+                    value={newCasePhone}
+                    onChange={(e) => setNewCasePhone(e.target.value)}
+                    placeholder="010-0000-0000"
+                    type="tel"
+                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">사건 유형 (선택)</label>
+                  <input
+                    value={newCaseType}
+                    onChange={(e) => setNewCaseType(e.target.value)}
+                    placeholder="예: 형사-폭행"
+                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="px-5 pb-5 flex gap-3">
+              <button onClick={() => setShowLinkModal(false)} className="flex-1 h-11 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50">닫기</button>
+              {linkModalTab === 'create' && (
+                <button
+                  onClick={handleCreateNewCase}
+                  disabled={createSaving || !newCaseName.trim() || !newCasePhone.trim()}
+                  className="flex-1 h-11 rounded-xl text-white text-sm font-medium disabled:opacity-50"
+                  style={{ background: '#1a2b5a' }}
+                >
+                  {createSaving ? '생성 중...' : '사건 생성 + 연결'}
+                </button>
+              )}
             </div>
           </div>
         </div>

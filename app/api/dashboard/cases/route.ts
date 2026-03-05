@@ -48,7 +48,7 @@ export async function GET(request: Request) {
       .eq('firm_id', firm.id),
     supabaseAdmin
       .from('case_summaries')
-      .select('id, session_id, client_name, client_phone, client_email, case_type, status, is_proxy, contact_name, contact_relation, created_at, sessions(channel)')
+      .select('id, session_id, client_name, client_phone, client_email, case_type, status, is_proxy, contact_name, contact_relation, created_at')
       .eq('firm_id', firm.id)
       .order('created_at', { ascending: false })
       .range(offset, offset + PAGE_LIMIT - 1),
@@ -58,16 +58,10 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: casesResult.error.message }, { status: 500 })
   }
 
-  // Flatten sessions.channel to top-level
-  const flatCases = (casesResult.data ?? []).map((c: Record<string, unknown>) => {
-    const sessions = c.sessions as { channel?: string } | null
-    return { ...c, channel: sessions?.channel ?? 'web', sessions: undefined }
-  })
-
-  return NextResponse.json({ cases: flatCases, total: countResult.count ?? 0 })
+  return NextResponse.json({ cases: casesResult.data ?? [], total: countResult.count ?? 0 })
 }
 
-// POST /api/dashboard/cases — 녹음 상담에서 새 사건 생성 (최소 데이터)
+// POST /api/dashboard/cases — 상담 기록에서 새 사건 생성 (최소 데이터)
 export async function POST(request: Request) {
   const user = await getAuthUser(request)
   if (!user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

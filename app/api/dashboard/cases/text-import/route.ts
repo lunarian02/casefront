@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { randomUUID } from 'crypto'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { supabaseAdmin } from '@/lib/supabase'
 
@@ -17,7 +18,6 @@ const TEXT_IMPORT_PROMPT = `당신은 법률 사건 정보를 구조화하는 AI
 - 주요 사건 경위 (시간순)
 - 요건사실 충족 여부
 - 증거 목록
-- 긴급도 (urgent/normal/low)
 - 소멸시효 분석
 - 다음 액션 제안
 
@@ -63,8 +63,6 @@ const TEXT_IMPORT_PROMPT = `당신은 법률 사건 정보를 구조화하는 AI
     "next_actions": [],
     "risk_factors": []
   },
-  "urgency": "normal",
-  "urgency_reason": "긴급도 판단 근거",
   "summary_text": "한 줄 요약",
   "conversation_turns": 0,
   "timestamp": "${new Date().toISOString()}"
@@ -131,22 +129,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'AI 구조화 중 오류가 발생했습니다. 다시 시도해 주세요.' }, { status: 500 })
   }
 
-  // Create session (channel='web', completed immediately)
-  const { data: session, error: sessionError } = await supabaseAdmin
-    .from('sessions')
-    .insert({
-      firm_id: auth.firm.id,
-      channel: 'web',
-      status: 'completed',
-      completed_at: new Date().toISOString(),
-    })
-    .select('id')
-    .single()
-
-  if (sessionError || !session) {
-    console.error('Session creation error:', sessionError)
-    return NextResponse.json({ error: '사건 저장 중 오류가 발생했습니다.' }, { status: 500 })
-  }
+  // Generate a unique session_id for this case
+  const sessionId = randomUUID()
 
   // Upsert client if phone is available
   let clientId: string | null = null
@@ -171,11 +155,6 @@ export async function POST(request: Request) {
 
     if (client) {
       clientId = client.id
-      // Link client to session
-      await supabaseAdmin
-        .from('sessions')
-        .update({ client_id: clientId })
-        .eq('id', session.id)
     }
   }
 
@@ -183,7 +162,7 @@ export async function POST(request: Request) {
   const { data: caseRecord, error: caseError } = await supabaseAdmin
     .from('case_summaries')
     .insert({
-      session_id: session.id,
+      session_id: sessionId,
       firm_id: auth.firm.id,
       client_id: clientId,
       client_name: clientName,
@@ -196,8 +175,6 @@ export async function POST(request: Request) {
       contact_relation: (caseSummary.contact_relation as string | null) ?? null,
       case_type: (caseSummary.case_type as string | null) ?? '기타',
       status: 'new',
-      urgency: (caseSummary.urgency as string | null) ?? 'normal',
-      urgency_reason: (caseSummary.urgency_reason as string | null) ?? null,
       summary: caseSummary,
     })
     .select('id, session_id')
@@ -208,5 +185,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: '사건 저장 중 오류가 발생했습니다.' }, { status: 500 })
   }
 
-  return NextResponse.json({ session_id: session.id, case_id: caseRecord.id })
+  return NextResponse.json({ session_id: caseRecord.session_id, case_id: caseRecord.id })
 }

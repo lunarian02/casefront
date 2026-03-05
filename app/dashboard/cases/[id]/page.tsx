@@ -31,6 +31,14 @@ type ClientCase = {
   created_at: string
 }
 
+type LiveClient = {
+  id: string
+  name: string
+  phone: string
+  email: string | null
+  referrer: string | null
+}
+
 type LinkedReport = {
   id: string
   case_type: string | null
@@ -105,6 +113,7 @@ export default function CaseDetailPage() {
   const router = useRouter()
   const { session, loading } = useAuth()
   const [caseData, setCaseData] = useState<CaseDetail | null>(null)
+  const [liveClient, setLiveClient] = useState<LiveClient | null>(null)
   const [clientCases, setClientCases] = useState<ClientCase[]>([])
   const [linkedRecordings, setLinkedRecordings] = useState<LinkedRecording[]>([])
   const [fetching, setFetching] = useState(true)
@@ -161,6 +170,7 @@ export default function CaseDetailPage() {
       .then((data) => {
         if (!data) return
         setCaseData(data.case)
+        setLiveClient(data.client ?? null)
         setClientCases(data.clientCases ?? [])
         setFetching(false)
       })
@@ -537,9 +547,12 @@ export default function CaseDetailPage() {
                 )}
               </div>
               <div className="space-y-2.5">
-                <InfoRow label="이름" value={caseData.client_name} />
-                <InfoRow label="연락처" value={caseData.client_phone} isPhone />
-                {caseData.client_email && <InfoRow label="이메일" value={caseData.client_email} isEmail />}
+                <InfoRow label="이름" value={liveClient?.name ?? caseData.client_name} />
+                <InfoRow label="연락처" value={liveClient?.phone ?? caseData.client_phone} isPhone />
+                {(liveClient?.email ?? caseData.client_email) && (
+                  <InfoRow label="이메일" value={(liveClient?.email ?? caseData.client_email) as string} isEmail />
+                )}
+                {liveClient?.referrer && <InfoRow label="추천인" value={liveClient.referrer} />}
                 <InfoRow label="접수일" value={new Date(caseData.created_at).toLocaleString('ko-KR', {
                   year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
                 })} />

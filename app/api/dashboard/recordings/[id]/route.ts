@@ -52,18 +52,24 @@ export async function GET(
     .from('recordings')
     .createSignedUrl(storagePath, 3600)
 
-  // Linked cases
+  // Linked cases (JOIN case_summaries for session_id navigation)
   const { data: links } = await supabaseAdmin
     .from('recording_case_links')
-    .select('id, case_session_id, case_client_name, case_type')
+    .select('id, case_id, case_client_name, case_type, case_summaries(session_id)')
     .eq('recording_id', recordingId)
     .eq('user_id', firm.id)
+
+  // Flatten session_id for navigation
+  const linkedCases = (links ?? []).map((l: Record<string, unknown>) => {
+    const cs = l.case_summaries as { session_id?: string } | null
+    return { ...l, session_id: cs?.session_id ?? null, case_summaries: undefined }
+  })
 
   return NextResponse.json({
     recording,
     report: report ?? null,
     transcript: transcript ?? null,
     signedUrl: urlData?.signedUrl ?? null,
-    linkedCases: links ?? [],
+    linkedCases,
   })
 }

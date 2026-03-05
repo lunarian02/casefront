@@ -25,13 +25,20 @@ export async function GET(
 
   const { data, error } = await supabaseAdmin
     .from('recording_case_links')
-    .select('id, case_session_id, case_client_name, case_type, created_at')
+    .select('id, case_id, case_client_name, case_type, created_at, case_summaries(session_id)')
     .eq('recording_id', recordingId)
     .eq('user_id', firm.id)
     .order('created_at', { ascending: false })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ links: data ?? [] })
+
+  // Flatten session_id for navigation
+  const links = (data ?? []).map((l: Record<string, unknown>) => {
+    const cs = l.case_summaries as { session_id?: string } | null
+    return { ...l, session_id: cs?.session_id ?? null, case_summaries: undefined }
+  })
+
+  return NextResponse.json({ links })
 }
 
 // POST: link a case to this recording
@@ -43,16 +50,16 @@ export async function POST(
   const firm = await getAuthFirm(request)
   if (!firm) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { case_session_id, case_client_name, case_type } = await request.json()
-  if (!case_session_id) {
-    return NextResponse.json({ error: 'case_session_id is required' }, { status: 400 })
+  const { case_id, case_client_name, case_type } = await request.json()
+  if (!case_id) {
+    return NextResponse.json({ error: 'case_id is required' }, { status: 400 })
   }
 
   const { data, error } = await supabaseAdmin
     .from('recording_case_links')
     .insert({
       recording_id: recordingId,
-      case_session_id,
+      case_id,
       user_id: firm.id,
       case_client_name: case_client_name ?? null,
       case_type: case_type ?? null,
