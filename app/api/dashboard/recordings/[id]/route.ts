@@ -62,10 +62,7 @@ export async function GET(
     .eq('recording_id', recordingId)
     .eq('user_id', firm.id)
 
-  // Map case_id as session_id for backward compatibility
-  const linkedCases = (links ?? []).map((l: Record<string, unknown>) => {
-    return { ...l, session_id: l.case_id }
-  })
+  const linkedCases = links ?? []
 
   return NextResponse.json({
     recording,

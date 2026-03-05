@@ -18,20 +18,19 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id: sessionId } = await params
+  const { id: caseId } = await params
   const firm = await getAuthFirm(request)
   if (!firm) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // Look up case integer ID from session_id
+  // Verify case exists and belongs to firm
   const { data: caseRow } = await supabaseAdmin
     .from('cases')
     .select('id')
-    .eq('session_id', sessionId)
+    .eq('id', caseId)
     .eq('firm_id', firm.id)
     .maybeSingle()
 
   if (!caseRow) return NextResponse.json({ recordings: [] })
-  const caseId = caseRow.id
 
   // Get recording IDs linked to this case
   const { data: links, error: linkErr } = await supabaseAdmin

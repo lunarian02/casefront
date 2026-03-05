@@ -32,12 +32,7 @@ export async function GET(
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Map case_id as session_id for backward compatibility
-  const links = (data ?? []).map((l: Record<string, unknown>) => {
-    return { ...l, session_id: l.case_id }
-  })
-
-  return NextResponse.json({ links })
+  return NextResponse.json({ links: data ?? [] })
 }
 
 // POST: link a case to this recording

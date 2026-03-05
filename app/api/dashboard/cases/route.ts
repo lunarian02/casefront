@@ -49,7 +49,7 @@ export async function GET(request: Request) {
     supabaseAdmin
       .from('cases')
       .select(`
-        id, session_id, case_type, status, is_proxy, contact_name, contact_relation, created_at,
+        id, case_type, status, created_at,
         client:clients(id, name, phone, email, referrer)
       `)
       .eq('firm_id', firm.id)
@@ -102,13 +102,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: clientError?.message ?? '고객 생성 실패' }, { status: 500 })
   }
 
-  // Step 2: Create case_summary with client_id
-  const sessionId = randomUUID()
+  // Step 2: Create case with client_id
   const { data, error } = await supabaseAdmin
     .from('cases')
     .insert({
       firm_id: firm.id,
-      session_id: sessionId,
       client_id: client.id,
       case_type: case_type?.trim() || null,
       status: 'new',
@@ -119,7 +117,7 @@ export async function POST(request: Request) {
       },
     })
     .select(`
-      id, session_id, case_type, status, created_at,
+      id, case_type, status, created_at,
       client:clients(id, name, phone, email, referrer)
     `)
     .single()

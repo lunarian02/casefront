@@ -44,20 +44,19 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id: sessionId } = await params
+  const { id: caseId } = await params
   const firm = await getAuthFirm(request)
   if (!firm) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // Look up case integer ID
+  // Verify case exists
   const { data: caseRow } = await supabaseAdmin
     .from('cases')
     .select('id')
-    .eq('session_id', sessionId)
+    .eq('id', caseId)
     .eq('firm_id', firm.id)
     .maybeSingle()
 
   if (!caseRow) return NextResponse.json({ report: null })
-  const caseId = caseRow.id
 
   const { data: report } = await supabaseAdmin
     .from('reports')
@@ -75,20 +74,19 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id: sessionId } = await params
+  const { id: caseId } = await params
   const firm = await getAuthFirm(request)
   if (!firm) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // Look up case integer ID
+  // Verify case exists
   const { data: caseRow } = await supabaseAdmin
     .from('cases')
     .select('id')
-    .eq('session_id', sessionId)
+    .eq('id', caseId)
     .eq('firm_id', firm.id)
     .maybeSingle()
 
   if (!caseRow) return NextResponse.json({ error: 'Case not found' }, { status: 404 })
-  const caseId = caseRow.id
 
   // Fetch all linked recording IDs
   const { data: links, error: linkErr } = await supabaseAdmin

@@ -28,15 +28,8 @@ const TEXT_IMPORT_PROMPT = `당신은 법률 사건 정보를 구조화하는 AI
   "client_name": "홍길동",
   "client_phone": "010-1234-5678",
   "client_email": null,
-  "is_proxy": false,
-  "contact_name": null,
-  "contact_phone": null,
-  "contact_email": null,
-  "contact_relation": null,
   "is_returning": false,
   "case_type": "민사",
-  "case_subtype": "대여금",
-  "case_sub_tag": null,
   "position": null,
   "events": [
     {
@@ -129,9 +122,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'AI 구조화 중 오류가 발생했습니다. 다시 시도해 주세요.' }, { status: 500 })
   }
 
-  // Generate a unique session_id for this case
-  const sessionId = randomUUID()
-
   // Upsert client if phone is available
   let clientId: string | null = null
   const clientPhone = (caseSummary.client_phone as string | null)?.replace(/[\s\-()]/g, '') ?? null
@@ -158,29 +148,23 @@ export async function POST(request: Request) {
     }
   }
 
-  // Save case_summary
+  // Save case
   const { data: caseRecord, error: caseError } = await supabaseAdmin
     .from('cases')
     .insert({
-      session_id: sessionId,
       firm_id: auth.firm.id,
       client_id: clientId,
-      is_proxy: (caseSummary.is_proxy as boolean | null) ?? false,
-      contact_name: (caseSummary.contact_name as string | null) ?? null,
-      contact_phone: (caseSummary.contact_phone as string | null) ?? null,
-      contact_email: (caseSummary.contact_email as string | null) ?? null,
-      contact_relation: (caseSummary.contact_relation as string | null) ?? null,
       case_type: (caseSummary.case_type as string | null) ?? '기타',
       status: 'new',
       summary: caseSummary,
     })
-    .select('id, session_id')
+    .select('id')
     .single()
 
   if (caseError || !caseRecord) {
-    console.error('Case summary creation error:', caseError)
+    console.error('Case creation error:', caseError)
     return NextResponse.json({ error: '사건 저장 중 오류가 발생했습니다.' }, { status: 500 })
   }
 
-  return NextResponse.json({ session_id: caseRecord.session_id, case_id: caseRecord.id })
+  return NextResponse.json({ case_id: caseRecord.id })
 }

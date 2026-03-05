@@ -10,14 +10,14 @@ async function getAuthUser(request: Request) {
 }
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id: sessionId } = await params
+  const { id: caseId } = await params
   const user = await getAuthUser(request)
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { data, error } = await supabaseAdmin
     .from('appointments')
     .select('id, title, appointment_type, scheduled_at, memo, created_at')
-    .eq('session_id', sessionId)
+    .eq('case_id', caseId)
     .eq('user_id', user.id)
     .order('scheduled_at', { ascending: true })
 
@@ -26,7 +26,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id: sessionId } = await params
+  const { id: caseId } = await params
   const user = await getAuthUser(request)
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -40,7 +40,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const { data, error } = await supabaseAdmin
     .from('appointments')
     .insert({
-      session_id: sessionId,
+      case_id: caseId,
       user_id: user.id,
       title: title.trim(),
       appointment_type: appointment_type ?? 'other',

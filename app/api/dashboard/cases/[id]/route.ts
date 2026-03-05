@@ -24,7 +24,7 @@ async function getAuthFirm(request: Request) {
 }
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id: sessionId } = await params
+  const { id: caseId } = await params
 
   const firm = await getAuthFirm(request)
   if (!firm) {
@@ -33,8 +33,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
   const { data: caseData, error: caseError } = await supabaseAdmin
     .from('cases')
-    .select('id, session_id, client_id, is_proxy, contact_name, contact_phone, contact_email, contact_relation, case_type, status, summary, parent_case_id, created_at')
-    .eq('session_id', sessionId)
+    .select('id, client_id, case_type, status, summary, parent_case_id, created_at')
+    .eq('id', caseId)
     .eq('firm_id', firm.id)
     .maybeSingle()
 
@@ -57,14 +57,14 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   }
 
   // Fetch other cases for the same client (for connect modal)
-  let clientCases: Array<{ id: number; session_id: string; case_type: string; created_at: string }> = []
+  let clientCases: Array<{ id: number; case_type: string; created_at: string }> = []
   if (caseData.client_id) {
     const { data: cc } = await supabaseAdmin
       .from('cases')
-      .select('id, session_id, case_type, created_at')
+      .select('id, case_type, created_at')
       .eq('client_id', caseData.client_id)
       .eq('firm_id', firm.id)
-      .neq('session_id', sessionId)
+      .neq('id', caseId)
       .order('created_at', { ascending: false })
       .limit(20)
     clientCases = cc ?? []
@@ -78,7 +78,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 }
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id: sessionId } = await params
+  const { id: caseId } = await params
 
   const firm = await getAuthFirm(request)
   if (!firm) {
@@ -97,9 +97,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const { data, error } = await supabaseAdmin
       .from('cases')
       .update({ status: body.status })
-      .eq('session_id', sessionId)
+      .eq('id', caseId)
       .eq('firm_id', firm.id)
-      .select('id, session_id, status')
+      .select('id, status')
       .single()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -111,9 +111,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const { data, error } = await supabaseAdmin
       .from('cases')
       .update({ parent_case_id: body.parent_case_id })
-      .eq('session_id', sessionId)
+      .eq('id', caseId)
       .eq('firm_id', firm.id)
-      .select('id, session_id, parent_case_id')
+      .select('id, parent_case_id')
       .single()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -129,7 +129,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const { data: current } = await supabaseAdmin
       .from('cases')
       .select('summary')
-      .eq('session_id', sessionId)
+      .eq('id', caseId)
       .eq('firm_id', firm.id)
       .single()
 
@@ -148,7 +148,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const { data, error } = await supabaseAdmin
     .from('cases')
     .update(allowedEdits)
-    .eq('session_id', sessionId)
+    .eq('id', caseId)
     .eq('firm_id', firm.id)
     .select()
     .single()
@@ -158,18 +158,18 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 }
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id: sessionId } = await params
+  const { id: caseId } = await params
 
   const firm = await getAuthFirm(request)
   if (!firm) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // Get case_summary id first (needed to delete related records)
+  // Verify case exists and belongs to firm
   const { data: caseData, error: findError } = await supabaseAdmin
     .from('cases')
     .select('id')
-    .eq('session_id', sessionId)
+    .eq('id', caseId)
     .eq('firm_id', firm.id)
     .maybeSingle()
 
@@ -177,11 +177,9 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     return NextResponse.json({ error: '사건을 찾을 수 없습니다.' }, { status: 404 })
   }
 
-  const caseId = caseData.id
-
   // Delete related records in order
-  await supabaseAdmin.from('case_notes').delete().eq('case_id', caseId)
-  await supabaseAdmin.from('files').delete().eq('case_id', caseId)
+  await supabaseAdmin.from('case_notes').delete().eq('case_id', caseData.id)
+  await supabaseAdmin.from('files').delete().eq('case_id', caseData.id)
 
   const { error: deleteError } = await supabaseAdmin
     .from('cases')
