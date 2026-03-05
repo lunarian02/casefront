@@ -60,7 +60,6 @@ export default function RecordingsPage() {
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(0)
   const [fetching, setFetching] = useState(true)
-  const [statusFilter, setStatusFilter] = useState<'all' | 'completed' | 'processing'>('all')
 
   const fetchRecordings = useCallback(() => {
     if (!session) return
@@ -80,7 +79,7 @@ export default function RecordingsPage() {
     fetchRecordings()
   }, [fetchRecordings])
 
-  // Realtime: re-fetch on recording status updates
+  // Realtime: re-fetch on recording status updates (new completed/failed recordings)
   useEffect(() => {
     if (!session) return
     const channel = supabaseBrowser
@@ -96,14 +95,6 @@ export default function RecordingsPage() {
     return () => { supabaseBrowser.removeChannel(channel) }
   }, [session, fetchRecordings])
 
-  const filtered = recordings.filter((r) => {
-    if (statusFilter === 'all') return true
-    if (statusFilter === 'completed') return r.status === 'completed'
-    return r.status !== 'completed'
-  })
-
-  const processingCount = recordings.filter((r) => r.status !== 'completed' && r.status !== 'failed').length
-
   if (loading || fetching) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -117,43 +108,17 @@ export default function RecordingsPage() {
       {/* Header */}
       <div className="mb-5">
         <h1 className="text-xl font-bold text-slate-900">상담 목록</h1>
-        <p className="text-slate-500 text-sm mt-0.5">
-          총 {total}건
-          {processingCount > 0 && (
-            <span className="ml-2 font-medium" style={{ color: '#D97706' }}>• 분석중 {processingCount}건</span>
-          )}
-        </p>
+        <p className="text-slate-500 text-sm mt-0.5">총 {total}건</p>
       </div>
 
-      {/* Status filter tabs */}
-      <div className="flex gap-1.5 mb-4 flex-wrap">
-        {([
-          { key: 'all', label: '전체', count: total },
-          { key: 'completed', label: '완료', count: recordings.filter((r) => r.status === 'completed').length },
-          { key: 'processing', label: '분석중', count: recordings.filter((r) => r.status !== 'completed' && r.status !== 'failed').length },
-        ] as const).map((f) => (
-          <button
-            key={f.key}
-            onClick={() => { setStatusFilter(f.key); setPage(0) }}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
-              statusFilter === f.key ? 'text-white border border-transparent' : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'
-            }`}
-            style={statusFilter === f.key ? { background: '#4a7aef' } : {}}
-          >
-            {f.label}
-            <span className="ml-1.5 opacity-70">{f.count}</span>
-          </button>
-        ))}
-      </div>
-
-      {filtered.length === 0 ? (
+      {recordings.length === 0 ? (
         <EmptyState />
 
       ) : (
         <>
           {/* Mobile: card list */}
           <div className="md:hidden space-y-3 pb-6">
-            {filtered.map((r) => {
+            {recordings.map((r) => {
               const s = statusLabel(r.status)
               return (
                 <div
@@ -195,7 +160,7 @@ export default function RecordingsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filtered.map((r) => {
+                {recordings.map((r) => {
                   const s = statusLabel(r.status)
                   return (
                     <tr

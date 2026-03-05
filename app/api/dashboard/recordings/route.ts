@@ -27,11 +27,13 @@ export async function GET(request: Request) {
     supabaseAdmin
       .from('recordings')
       .select('id', { count: 'exact', head: true })
-      .eq('firm_id', firm.id),
+      .eq('firm_id', firm.id)
+      .in('status', ['completed', 'failed']),
     supabaseAdmin
       .from('recordings')
       .select('id, title, status, duration_seconds, created_at, reports(case_type), client:clients(id, name, phone)')
       .eq('firm_id', firm.id)
+      .in('status', ['completed', 'failed'])
       .order('created_at', { ascending: false })
       .range(offset, offset + PAGE_LIMIT - 1),
   ])

@@ -611,7 +611,15 @@ export default function RecordingDetailPage() {
       {/* ── 리포트 탭 ── */}
       {activeTab === 'report' && (
         <div>
-          {recording.status === 'completed' && report ? (
+          {recording.status === 'failed' ? (
+            <div className="text-center py-16">
+              <svg className="w-12 h-12 mx-auto mb-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+              </svg>
+              <p className="text-red-600 font-semibold mb-2">처리에 실패했습니다</p>
+              <p className="text-sm text-slate-500">다시 업로드해주세요.</p>
+            </div>
+          ) : report ? (
             <div className="bg-white rounded-xl border border-slate-200 p-6">
               <div className="prose prose-slate prose-sm max-w-none
                 prose-headings:font-semibold prose-headings:text-slate-800
@@ -624,18 +632,9 @@ export default function RecordingDetailPage() {
                 <ReactMarkdown>{report.content}</ReactMarkdown>
               </div>
             </div>
-          ) : recording.status === 'failed' ? (
-            <div className="text-center py-16">
-              <p className="text-red-500 font-medium mb-1">리포트 생성 중 오류가 발생했습니다.</p>
-              <p className="text-sm text-slate-500">잠시 후 다시 시도하거나 앱에서 재처리해 주세요.</p>
-            </div>
           ) : (
             <div className="text-center py-16">
-              <div className="flex items-center justify-center gap-3 mb-3">
-                <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#D97706', borderTopColor: 'transparent' }} />
-                <span className="text-slate-600 font-medium">리포트를 생성하고 있습니다...</span>
-              </div>
-              <p className="text-sm text-slate-400">Whisper STT → Gemini 분석 순으로 처리됩니다. 완료 시 자동 갱신됩니다.</p>
+              <p className="text-sm text-slate-400">리포트가 없습니다.</p>
             </div>
           )}
         </div>
@@ -672,7 +671,7 @@ export default function RecordingDetailPage() {
 
               {segments.length === 0 ? (
                 <div className="px-4 py-10 text-center text-sm text-slate-400">
-                  {recording.status === 'completed' ? '스크립트가 없습니다.' : '스크립트를 생성하고 있습니다...'}
+                  스크립트가 없습니다.
                 </div>
               ) : (
                 <div className="max-h-[500px] overflow-y-auto divide-y divide-slate-50">
@@ -715,7 +714,7 @@ export default function RecordingDetailPage() {
             </div>
           ) : (
             <div className="bg-white rounded-xl border border-slate-200 p-6 text-center text-sm text-slate-400">
-              {recording.status === 'completed' ? '스크립트가 없습니다.' : '스크립트를 생성하고 있습니다...'}
+              스크립트가 없습니다.
             </div>
           )}
         </div>
