@@ -25,7 +25,7 @@ export async function GET(
   // Recording
   const { data: recording, error: recErr } = await supabaseAdmin
     .from('recordings')
-    .select('id, title, status, duration_seconds, created_at, firm_id, client_id, client:clients(id, name, phone, email)')
+    .select('id, title, status, duration_seconds, created_at, firm_id, client_id, file_path, client:clients(id, name, phone, email)')
     .eq('id', recordingId)
     .eq('firm_id', firm.id)
     .maybeSingle()
@@ -46,11 +46,14 @@ export async function GET(
     .eq('recording_id', recordingId)
     .maybeSingle()
 
-  // Signed URL (1 hour)
-  const storagePath = `recordings/${firm.id}/${recordingId}.m4a`
-  const { data: urlData } = await supabaseAdmin.storage
-    .from('recordings')
-    .createSignedUrl(storagePath, 3600)
+  // Signed URL (1 hour) - use file_path from database
+  let signedUrl = null
+  if (recording.file_path) {
+    const { data: urlData } = await supabaseAdmin.storage
+      .from('recordings')
+      .createSignedUrl(recording.file_path, 3600)
+    signedUrl = urlData?.signedUrl ?? null
+  }
 
   // Linked cases
   const { data: links } = await supabaseAdmin
@@ -68,7 +71,7 @@ export async function GET(
     recording,
     report: report ?? null,
     transcript: transcript ?? null,
-    signedUrl: urlData?.signedUrl ?? null,
+    signedUrl,
     linkedCases,
   })
 }
