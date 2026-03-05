@@ -51,23 +51,30 @@ function statusLabel(status: string): { text: string; color: string } {
   return { text: '분석중', color: '#D97706' }
 }
 
+const PAGE_SIZE = 20
+
 export default function RecordingsPage() {
   const { session, loading } = useAuth()
   const router = useRouter()
   const [recordings, setRecordings] = useState<RecordingRow[]>([])
+  const [total, setTotal] = useState(0)
+  const [page, setPage] = useState(0)
   const [fetching, setFetching] = useState(true)
   const [statusFilter, setStatusFilter] = useState<'all' | 'completed' | 'processing'>('all')
 
   const fetchRecordings = useCallback(() => {
     if (!session) return
-    fetch('/api/dashboard/recordings', {
+    fetch(`/api/dashboard/recordings?offset=${page * PAGE_SIZE}`, {
       headers: { Authorization: `Bearer ${session.access_token}` },
     })
       .then((r) => r.json())
-      .then((data) => setRecordings(data.recordings ?? []))
+      .then((data) => {
+        setRecordings(data.recordings ?? [])
+        setTotal(data.total ?? 0)
+      })
       .catch(() => {})
       .finally(() => setFetching(false))
-  }, [session])
+  }, [session, page])
 
   useEffect(() => {
     fetchRecordings()
@@ -109,9 +116,9 @@ export default function RecordingsPage() {
     <div className="p-4 md:p-6 max-w-5xl">
       {/* Header */}
       <div className="mb-5">
-        <h1 className="text-xl font-bold text-slate-900">녹음 상담</h1>
+        <h1 className="text-xl font-bold text-slate-900">상담 기록</h1>
         <p className="text-slate-500 text-sm mt-0.5">
-          총 {recordings.length}건
+          총 {total}건
           {processingCount > 0 && (
             <span className="ml-2 font-medium" style={{ color: '#D97706' }}>• 분석중 {processingCount}건</span>
           )}
@@ -121,13 +128,13 @@ export default function RecordingsPage() {
       {/* Status filter tabs */}
       <div className="flex gap-1.5 mb-4 flex-wrap">
         {([
-          { key: 'all', label: '전체', count: recordings.length },
+          { key: 'all', label: '전체', count: total },
           { key: 'completed', label: '완료', count: recordings.filter((r) => r.status === 'completed').length },
           { key: 'processing', label: '분석중', count: recordings.filter((r) => r.status !== 'completed' && r.status !== 'failed').length },
         ] as const).map((f) => (
           <button
             key={f.key}
-            onClick={() => setStatusFilter(f.key)}
+            onClick={() => { setStatusFilter(f.key); setPage(0) }}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
               statusFilter === f.key ? 'text-white border border-transparent' : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'
             }`}
@@ -145,7 +152,7 @@ export default function RecordingsPage() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
               d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
           </svg>
-          <p className="text-sm font-medium text-slate-500 mb-1">녹음 상담이 없습니다</p>
+          <p className="text-sm font-medium text-slate-500 mb-1">상담 기록이 없습니다</p>
           <p className="text-sm">CaseFront 앱에서 상담을 녹음하면 여기에 표시됩니다.</p>
         </div>
       ) : (
@@ -226,6 +233,29 @@ export default function RecordingsPage() {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination */}
+          {total > PAGE_SIZE && (
+            <div className="flex items-center justify-between pt-3">
+              <button
+                onClick={() => setPage((p) => p - 1)}
+                disabled={page === 0}
+                className="px-3 py-1.5 text-sm text-slate-600 border border-slate-200 rounded-lg bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                이전
+              </button>
+              <span className="text-sm text-slate-500">
+                {page + 1} / {Math.ceil(total / PAGE_SIZE)} 페이지
+              </span>
+              <button
+                onClick={() => setPage((p) => p + 1)}
+                disabled={(page + 1) * PAGE_SIZE >= total}
+                className="px-3 py-1.5 text-sm text-slate-600 border border-slate-200 rounded-lg bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                다음
+              </button>
+            </div>
+          )}
         </>
       )}
     </div>

@@ -24,6 +24,8 @@ async function getAuthFirmId(request: Request): Promise<string | null> {
   return firm?.id ?? null
 }
 
+const PAGE_LIMIT = 20
+
 export async function POST(request: Request) {
   const firmId = await getAuthFirmId(request)
   if (!firmId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -40,8 +42,9 @@ export async function POST(request: Request) {
       name: body.name.trim(),
       phone: normalizePhone(body.phone),
       email: body.email ? body.email.toLowerCase().trim() : null,
+      referrer: body.referrer ? body.referrer.trim() : null,
     })
-    .select('id, name, phone, email, created_at, last_contact_at')
+    .select('id, name, phone, email, referrer, created_at, last_contact_at')
     .single()
 
   if (error) {
@@ -59,26 +62,39 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { data: clients, error } = await supabaseAdmin
-    .from('clients')
-    .select('id, name, phone, email, created_at, last_contact_at')
-    .eq('firm_id', firmId)
-    .order('last_contact_at', { ascending: false })
+  const url = new URL(request.url)
+  const offset = Math.max(0, parseInt(url.searchParams.get('offset') ?? '0', 10))
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  const [countResult, clientsResult] = await Promise.all([
+    supabaseAdmin
+      .from('clients')
+      .select('id', { count: 'exact', head: true })
+      .eq('firm_id', firmId),
+    supabaseAdmin
+      .from('clients')
+      .select('id, name, phone, email, referrer, created_at, last_contact_at')
+      .eq('firm_id', firmId)
+      .order('last_contact_at', { ascending: false })
+      .range(offset, offset + PAGE_LIMIT - 1),
+  ])
+
+  if (clientsResult.error) {
+    return NextResponse.json({ error: clientsResult.error.message }, { status: 500 })
   }
 
-  if (!clients || clients.length === 0) {
-    return NextResponse.json({ clients: [] })
+  const clients = clientsResult.data ?? []
+
+  if (clients.length === 0) {
+    return NextResponse.json({ clients: [], total: countResult.count ?? 0 })
   }
 
   // case count per client
+  const clientIds = clients.map((c) => c.id)
   const { data: summaryRows } = await supabaseAdmin
     .from('case_summaries')
     .select('client_id')
     .eq('firm_id', firmId)
-    .not('client_id', 'is', null)
+    .in('client_id', clientIds)
 
   const caseCountMap: Record<string, number> = {}
   for (const row of summaryRows ?? []) {
@@ -92,5 +108,5 @@ export async function GET(request: Request) {
     case_count: caseCountMap[c.id] ?? 0,
   }))
 
-  return NextResponse.json({ clients: result })
+  return NextResponse.json({ clients: result, total: countResult.count ?? 0 })
 }

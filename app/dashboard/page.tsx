@@ -24,13 +24,6 @@ const STATUS_CONFIG = {
   done:      { label: '완료',  color: '#16A34A' },
 }
 
-function caseCategory(caseType: string): '민사' | '형사' | '행정' {
-  const t = caseType ?? ''
-  if (/형사|폭행|상해|절도|사기|횡령|배임|음주|살인|강도|성범죄|마약|협박|공갈|명예훼손/.test(t)) return '형사'
-  if (/행정소송|행정처분|행정심판|조세|국세|지방세|행정/.test(t)) return '행정'
-  return '민사'
-}
-
 function formatDate(dateStr: string) {
   const diffMs = Date.now() - new Date(dateStr).getTime()
   const diffMin = Math.floor(diffMs / 60000)
@@ -43,12 +36,15 @@ function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })
 }
 
+const PAGE_SIZE = 20
+
 export default function DashboardPage() {
   const { session, loading } = useAuth()
   const router = useRouter()
   const [cases, setCases] = useState<CaseRow[]>([])
+  const [total, setTotal] = useState(0)
+  const [page, setPage] = useState(0)
   const [statusFilter, setStatusFilter] = useState<'all' | 'new' | 'reviewing' | 'done'>('all')
-  const [categoryFilter, setCategoryFilter] = useState<'all' | '민사' | '형사' | '행정'>('all')
   const [fetching, setFetching] = useState(true)
 
   const [modalOpen, setModalOpen] = useState(false)
@@ -61,16 +57,18 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!session) return
-    fetch('/api/dashboard/cases', {
+    setFetching(true)
+    fetch(`/api/dashboard/cases?offset=${page * PAGE_SIZE}`, {
       headers: { Authorization: `Bearer ${session.access_token}` },
     })
       .then((r) => r.json())
       .then((data) => {
         setCases(data.cases ?? [])
+        setTotal(data.total ?? 0)
         setFetching(false)
       })
       .catch(() => setFetching(false))
-  }, [session])
+  }, [session, page])
 
   async function handleImport() {
     if (!pasteText.trim()) { setImportError('텍스트를 입력해 주세요.'); return }
@@ -118,9 +116,7 @@ export default function DashboardPage() {
   }
 
   const filtered = cases.filter((c) => {
-    const statusOk = statusFilter === 'all' || (c.status ?? 'new') === statusFilter
-    const catOk = categoryFilter === 'all' || caseCategory(c.case_type) === categoryFilter
-    return statusOk && catOk
+    return statusFilter === 'all' || (c.status ?? 'new') === statusFilter
   })
 
   const newCount = cases.filter((c) => !c.status || c.status === 'new').length
@@ -132,7 +128,7 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-xl font-bold text-slate-900">사건 목록</h1>
           <p className="text-slate-500 text-sm mt-0.5">
-            총 {cases.length}건
+            총 {total}건
             {newCount > 0 && (
               <span className="ml-2 font-medium" style={{ color: '#4a7aef' }}>• 신규 {newCount}건</span>
             )}
@@ -155,7 +151,7 @@ export default function DashboardPage() {
         {(['all', 'new', 'reviewing', 'done'] as const).map((f) => (
           <button
             key={f}
-            onClick={() => setStatusFilter(f)}
+            onClick={() => { setStatusFilter(f); setPage(0) }}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
               statusFilter === f ? 'text-white border border-transparent' : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'
             }`}
@@ -163,29 +159,8 @@ export default function DashboardPage() {
           >
             {f === 'all' ? '전체' : STATUS_CONFIG[f].label}
             <span className="ml-1.5 opacity-70">
-              {f === 'all' ? cases.length : cases.filter((c) => (c.status ?? 'new') === f).length}
+              {f === 'all' ? total : cases.filter((c) => (c.status ?? 'new') === f).length}
             </span>
-          </button>
-        ))}
-      </div>
-
-      {/* Category filters */}
-      <div className="flex gap-1.5 mb-4 flex-wrap">
-        {(['all', '민사', '형사', '행정'] as const).map((f) => (
-          <button
-            key={f}
-            onClick={() => setCategoryFilter(f)}
-            className={`px-3 py-1.5 rounded-lg text-sm transition-colors whitespace-nowrap ${
-              categoryFilter === f ? 'font-medium text-white border border-transparent' : 'text-slate-500 bg-white border border-slate-100 hover:border-slate-200'
-            }`}
-            style={categoryFilter === f ? { background: '#1a2b5a' } : {}}
-          >
-            {f === 'all' ? '전체 유형' : f}
-            {f !== 'all' && (
-              <span className="ml-1.5 opacity-60">
-                {cases.filter((c) => caseCategory(c.case_type) === f).length}
-              </span>
-            )}
           </button>
         ))}
       </div>
@@ -234,8 +209,6 @@ export default function DashboardPage() {
                     </div>
                     <div className="text-sm text-slate-500 mb-0.5">{c.case_type}</div>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs text-slate-400">{caseCategory(c.case_type)}</span>
-                      <span className="text-xs text-slate-300">·</span>
                       <span className="text-xs text-slate-400">{formatDate(c.created_at)}</span>
                     </div>
                   </div>
@@ -251,7 +224,6 @@ export default function DashboardPage() {
                 <tr>
                   <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">고객명</th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">사건</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">유형</th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">상태</th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">접수일</th>
                   <th className="px-4 py-3" />
@@ -260,7 +232,6 @@ export default function DashboardPage() {
               <tbody className="divide-y divide-slate-100">
                 {filtered.map((c) => {
                   const s = STATUS_CONFIG[c.status ?? 'new']
-                  const cat = caseCategory(c.case_type)
                   const isPast = (c.status ?? 'new') === 'done'
                   const proxyLabel = c.is_proxy && c.contact_name
                     ? `(대리: ${c.contact_name}${c.contact_relation ? `/${c.contact_relation}` : ''})`
@@ -276,7 +247,6 @@ export default function DashboardPage() {
                         {proxyLabel && <span className="ml-1.5 text-xs text-slate-400">{proxyLabel}</span>}
                       </td>
                       <td className="px-4 py-3 text-sm text-slate-600 max-w-xs truncate">{c.case_type}</td>
-                      <td className="px-4 py-3 text-sm text-slate-400">{cat}</td>
                       <td className="px-4 py-3">
                         <span className="text-sm font-medium" style={{ color: s.color }}>{s.label}</span>
                       </td>
@@ -298,6 +268,29 @@ export default function DashboardPage() {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination */}
+          {total > PAGE_SIZE && (
+            <div className="flex items-center justify-between pt-3">
+              <button
+                onClick={() => setPage((p) => p - 1)}
+                disabled={page === 0}
+                className="px-3 py-1.5 text-sm text-slate-600 border border-slate-200 rounded-lg bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                이전
+              </button>
+              <span className="text-sm text-slate-500">
+                {page + 1} / {Math.ceil(total / PAGE_SIZE)} 페이지
+              </span>
+              <button
+                onClick={() => setPage((p) => p + 1)}
+                disabled={(page + 1) * PAGE_SIZE >= total}
+                className="px-3 py-1.5 text-sm text-slate-600 border border-slate-200 rounded-lg bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                다음
+              </button>
+            </div>
+          )}
         </>
       )}
 

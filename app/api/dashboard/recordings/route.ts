@@ -14,25 +14,36 @@ async function getAuthFirm(request: Request) {
   return firm ?? null
 }
 
+const PAGE_LIMIT = 20
+
 export async function GET(request: Request) {
   const firm = await getAuthFirm(request)
   if (!firm) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data, error } = await supabaseAdmin
-    .from('recordings')
-    .select('id, title, status, duration_seconds, created_at, reports(case_type)')
-    .eq('firm_id', firm.id)
-    .order('created_at', { ascending: false })
-    .limit(200)
+  const url = new URL(request.url)
+  const offset = Math.max(0, parseInt(url.searchParams.get('offset') ?? '0', 10))
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  const [countResult, dataResult] = await Promise.all([
+    supabaseAdmin
+      .from('recordings')
+      .select('id', { count: 'exact', head: true })
+      .eq('firm_id', firm.id),
+    supabaseAdmin
+      .from('recordings')
+      .select('id, title, status, duration_seconds, client_name, created_at, reports(case_type)')
+      .eq('firm_id', firm.id)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + PAGE_LIMIT - 1),
+  ])
+
+  if (dataResult.error) return NextResponse.json({ error: dataResult.error.message }, { status: 500 })
 
   // Flatten reports join
-  const recordings = (data ?? []).map((r: Record<string, unknown>) => {
+  const recordings = (dataResult.data ?? []).map((r: Record<string, unknown>) => {
     const reports = r.reports as { case_type?: string } | { case_type?: string }[] | null
     const caseType = Array.isArray(reports) ? reports[0]?.case_type : reports?.case_type
     return { ...r, case_type: caseType ?? null, reports: undefined }
   })
 
-  return NextResponse.json({ recordings })
+  return NextResponse.json({ recordings, total: countResult.count ?? 0 })
 }

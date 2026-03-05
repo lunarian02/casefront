@@ -8,6 +8,7 @@ type ClientRow = {
   name: string
   phone: string
   email: string | null
+  referrer: string | null
   created_at: string
   last_contact_at: string
   case_count: number
@@ -17,6 +18,7 @@ type ClientFormState = {
   name: string
   phone: string
   email: string
+  referrer: string
 }
 
 function formatPhone(raw: string | null | undefined): string {
@@ -33,10 +35,14 @@ function formatDate(dateStr: string) {
   return d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
+const PAGE_SIZE = 20
+
 export default function ClientsPage() {
   const { session, loading } = useAuth()
   const router = useRouter()
   const [clients, setClients] = useState<ClientRow[]>([])
+  const [total, setTotal] = useState(0)
+  const [page, setPage] = useState(0)
   const [fetching, setFetching] = useState(true)
   const [search, setSearch] = useState('')
 
@@ -44,7 +50,7 @@ export default function ClientsPage() {
   const [showModal, setShowModal] = useState(false)
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add')
   const [editingClient, setEditingClient] = useState<ClientRow | null>(null)
-  const [form, setForm] = useState<ClientFormState>({ name: '', phone: '', email: '' })
+  const [form, setForm] = useState<ClientFormState>({ name: '', phone: '', email: '', referrer: '' })
   const [formError, setFormError] = useState('')
   const [formSaving, setFormSaving] = useState(false)
 
@@ -54,21 +60,23 @@ export default function ClientsPage() {
 
   useEffect(() => {
     if (!session) return
-    fetch('/api/dashboard/clients', {
+    setFetching(true)
+    fetch(`/api/dashboard/clients?offset=${page * PAGE_SIZE}`, {
       headers: { Authorization: `Bearer ${session.access_token}` },
     })
       .then((r) => r.json())
       .then((data) => {
         setClients(data.clients ?? [])
+        setTotal(data.total ?? 0)
         setFetching(false)
       })
       .catch(() => setFetching(false))
-  }, [session])
+  }, [session, page])
 
   function openAddModal() {
     setModalMode('add')
     setEditingClient(null)
-    setForm({ name: '', phone: '', email: '' })
+    setForm({ name: '', phone: '', email: '', referrer: '' })
     setFormError('')
     setShowModal(true)
   }
@@ -77,7 +85,7 @@ export default function ClientsPage() {
     e.stopPropagation()
     setModalMode('edit')
     setEditingClient(c)
-    setForm({ name: c.name, phone: c.phone, email: c.email ?? '' })
+    setForm({ name: c.name, phone: c.phone, email: c.email ?? '', referrer: c.referrer ?? '' })
     setFormError('')
     setShowModal(true)
   }
@@ -109,6 +117,7 @@ export default function ClientsPage() {
         name: form.name.trim(),
         phone: form.phone.trim(),
         email: form.email.trim() ? form.email.trim().toLowerCase() : null,
+        referrer: form.referrer.trim() || null,
       }
       if (modalMode === 'add') {
         const res = await fetch('/api/dashboard/clients', {
@@ -182,7 +191,7 @@ export default function ClientsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-bold text-slate-900">고객 목록</h1>
-          <p className="text-slate-500 text-sm mt-0.5">총 {clients.length}명</p>
+          <p className="text-slate-500 text-sm mt-0.5">총 {total}명</p>
         </div>
         <button
           onClick={openAddModal}
@@ -236,6 +245,7 @@ export default function ClientsPage() {
                 <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">이름</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">전화번호</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider hidden sm:table-cell">이메일</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider hidden md:table-cell">추천인</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">총 접수</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">최근 접수일</th>
                 <th className="px-4 py-3" />
@@ -261,6 +271,9 @@ export default function ClientsPage() {
                   </td>
                   <td className="px-4 py-3 text-sm text-slate-500 hidden sm:table-cell">
                     {c.email ?? '-'}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-slate-500 hidden md:table-cell">
+                    {c.referrer ?? '-'}
                   </td>
                   <td className="px-4 py-3 text-sm text-slate-700">
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">
@@ -288,6 +301,29 @@ export default function ClientsPage() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {total > PAGE_SIZE && (
+        <div className="flex items-center justify-between pt-3">
+          <button
+            onClick={() => setPage((p) => p - 1)}
+            disabled={page === 0}
+            className="px-3 py-1.5 text-sm text-slate-600 border border-slate-200 rounded-lg bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            이전
+          </button>
+          <span className="text-sm text-slate-500">
+            {page + 1} / {Math.ceil(total / PAGE_SIZE)} 페이지
+          </span>
+          <button
+            onClick={() => setPage((p) => p + 1)}
+            disabled={(page + 1) * PAGE_SIZE >= total}
+            className="px-3 py-1.5 text-sm text-slate-600 border border-slate-200 rounded-lg bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            다음
+          </button>
         </div>
       )}
 
@@ -326,6 +362,16 @@ export default function ClientsPage() {
                   value={form.email}
                   onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
                   placeholder="example@email.com"
+                  className="w-full px-3 py-2 text-sm text-slate-900 border border-slate-200 rounded-lg bg-white outline-none focus:ring-2 focus:ring-[#4a7aef] focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1">추천인 (선택)</label>
+                <input
+                  type="text"
+                  value={form.referrer}
+                  onChange={(e) => setForm((f) => ({ ...f, referrer: e.target.value }))}
+                  placeholder="소개해 주신 분 이름"
                   className="w-full px-3 py-2 text-sm text-slate-900 border border-slate-200 rounded-lg bg-white outline-none focus:ring-2 focus:ring-[#4a7aef] focus:border-transparent"
                 />
               </div>

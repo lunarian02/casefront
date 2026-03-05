@@ -25,7 +25,7 @@ export async function GET(
   // Recording
   const { data: recording, error: recErr } = await supabaseAdmin
     .from('recordings')
-    .select('id, title, status, duration_seconds, created_at, firm_id')
+    .select('id, title, status, duration_seconds, created_at, firm_id, client_id, client_name')
     .eq('id', recordingId)
     .eq('firm_id', firm.id)
     .maybeSingle()

@@ -24,12 +24,6 @@ type CaseDetail = {
   created_at: string
 }
 
-type Message = {
-  role: 'user' | 'assistant' | 'customer' | 'lawyer'
-  content: string
-  created_at: string
-}
-
 type ClientCase = {
   id: number
   session_id: string
@@ -37,11 +31,26 @@ type ClientCase = {
   created_at: string
 }
 
+type LinkedReport = {
+  id: string
+  case_type: string | null
+  content: string
+  report_type: string
+}
+
 type LinkedRecording = {
   id: string
   title: string
   status: string
   duration_seconds: number | null
+  created_at: string
+  reports: LinkedReport | LinkedReport[] | null
+}
+
+type ConsolidatedReport = {
+  id: string
+  content: string
+  case_type: string | null
   created_at: string
 }
 
@@ -56,7 +65,8 @@ type Appointment = {
 
 type EditEvent = { date: string; summary: string }
 type EditRequirement = { element: string; status: 'confirmed' | 'denied' | 'unknown'; detail: string }
-type TabKey = 'report' | 'transcript' | 'recording' | 'schedule'
+type TabKey = 'report' | 'schedule'
+type EditingSection = null | 'summary' | 'events' | 'requirements'
 
 const STATUS_CONFIG = {
   new:       { label: '신규',  color: '#4a7aef', next: 'reviewing' as const, nextLabel: '검토 시작' },
@@ -95,8 +105,6 @@ export default function CaseDetailPage() {
   const router = useRouter()
   const { session, loading } = useAuth()
   const [caseData, setCaseData] = useState<CaseDetail | null>(null)
-  const [messages, setMessages] = useState<Message[]>([])
-  const [parentMessages, setParentMessages] = useState<Message[]>([])
   const [clientCases, setClientCases] = useState<ClientCase[]>([])
   const [linkedRecordings, setLinkedRecordings] = useState<LinkedRecording[]>([])
   const [fetching, setFetching] = useState(true)
@@ -106,11 +114,8 @@ export default function CaseDetailPage() {
   // Tabs
   const [activeTab, setActiveTab] = useState<TabKey>('report')
 
-  // Edit mode
-  const [editMode, setEditMode] = useState(false)
-  const [editClientName, setEditClientName] = useState('')
-  const [editClientPhone, setEditClientPhone] = useState('')
-  const [editClientEmail, setEditClientEmail] = useState('')
+  // Per-section edit state
+  const [editingSection, setEditingSection] = useState<EditingSection>(null)
   const [editCaseType, setEditCaseType] = useState('')
   const [editSummaryText, setEditSummaryText] = useState('')
   const [editEvents, setEditEvents] = useState<EditEvent[]>([])
@@ -124,6 +129,11 @@ export default function CaseDetailPage() {
   // Delete confirm
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
+
+  // Consolidated report
+  const [consolidatedReport, setConsolidatedReport] = useState<ConsolidatedReport | null>(null)
+  const [consolidating, setConsolidating] = useState(false)
+  const [showConsolidatedReport, setShowConsolidatedReport] = useState(false)
 
   // Appointments
   const [appointments, setAppointments] = useState<Appointment[]>([])
@@ -151,8 +161,6 @@ export default function CaseDetailPage() {
       .then((data) => {
         if (!data) return
         setCaseData(data.case)
-        setMessages(data.messages ?? [])
-        setParentMessages(data.parentMessages ?? [])
         setClientCases(data.clientCases ?? [])
         setFetching(false)
       })
@@ -164,6 +172,14 @@ export default function CaseDetailPage() {
     })
       .then((r) => r.json())
       .then((d) => setLinkedRecordings(d.recordings ?? []))
+      .catch(() => {})
+
+    // Fetch consolidated report if exists
+    fetch(`/api/dashboard/cases/${sessionId}/consolidated-report`, {
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    })
+      .then((r) => r.json())
+      .then((d) => { if (d.report) setConsolidatedReport(d.report) })
       .catch(() => {})
   }, [session, sessionId])
 
@@ -178,20 +194,80 @@ export default function CaseDetailPage() {
       .finally(() => setAptLoading(false))
   }, [session, sessionId, activeTab])
 
-  function openEditMode() {
+  async function saveSection(patch: Record<string, unknown>) {
+    if (!session || !sessionId || editSaving) return false
+    setEditSaving(true)
+    try {
+      const res = await fetch(`/api/dashboard/cases/${sessionId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify(patch),
+      })
+      return res.ok
+    } finally {
+      setEditSaving(false)
+    }
+  }
+
+  function openSummaryEdit() {
     if (!caseData) return
-    setEditClientName(caseData.client_name ?? '')
-    setEditClientPhone(caseData.client_phone ?? '')
-    setEditClientEmail(caseData.client_email ?? '')
     setEditCaseType(caseData.case_type ?? '')
     setEditSummaryText(caseData.summary?.summary_text ?? '')
+    setEditingSection('summary')
+  }
+
+  async function handleSaveSummary() {
+    const ok = await saveSection({
+      case_type: editCaseType,
+      summary_patch: { summary_text: editSummaryText },
+    })
+    if (ok) {
+      setCaseData((prev) => prev ? {
+        ...prev,
+        case_type: editCaseType,
+        summary: { ...prev.summary, summary_text: editSummaryText },
+      } : prev)
+      setEditingSection(null)
+    }
+  }
+
+  function openEventsEdit() {
+    if (!caseData) return
     setEditEvents((caseData.summary?.events ?? []).map((e) => ({ date: e.date ?? '', summary: e.summary ?? '' })))
+    setEditingSection('events')
+  }
+
+  async function handleSaveEvents() {
+    const mapped = editEvents.map((e) => ({ date: e.date, summary: e.summary, subject: '', object: '', action: e.summary }))
+    const ok = await saveSection({ summary_patch: { events: mapped } })
+    if (ok) {
+      setCaseData((prev) => prev ? {
+        ...prev,
+        summary: { ...prev.summary, events: mapped },
+      } : prev)
+      setEditingSection(null)
+    }
+  }
+
+  function openRequirementsEdit() {
+    if (!caseData) return
     setEditRequirements((caseData.summary?.requirements ?? []).map((r) => ({
       element: r.element ?? '',
       status: (r.status as 'confirmed' | 'denied' | 'unknown') ?? 'unknown',
       detail: r.detail ?? '',
     })))
-    setEditMode(true)
+    setEditingSection('requirements')
+  }
+
+  async function handleSaveRequirements() {
+    const ok = await saveSection({ summary_patch: { requirements: editRequirements } })
+    if (ok) {
+      setCaseData((prev) => prev ? {
+        ...prev,
+        summary: { ...prev.summary, requirements: editRequirements },
+      } : prev)
+      setEditingSection(null)
+    }
   }
 
   async function handleStatusChange(nextStatus: 'reviewing' | 'done') {
@@ -209,44 +285,6 @@ export default function CaseDetailPage() {
     }
   }
 
-  async function handleSaveEdit() {
-    if (!session || !sessionId || editSaving) return
-    setEditSaving(true)
-    try {
-      const res = await fetch(`/api/dashboard/cases/${sessionId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
-        body: JSON.stringify({
-          client_name: editClientName,
-          client_phone: editClientPhone,
-          client_email: editClientEmail,
-          case_type: editCaseType,
-          summary_patch: {
-            summary_text: editSummaryText,
-            events: editEvents.map((e) => ({ date: e.date, summary: e.summary, subject: '', object: '', action: e.summary })),
-            requirements: editRequirements,
-          },
-        }),
-      })
-      if (res.ok) {
-        setCaseData((prev) => prev ? {
-          ...prev,
-          client_name: editClientName, client_phone: editClientPhone,
-          client_email: editClientEmail, case_type: editCaseType,
-          summary: {
-            ...prev.summary,
-            summary_text: editSummaryText,
-            events: editEvents.map((e) => ({ date: e.date, summary: e.summary, subject: '', object: '', action: e.summary })),
-            requirements: editRequirements,
-          },
-        } : prev)
-        setEditMode(false)
-      }
-    } finally {
-      setEditSaving(false)
-    }
-  }
-
   async function handleConnect(parentId: number) {
     if (!session || !sessionId || connectSaving) return
     setConnectSaving(true)
@@ -259,6 +297,24 @@ export default function CaseDetailPage() {
       if (res.ok) { setCaseData((prev) => prev ? { ...prev, parent_case_id: parentId } : prev); setShowConnectModal(false) }
     } finally {
       setConnectSaving(false)
+    }
+  }
+
+  async function handleGenerateConsolidatedReport() {
+    if (!session || !sessionId || consolidating) return
+    setConsolidating(true)
+    try {
+      const res = await fetch(`/api/dashboard/cases/${sessionId}/consolidated-report`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setConsolidatedReport(data.report)
+        setShowConsolidatedReport(true)
+      }
+    } finally {
+      setConsolidating(false)
     }
   }
 
@@ -365,8 +421,6 @@ export default function CaseDetailPage() {
 
   const TABS: { key: TabKey; label: string }[] = [
     { key: 'report', label: '리포트' },
-    { key: 'transcript', label: '스크립트' },
-    { key: 'recording', label: '녹음 원본' },
     { key: 'schedule', label: '일정' },
   ]
 
@@ -384,78 +438,48 @@ export default function CaseDetailPage() {
             </svg>
           </button>
           <div>
-            <h1 className="text-xl font-bold text-slate-900">
-              {editMode ? (
-                <input
-                  value={editCaseType}
-                  onChange={(e) => setEditCaseType(e.target.value)}
-                  placeholder="사건유형"
-                  className="border border-blue-200 rounded-lg px-2 py-0.5 text-base font-bold text-slate-900 bg-white focus:outline-none focus:border-blue-400 w-40"
-                />
-              ) : caseData.client_name}
-            </h1>
-            {!editMode && (
-              <p className="text-sm text-slate-500 mt-0.5">{caseData.case_type}</p>
-            )}
+            <h1 className="text-xl font-bold text-slate-900">{caseData.client_name}</h1>
+            <p className="text-sm text-slate-500 mt-0.5">{caseData.case_type}</p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          {!editMode && (
-            <>
-              <span className="text-sm font-medium" style={{ color: status.color }}>{status.label}</span>
-              {status.next && (
-                <button
-                  onClick={() => handleStatusChange(status.next!)}
-                  disabled={statusUpdating}
-                  className="px-3 py-1.5 text-sm font-medium text-white rounded-lg disabled:opacity-50 transition-colors"
-                  style={{ background: '#1a2b5a' }}
-                >
-                  {statusUpdating ? '처리 중...' : status.nextLabel}
-                </button>
-              )}
-              <a
-                href={`tel:${caseData.client_phone}`}
-                className="px-3 py-1.5 text-sm font-medium text-white rounded-lg flex items-center gap-1.5 hover:opacity-90 transition-opacity"
-                style={{ background: '#1a2b5a' }}
-              >
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 015.13 12.7a19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
-                </svg>
-                콜백
-              </a>
-              <button
-                onClick={openEditMode}
-                className="px-3 py-1.5 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
-              >수정</button>
-              {clientCases.length > 0 && (
-                <button
-                  onClick={() => setShowConnectModal(true)}
-                  className="px-3 py-1.5 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
-                >기존 사건에 연결</button>
-              )}
-              <button
-                onClick={() => setShowDeleteConfirm(true)}
-                className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 border border-slate-200 rounded-lg transition-colors"
-                title="사건 삭제"
-              >
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
-                </svg>
-              </button>
-            </>
+          <span className="text-sm font-medium" style={{ color: status.color }}>{status.label}</span>
+          {status.next && (
+            <button
+              onClick={() => handleStatusChange(status.next!)}
+              disabled={statusUpdating}
+              className="px-3 py-1.5 text-sm font-medium text-white rounded-lg disabled:opacity-50 transition-colors"
+              style={{ background: '#1a2b5a' }}
+            >
+              {statusUpdating ? '처리 중...' : status.nextLabel}
+            </button>
           )}
-          {editMode && (
-            <>
-              <button onClick={() => setEditMode(false)} className="px-3 py-1.5 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg">취소</button>
-              <button
-                onClick={handleSaveEdit}
-                disabled={editSaving}
-                className="px-3 py-1.5 text-sm font-medium text-white rounded-lg disabled:opacity-50"
-                style={{ background: '#1a2b5a' }}
-              >{editSaving ? '저장 중...' : '저장'}</button>
-            </>
+          <a
+            href={`tel:${caseData.client_phone}`}
+            className="px-3 py-1.5 text-sm font-medium text-white rounded-lg flex items-center gap-1.5 hover:opacity-90 transition-opacity"
+            style={{ background: '#1a2b5a' }}
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 015.13 12.7a19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
+            </svg>
+            콜백
+          </a>
+          {clientCases.length > 0 && (
+            <button
+              onClick={() => setShowConnectModal(true)}
+              className="px-3 py-1.5 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+            >기존 사건에 연결</button>
           )}
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 border border-slate-200 rounded-lg transition-colors"
+            title="사건 삭제"
+          >
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+            </svg>
+          </button>
         </div>
       </div>
 
@@ -493,50 +517,33 @@ export default function CaseDetailPage() {
           {/* Left: main info */}
           <div className="lg:col-span-2 space-y-4">
 
-            {/* Client info */}
+            {/* Client info — always readonly; edit via client detail page */}
             <div className="bg-white rounded-xl border border-slate-200 p-4">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
                   {caseData.is_proxy ? '당사자 정보' : '고객 정보'}
                 </h2>
-                {caseData.client_id && !editMode && (
+                {caseData.client_id && (
                   <button
                     onClick={() => router.push(`/dashboard/clients/${caseData.client_id}`)}
                     className="text-xs font-medium hover:underline flex items-center gap-1"
                     style={{ color: '#4a7aef' }}
                   >
-                    고객 상세 보기
+                    고객 상세에서 수정
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </button>
                 )}
               </div>
-              {editMode ? (
-                <div className="space-y-2.5">
-                  <div className="flex items-center gap-3">
-                    <span className="text-slate-400 text-sm w-14 flex-shrink-0">이름</span>
-                    <input value={editClientName} onChange={(e) => setEditClientName(e.target.value)} className={inputCls} placeholder="이름" />
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-slate-400 text-sm w-14 flex-shrink-0">연락처</span>
-                    <input value={editClientPhone} onChange={(e) => setEditClientPhone(e.target.value)} className={inputCls} placeholder="010-0000-0000" />
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-slate-400 text-sm w-14 flex-shrink-0">이메일</span>
-                    <input value={editClientEmail} onChange={(e) => setEditClientEmail(e.target.value)} className={inputCls} placeholder="email@example.com" />
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-2.5">
-                  <InfoRow label="이름" value={caseData.client_name} />
-                  <InfoRow label="연락처" value={caseData.client_phone} isPhone />
-                  {caseData.client_email && <InfoRow label="이메일" value={caseData.client_email} isEmail />}
-                  <InfoRow label="접수일" value={new Date(caseData.created_at).toLocaleString('ko-KR', {
-                    year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
-                  })} />
-                </div>
-              )}
+              <div className="space-y-2.5">
+                <InfoRow label="이름" value={caseData.client_name} />
+                <InfoRow label="연락처" value={caseData.client_phone} isPhone />
+                {caseData.client_email && <InfoRow label="이메일" value={caseData.client_email} isEmail />}
+                <InfoRow label="접수일" value={new Date(caseData.created_at).toLocaleString('ko-KR', {
+                  year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
+                })} />
+              </div>
             </div>
 
             {/* Proxy contact */}
@@ -551,11 +558,48 @@ export default function CaseDetailPage() {
               </div>
             )}
 
-            {/* Summary */}
+            {/* Summary — section edit */}
             <div className="bg-white rounded-xl border border-slate-200 p-4">
-              <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">접수 요약</h2>
-              {editMode ? (
-                <textarea value={editSummaryText} onChange={(e) => setEditSummaryText(e.target.value)} rows={3} className={`${inputCls} resize-none`} placeholder="한 줄 요약" />
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">접수 요약</h2>
+                {editingSection !== 'summary' && (
+                  <button
+                    onClick={openSummaryEdit}
+                    disabled={editingSection !== null}
+                    className="text-xs font-medium text-slate-400 hover:text-slate-600 disabled:opacity-40 transition-colors"
+                  >
+                    수정
+                  </button>
+                )}
+              </div>
+              {editingSection === 'summary' ? (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-slate-400 w-16 flex-shrink-0">사건 유형</span>
+                    <input
+                      value={editCaseType}
+                      onChange={(e) => setEditCaseType(e.target.value)}
+                      className={inputCls}
+                      placeholder="예: 형사-폭행"
+                    />
+                  </div>
+                  <textarea
+                    value={editSummaryText}
+                    onChange={(e) => setEditSummaryText(e.target.value)}
+                    rows={3}
+                    className={`${inputCls} resize-none`}
+                    placeholder="접수 요약"
+                  />
+                  <div className="flex justify-end gap-2">
+                    <button onClick={() => setEditingSection(null)} className="px-3 py-1.5 text-sm text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50">취소</button>
+                    <button
+                      onClick={handleSaveSummary}
+                      disabled={editSaving}
+                      className="px-3 py-1.5 text-sm text-white rounded-lg disabled:opacity-50"
+                      style={{ background: '#1a2b5a' }}
+                    >{editSaving ? '저장 중...' : '저장'}</button>
+                  </div>
+                </div>
               ) : (
                 <>
                   <p className="text-slate-700 text-sm leading-relaxed">{summary?.summary_text}</p>
@@ -569,11 +613,22 @@ export default function CaseDetailPage() {
               )}
             </div>
 
-            {/* Requirements */}
-            {(editMode || (summary?.requirements?.length > 0)) && (
+            {/* Requirements — section edit */}
+            {(editingSection === 'requirements' || (summary?.requirements?.length > 0)) && (
               <div className="bg-white rounded-xl border border-slate-200 p-4">
-                <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">요건사실 체크리스트</h2>
-                {editMode ? (
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">요건사실 체크리스트</h2>
+                  {editingSection !== 'requirements' && (
+                    <button
+                      onClick={openRequirementsEdit}
+                      disabled={editingSection !== null}
+                      className="text-xs font-medium text-slate-400 hover:text-slate-600 disabled:opacity-40 transition-colors"
+                    >
+                      수정
+                    </button>
+                  )}
+                </div>
+                {editingSection === 'requirements' ? (
                   <div className="space-y-3">
                     {editRequirements.map((req, i) => (
                       <div key={i} className="border border-slate-200 rounded-lg p-3 space-y-2">
@@ -614,6 +669,15 @@ export default function CaseDetailPage() {
                       onClick={() => setEditRequirements((prev) => [...prev, { element: '', status: 'unknown', detail: '' }])}
                       className="w-full py-2 border border-dashed border-slate-300 rounded-lg text-sm text-slate-500 hover:border-blue-300 hover:text-blue-500 transition-colors"
                     >+ 요건 추가</button>
+                    <div className="flex justify-end gap-2">
+                      <button onClick={() => setEditingSection(null)} className="px-3 py-1.5 text-sm text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50">취소</button>
+                      <button
+                        onClick={handleSaveRequirements}
+                        disabled={editSaving}
+                        className="px-3 py-1.5 text-sm text-white rounded-lg disabled:opacity-50"
+                        style={{ background: '#1a2b5a' }}
+                      >{editSaving ? '저장 중...' : '저장'}</button>
+                    </div>
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -640,7 +704,7 @@ export default function CaseDetailPage() {
             )}
 
             {/* Legal Analysis */}
-            {!editMode && summary?.legal_analysis && (
+            {summary?.legal_analysis && (
               <div className="bg-white rounded-xl border border-slate-200 p-4">
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">사건 검토 분석</h2>
@@ -698,11 +762,22 @@ export default function CaseDetailPage() {
               </div>
             )}
 
-            {/* Events timeline */}
-            {(editMode || (summary?.events?.length > 0)) && (
+            {/* Events timeline — section edit */}
+            {(editingSection === 'events' || (summary?.events?.length > 0)) && (
               <div className="bg-white rounded-xl border border-slate-200 p-4">
-                <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">사건 경위</h2>
-                {editMode ? (
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">사건 경위</h2>
+                  {editingSection !== 'events' && (
+                    <button
+                      onClick={openEventsEdit}
+                      disabled={editingSection !== null}
+                      className="text-xs font-medium text-slate-400 hover:text-slate-600 disabled:opacity-40 transition-colors"
+                    >
+                      수정
+                    </button>
+                  )}
+                </div>
+                {editingSection === 'events' ? (
                   <div className="space-y-3">
                     {editEvents.map((ev, i) => (
                       <div key={i} className="border border-slate-200 rounded-lg p-3 space-y-2">
@@ -720,6 +795,15 @@ export default function CaseDetailPage() {
                     <button onClick={() => setEditEvents((prev) => [...prev, { date: '', summary: '' }])} className="w-full py-2 border border-dashed border-slate-300 rounded-lg text-sm text-slate-500 hover:border-blue-300 hover:text-blue-500 transition-colors">
                       + 경위 추가
                     </button>
+                    <div className="flex justify-end gap-2">
+                      <button onClick={() => setEditingSection(null)} className="px-3 py-1.5 text-sm text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50">취소</button>
+                      <button
+                        onClick={handleSaveEvents}
+                        disabled={editSaving}
+                        className="px-3 py-1.5 text-sm text-white rounded-lg disabled:opacity-50"
+                        style={{ background: '#1a2b5a' }}
+                      >{editSaving ? '저장 중...' : '저장'}</button>
+                    </div>
                   </div>
                 ) : (
                   <div className="space-y-0">
@@ -741,7 +825,7 @@ export default function CaseDetailPage() {
             )}
 
             {/* Unconfirmed */}
-            {!editMode && summary?.unconfirmed?.length > 0 && (
+            {summary?.unconfirmed?.length > 0 && (
               <div className="bg-white rounded-xl border border-slate-200 p-4">
                 <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">미확인 사항</h2>
                 <ul className="space-y-1.5">
@@ -757,7 +841,7 @@ export default function CaseDetailPage() {
 
           {/* Right column */}
           <div className="space-y-4">
-            {summary?.evidence?.length > 0 && !editMode && (
+            {summary?.evidence?.length > 0 && (
               <div className="bg-white rounded-xl border border-slate-200 p-4">
                 <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">보유 증거</h2>
                 <ul className="space-y-2">
@@ -770,7 +854,7 @@ export default function CaseDetailPage() {
               </div>
             )}
 
-            {summary?.document_request?.length > 0 && !editMode && (
+            {summary?.document_request?.length > 0 && (
               <div className="bg-white rounded-xl border border-slate-200 p-4">
                 <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">요청 증빙자료</h2>
                 <ul className="space-y-2">
@@ -791,17 +875,17 @@ export default function CaseDetailPage() {
               </div>
             )}
 
-            {summary?.client_request && !editMode && (
+            {summary?.client_request && (
               <div className="bg-white rounded-xl border border-slate-200 p-4">
                 <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">고객 요청사항</h2>
                 <p className="text-sm text-slate-700">{summary.client_request}</p>
               </div>
             )}
 
-            {/* Linked recordings */}
-            {linkedRecordings.length > 0 && !editMode && (
+            {/* Linked consultations */}
+            {linkedRecordings.length > 0 && (
               <div className="bg-white rounded-xl border border-slate-200 p-4">
-                <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">연결된 녹음 상담</h2>
+                <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">연결된 상담 기록</h2>
                 <ul className="space-y-2">
                   {linkedRecordings.map((rec) => (
                     <li key={rec.id}>
@@ -826,45 +910,83 @@ export default function CaseDetailPage() {
                             )}
                           </p>
                         </div>
-                        <svg className="w-4 h-4 text-slate-300 group-hover:text-blue-400 flex-shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
+                        <span className="text-xs font-medium flex-shrink-0 group-hover:text-blue-600 transition-colors" style={{ color: '#4a7aef' }}>
+                          상담 상세 보기 →
+                        </span>
                       </a>
                     </li>
                   ))}
                 </ul>
+
+                {/* Consolidated report section */}
+                {linkedRecordings.length >= 2 && (
+                  <div className="mt-3 pt-3 border-t border-slate-100">
+                    {consolidatedReport ? (
+                      <>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs font-semibold text-slate-500">통합 리포트</span>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => setShowConsolidatedReport((v) => !v)}
+                              className="text-xs text-slate-400 hover:text-slate-600"
+                            >
+                              {showConsolidatedReport ? '접기' : '펼치기'}
+                            </button>
+                            <button
+                              onClick={handleGenerateConsolidatedReport}
+                              disabled={consolidating}
+                              className="text-xs font-medium hover:underline disabled:opacity-50"
+                              style={{ color: '#4a7aef' }}
+                            >
+                              {consolidating ? '생성 중...' : '재생성'}
+                            </button>
+                          </div>
+                        </div>
+                        {showConsolidatedReport && (
+                          <div className="prose prose-slate prose-xs max-w-none text-xs leading-relaxed">
+                            <pre className="whitespace-pre-wrap font-sans text-slate-700 text-xs leading-relaxed">{consolidatedReport.content}</pre>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <button
+                        onClick={handleGenerateConsolidatedReport}
+                        disabled={consolidating}
+                        className="w-full py-2.5 border border-dashed border-slate-300 rounded-lg text-sm font-medium text-slate-600 hover:border-blue-300 hover:text-blue-600 transition-colors disabled:opacity-50"
+                      >
+                        {consolidating ? (
+                          <span className="flex items-center justify-center gap-2">
+                            <span className="w-3.5 h-3.5 border-2 border-t-transparent rounded-full animate-spin inline-block" style={{ borderColor: '#4a7aef', borderTopColor: 'transparent' }} />
+                            통합 리포트 생성 중...
+                          </span>
+                        ) : (
+                          '통합 리포트 생성 →'
+                        )}
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Single recording — show its report inline */}
+                {linkedRecordings.length === 1 && (() => {
+                  const rec = linkedRecordings[0]
+                  const rpt = Array.isArray(rec.reports) ? rec.reports[0] : rec.reports
+                  if (!rpt) return null
+                  return (
+                    <div className="mt-3 pt-3 border-t border-slate-100">
+                      <a
+                        href={`/dashboard/recordings/${rec.id}`}
+                        className="flex items-center gap-1 text-xs font-medium hover:underline"
+                        style={{ color: '#4a7aef' }}
+                      >
+                        상담 리포트 보기 →
+                      </a>
+                    </div>
+                  )
+                })()}
               </div>
             )}
           </div>
-        </div>
-      )}
-
-      {/* ── 스크립트 탭 ── */}
-      {activeTab === 'transcript' && (
-        <div className="space-y-4 max-w-2xl">
-          {messages.length === 0 && parentMessages.length === 0 ? (
-            <div className="text-center py-16 text-slate-400">
-              <p className="text-sm">대화 내역이 없습니다.</p>
-            </div>
-          ) : (
-            <>
-              <ChatHistory label={`대화 내역 (${messages.length}개)`} messages={messages} defaultOpen />
-              {parentMessages.length > 0 && (
-                <ChatHistory label={`이전 사건 대화 (${parentMessages.length}개)`} messages={parentMessages} defaultOpen={false} />
-              )}
-            </>
-          )}
-        </div>
-      )}
-
-      {/* ── 녹음 원본 탭 ── */}
-      {activeTab === 'recording' && (
-        <div className="text-center py-20 text-slate-400">
-          <svg className="w-12 h-12 mx-auto mb-4 text-slate-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-          </svg>
-          <p className="text-sm font-medium text-slate-500 mb-1">녹음 원본 없음</p>
-          <p className="text-sm">CaseFront 앱에서 녹음한 상담만 여기에 표시됩니다.</p>
         </div>
       )}
 
@@ -1067,42 +1189,6 @@ function InfoRow({ label, value, isPhone, isEmail }: { label: string; value: str
         <a href={`tel:${value}`} className="text-sm hover:underline" style={{ color: '#4a7aef' }}>{display}</a>
       ) : (
         <span className="text-slate-700 text-sm">{display}</span>
-      )}
-    </div>
-  )
-}
-
-function ChatHistory({ label, messages, defaultOpen }: { label: string; messages: Message[]; defaultOpen: boolean }) {
-  const [show, setShow] = useState(defaultOpen)
-  return (
-    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-      <button
-        onClick={() => setShow(!show)}
-        className="w-full px-4 py-3 flex items-center justify-between text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
-      >
-        <span>{label}</span>
-        <svg className={`w-4 h-4 text-slate-400 transition-transform ${show ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-      {show && (
-        <div className="border-t border-slate-100 max-h-96 overflow-y-auto p-3 space-y-2 bg-slate-50">
-          {messages.map((msg, i) => {
-            const isUser = msg.role === 'user'
-            return (
-              <div key={i} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-                <div
-                  className={`max-w-[85%] px-3 py-2 rounded-xl text-sm ${
-                    isUser ? 'text-white rounded-br-sm' : 'bg-white text-slate-800 border border-slate-200 rounded-bl-sm'
-                  }`}
-                  style={isUser ? { background: '#1a2b5a' } : {}}
-                >
-                  {msg.content}
-                </div>
-              </div>
-            )
-          })}
-        </div>
       )}
     </div>
   )

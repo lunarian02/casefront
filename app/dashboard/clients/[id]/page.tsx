@@ -9,6 +9,7 @@ type ClientDetail = {
   name: string
   phone: string
   email: string | null
+  referrer: string | null
   created_at: string
   last_contact_at: string
 }
@@ -17,47 +18,45 @@ type CaseRow = {
   id: string
   session_id: string
   case_type: string
-  urgency: 'urgent' | 'normal' | 'low'
-  urgency_reason?: string
-  status: 'new' | 'reviewing' | 'completed' | null
+  status: 'new' | 'reviewing' | 'done' | 'completed' | null
   summary: CaseSummary
   created_at: string
 }
 
-type SessionRow = {
+type RecordingRow = {
   id: string
+  title: string | null
+  status: string
+  duration_seconds: number | null
   created_at: string
-  messages: { session_id: string; role: string; content: string; created_at: string }[]
-}
-
-const URGENCY_CONFIG = {
-  urgent: { label: '긴급', badge: 'bg-red-100 text-red-700' },
-  normal: { label: '일반', badge: 'bg-blue-100 text-blue-700' },
-  low: { label: '여유', badge: 'bg-slate-100 text-slate-600' },
 }
 
 const STATUS_CONFIG = {
-  new: { label: '신규', style: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
+  new:       { label: '신규',  style: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
   reviewing: { label: '검토중', style: 'bg-blue-50 text-blue-700 border-blue-200' },
-  completed: { label: '완료', style: 'bg-green-50 text-green-700 border-green-200' },
+  done:      { label: '완료',  style: 'bg-green-50 text-green-700 border-green-200' },
+  completed: { label: '완료',  style: 'bg-green-50 text-green-700 border-green-200' },
+}
+
+const REC_STATUS: Record<string, { label: string; color: string }> = {
+  completed:  { label: '완료',   color: '#16A34A' },
+  processing: { label: '분석중', color: '#D97706' },
+  uploaded:   { label: '업로드됨', color: '#4a7aef' },
+  uploading:  { label: '업로드중', color: '#94a3b8' },
+  failed:     { label: '실패',   color: '#DC2626' },
 }
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleString('ko-KR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+    year: 'numeric', month: 'long', day: 'numeric',
   })
 }
 
-function formatDateTime(dateStr: string) {
-  return new Date(dateStr).toLocaleString('ko-KR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+function formatDuration(seconds: number | null) {
+  if (!seconds) return null
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  return `${m}:${String(s).padStart(2, '0')}`
 }
 
 export default function ClientDetailPage() {
@@ -66,10 +65,17 @@ export default function ClientDetailPage() {
   const { session, loading } = useAuth()
   const [client, setClient] = useState<ClientDetail | null>(null)
   const [cases, setCases] = useState<CaseRow[]>([])
-  const [sessions, setSessions] = useState<SessionRow[]>([])
-  const [expandedSession, setExpandedSession] = useState<string | null>(null)
+  const [recordings, setRecordings] = useState<RecordingRow[]>([])
   const [fetching, setFetching] = useState(true)
   const [notFound, setNotFound] = useState(false)
+
+  // Client info inline edit
+  const [editMode, setEditMode] = useState(false)
+  const [editName, setEditName] = useState('')
+  const [editPhone, setEditPhone] = useState('')
+  const [editEmail, setEditEmail] = useState('')
+  const [editReferrer, setEditReferrer] = useState('')
+  const [editSaving, setEditSaving] = useState(false)
 
   const clientId = params?.id as string
 
@@ -86,11 +92,39 @@ export default function ClientDetailPage() {
         if (!data) return
         setClient(data.client)
         setCases(data.cases ?? [])
-        setSessions(data.sessions ?? [])
+        setRecordings(data.recordings ?? [])
         setFetching(false)
       })
       .catch(() => setFetching(false))
   }, [session, clientId])
+
+  function openEdit() {
+    if (!client) return
+    setEditName(client.name)
+    setEditPhone(client.phone)
+    setEditEmail(client.email ?? '')
+    setEditReferrer(client.referrer ?? '')
+    setEditMode(true)
+  }
+
+  async function handleSaveEdit() {
+    if (!session || !clientId || editSaving) return
+    setEditSaving(true)
+    try {
+      const res = await fetch(`/api/dashboard/clients/${clientId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ name: editName, phone: editPhone, email: editEmail || null, referrer: editReferrer || null }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setClient((prev) => prev ? { ...prev, ...data.client } : prev)
+        setEditMode(false)
+      }
+    } finally {
+      setEditSaving(false)
+    }
+  }
 
   if (loading || fetching) {
     return (
@@ -111,6 +145,8 @@ export default function ClientDetailPage() {
     )
   }
 
+  const inputCls = 'w-full border border-blue-200 rounded-lg px-3 py-2 text-sm text-slate-900 bg-white focus:outline-none focus:border-blue-400'
+
   return (
     <div className="p-6 max-w-5xl">
       {/* Header */}
@@ -129,20 +165,61 @@ export default function ClientDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Left: client info + cases */}
         <div className="lg:col-span-2 space-y-4">
-          {/* Basic info */}
+          {/* Basic info — inline edit */}
           <div className="bg-white rounded-xl border border-slate-200 p-4">
-            <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">기본 정보</h2>
-            <div className="space-y-2.5">
-              <Row label="이름">{client.name}</Row>
-              <Row label="전화번호">
-                <a href={`tel:${client.phone}`} className="hover:underline" style={{ color: '#4a7aef' }}>
-                  {client.phone}
-                </a>
-              </Row>
-              <Row label="이메일">{client.email ?? '-'}</Row>
-              <Row label="첫 연락일">{formatDate(client.created_at)}</Row>
-              <Row label="최근 연락">{formatDate(client.last_contact_at)}</Row>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">기본 정보</h2>
+              {!editMode ? (
+                <button
+                  onClick={openEdit}
+                  className="text-xs font-medium text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  수정
+                </button>
+              ) : null}
             </div>
+            {editMode ? (
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-slate-400 text-sm w-16 flex-shrink-0">이름</span>
+                  <input value={editName} onChange={(e) => setEditName(e.target.value)} className={inputCls} placeholder="이름" />
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-slate-400 text-sm w-16 flex-shrink-0">전화번호</span>
+                  <input value={editPhone} onChange={(e) => setEditPhone(e.target.value)} className={inputCls} placeholder="010-0000-0000" />
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-slate-400 text-sm w-16 flex-shrink-0">이메일</span>
+                  <input value={editEmail} onChange={(e) => setEditEmail(e.target.value)} className={inputCls} placeholder="email@example.com" />
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-slate-400 text-sm w-16 flex-shrink-0">추천인</span>
+                  <input value={editReferrer} onChange={(e) => setEditReferrer(e.target.value)} className={inputCls} placeholder="소개해 주신 분 이름" />
+                </div>
+                <div className="flex justify-end gap-2 pt-1">
+                  <button onClick={() => setEditMode(false)} className="px-3 py-1.5 text-sm text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50">취소</button>
+                  <button
+                    onClick={handleSaveEdit}
+                    disabled={editSaving}
+                    className="px-3 py-1.5 text-sm text-white rounded-lg disabled:opacity-50"
+                    style={{ background: '#1a2b5a' }}
+                  >{editSaving ? '저장 중...' : '저장'}</button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                <Row label="이름">{client.name}</Row>
+                <Row label="전화번호">
+                  <a href={`tel:${client.phone}`} className="hover:underline" style={{ color: '#4a7aef' }}>
+                    {client.phone}
+                  </a>
+                </Row>
+                <Row label="이메일">{client.email ?? '-'}</Row>
+                <Row label="추천인">{client.referrer ?? '-'}</Row>
+                <Row label="첫 연락일">{formatDate(client.created_at)}</Row>
+                <Row label="최근 연락">{formatDate(client.last_contact_at)}</Row>
+              </div>
+            )}
           </div>
 
           {/* Cases */}
@@ -155,20 +232,14 @@ export default function ClientDetailPage() {
             ) : (
               <div className="space-y-2">
                 {cases.map((c) => {
-                  const urgency = URGENCY_CONFIG[c.urgency]
-                  const status = STATUS_CONFIG[c.status ?? 'new']
+                  const status = STATUS_CONFIG[c.status ?? 'new'] ?? STATUS_CONFIG.new
                   return (
                     <div
                       key={c.session_id}
                       onClick={() => router.push(`/dashboard/cases/${c.session_id}`)}
                       className="flex items-center justify-between p-3 rounded-lg border border-slate-100 hover:border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors"
                     >
-                      <div className="flex items-center gap-2.5">
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${urgency.badge}`}>
-                          {urgency.label}
-                        </span>
-                        <span className="text-sm font-medium text-slate-800">{c.case_type}</span>
-                      </div>
+                      <span className="text-sm font-medium text-slate-800">{c.case_type}</span>
                       <div className="flex items-center gap-2.5">
                         <span className={`px-2 py-0.5 rounded border text-xs font-medium ${status.style}`}>
                           {status.label}
@@ -186,53 +257,41 @@ export default function ClientDetailPage() {
           </div>
         </div>
 
-        {/* Right: conversation history */}
+        {/* Right: recording consultation history */}
         <div className="space-y-3">
           <div className="bg-white rounded-xl border border-slate-200 p-4">
             <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
-              전체 상담 이력 ({sessions.length}회)
+              상담 기록 ({recordings.length}건)
             </h2>
-            {sessions.length === 0 ? (
-              <p className="text-sm text-slate-400 py-2 text-center">상담 이력이 없습니다.</p>
+            {recordings.length === 0 ? (
+              <p className="text-sm text-slate-400 py-2 text-center">상담 기록이 없습니다.</p>
             ) : (
               <div className="space-y-2">
-                {sessions.map((s) => (
-                  <div key={s.id} className="border border-slate-100 rounded-lg overflow-hidden">
-                    <button
-                      onClick={() => setExpandedSession(expandedSession === s.id ? null : s.id)}
-                      className="w-full flex items-center justify-between px-3 py-2.5 text-sm text-left hover:bg-slate-50 transition-colors"
+                {recordings.map((rec) => {
+                  const rs = REC_STATUS[rec.status] ?? { label: rec.status, color: '#94a3b8' }
+                  return (
+                    <div
+                      key={rec.id}
+                      onClick={() => router.push(`/dashboard/recordings/${rec.id}`)}
+                      className="flex items-center justify-between p-2.5 rounded-lg border border-slate-100 hover:border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors group"
                     >
-                      <div>
-                        <p className="font-medium text-slate-700">{formatDateTime(s.created_at)}</p>
-                        <p className="text-xs text-slate-400 mt-0.5">{s.messages.length}개 메시지</p>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-slate-800 truncate group-hover:text-blue-600 transition-colors">
+                          {rec.title || '제목 없음'}
+                        </p>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <span className="text-xs font-medium" style={{ color: rs.color }}>{rs.label}</span>
+                          {rec.duration_seconds != null && (
+                            <span className="text-xs text-slate-400">· {formatDuration(rec.duration_seconds)}</span>
+                          )}
+                        </div>
                       </div>
-                      <svg
-                        className={`w-4 h-4 text-slate-400 transition-transform flex-shrink-0 ${expandedSession === s.id ? 'rotate-180' : ''}`}
-                        fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      <svg className="w-4 h-4 text-slate-300 group-hover:text-blue-400 flex-shrink-0 ml-2 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
-                    </button>
-                    {expandedSession === s.id && (
-                      <div className="border-t border-slate-100 max-h-64 overflow-y-auto p-2.5 space-y-1.5 bg-slate-50">
-                        {s.messages.map((msg, i) => (
-                          <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                            <div
-                              className={`max-w-[85%] px-2.5 py-1.5 rounded-lg text-xs ${
-                                msg.role === 'user'
-                                  ? 'text-white rounded-br-sm'
-                                  : 'bg-white text-slate-700 border border-slate-200 rounded-bl-sm'
-                              }`}
-                              style={msg.role === 'user' ? { background: '#1a2b5a' } : {}}
-                            >
-                              {msg.content}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
+                    </div>
+                  )
+                })}
               </div>
             )}
           </div>

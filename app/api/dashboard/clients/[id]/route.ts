@@ -30,6 +30,7 @@ export async function PATCH(
   if (body.name) allowed.name = body.name
   if (body.phone) allowed.phone = body.phone
   if ('email' in body) allowed.email = body.email || null
+  if ('referrer' in body) allowed.referrer = body.referrer || null
 
   if (Object.keys(allowed).length === 0) {
     return NextResponse.json({ error: '수정할 항목이 없습니다.' }, { status: 400 })
@@ -40,7 +41,7 @@ export async function PATCH(
     .update(allowed)
     .eq('id', clientId)
     .eq('firm_id', firmId)
-    .select('id, name, phone, email')
+    .select('id, name, phone, email, referrer')
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -83,7 +84,7 @@ export async function GET(
   // Fetch client (firm_id check = security)
   const { data: client, error: clientError } = await supabaseAdmin
     .from('clients')
-    .select('id, name, phone, email, created_at, last_contact_at')
+    .select('id, name, phone, email, referrer, created_at, last_contact_at')
     .eq('id', clientId)
     .eq('firm_id', firmId)
     .maybeSingle()
@@ -95,41 +96,21 @@ export async function GET(
   // Fetch all cases for this client
   const { data: cases } = await supabaseAdmin
     .from('case_summaries')
-    .select('id, session_id, case_type, urgency, urgency_reason, status, summary, created_at')
+    .select('id, session_id, case_type, status, summary, created_at')
     .eq('client_id', clientId)
     .order('created_at', { ascending: false })
 
-  // Fetch all sessions for this client (to get messages)
-  const { data: sessions } = await supabaseAdmin
-    .from('sessions')
-    .select('id, created_at')
+  // Fetch recordings linked to this client
+  const { data: recordings } = await supabaseAdmin
+    .from('recordings')
+    .select('id, title, status, duration_seconds, created_at')
     .eq('client_id', clientId)
+    .eq('firm_id', firmId)
     .order('created_at', { ascending: false })
-
-  const sessionIds = (sessions ?? []).map((s) => s.id)
-
-  // Fetch all messages for those sessions
-  const { data: messages } = sessionIds.length
-    ? await supabaseAdmin
-        .from('messages')
-        .select('session_id, role, content, created_at')
-        .in('session_id', sessionIds)
-        .order('created_at', { ascending: true })
-    : { data: [] }
-
-  type MsgRow = { session_id: string; role: string; content: string; created_at: string }
-  const messagesBySession: Record<string, MsgRow[]> = {}
-  for (const msg of (messages ?? []) as MsgRow[]) {
-    if (!messagesBySession[msg.session_id]) messagesBySession[msg.session_id] = []
-    messagesBySession[msg.session_id].push(msg)
-  }
 
   return NextResponse.json({
     client,
     cases: cases ?? [],
-    sessions: (sessions ?? []).map((s) => ({
-      ...s,
-      messages: messagesBySession[s.id] ?? [],
-    })),
+    recordings: recordings ?? [],
   })
 }
