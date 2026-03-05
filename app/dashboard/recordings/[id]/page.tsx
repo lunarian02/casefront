@@ -15,7 +15,12 @@ type Recording = {
   created_at: string
   firm_id: string
   client_id: string | null
-  client_name: string | null
+  client?: {
+    id: string
+    name: string
+    phone: string
+    email: string | null
+  } | null
 }
 
 type Report = {
@@ -416,7 +421,7 @@ export default function RecordingDetailPage() {
   async function openLinkModal() {
     if (!session) return
     setLinkModalTab('link')
-    setNewCaseName(recording?.client_name ?? '')
+    setNewCaseName(recording?.client?.name ?? '')
     setNewCasePhone('')
     setNewCaseType('')
     setShowLinkModal(true)
@@ -546,7 +551,7 @@ export default function RecordingDetailPage() {
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
-            {recording.client_name ?? '고객 상세'} →
+            {recording.client?.name ?? '고객 상세'} →
           </button>
         </div>
       )}

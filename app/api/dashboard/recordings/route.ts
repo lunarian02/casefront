@@ -30,7 +30,7 @@ export async function GET(request: Request) {
       .eq('firm_id', firm.id),
     supabaseAdmin
       .from('recordings')
-      .select('id, title, status, duration_seconds, client_name, created_at, reports(case_type)')
+      .select('id, title, status, duration_seconds, created_at, reports(case_type), client:clients(id, name, phone)')
       .eq('firm_id', firm.id)
       .order('created_at', { ascending: false })
       .range(offset, offset + PAGE_LIMIT - 1),

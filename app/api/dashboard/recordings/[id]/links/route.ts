@@ -55,6 +55,15 @@ export async function POST(
     return NextResponse.json({ error: 'case_id is required' }, { status: 400 })
   }
 
+  // 1. Get client_id from case_summaries
+  const { data: caseData } = await supabaseAdmin
+    .from('case_summaries')
+    .select('client_id')
+    .eq('id', case_id)
+    .eq('firm_id', firm.id)
+    .maybeSingle()
+
+  // 2. Insert link
   const { data, error } = await supabaseAdmin
     .from('recording_case_links')
     .insert({
@@ -71,6 +80,17 @@ export async function POST(
     if (error.code === '23505') return NextResponse.json({ error: '이미 연결된 사건입니다.' }, { status: 409 })
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
+
+  // 3. Update recording.client_id (if case has client_id and recording doesn't)
+  if (caseData?.client_id) {
+    await supabaseAdmin
+      .from('recordings')
+      .update({ client_id: caseData.client_id })
+      .eq('id', recordingId)
+      .eq('firm_id', firm.id)
+      .is('client_id', null) // Only update if currently NULL
+  }
+
   return NextResponse.json({ link: data }, { status: 201 })
 }
 
