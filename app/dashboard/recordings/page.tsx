@@ -1,6 +1,5 @@
 'use client'
-import { useEffect, useState, useCallback } from 'react'
-import type { Session } from '@supabase/supabase-js'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { supabaseBrowser } from '@/lib/supabaseClient'
@@ -62,6 +61,7 @@ export default function RecordingsPage() {
   const [page, setPage] = useState(0)
   const [fetching, setFetching] = useState(true)
   const [statusFilter, setStatusFilter] = useState<'all' | 'completed' | 'processing'>('all')
+  const autoSeededRef = useRef(false)
 
   const fetchRecordings = useCallback(() => {
     if (!session) return
@@ -80,6 +80,16 @@ export default function RecordingsPage() {
   useEffect(() => {
     fetchRecordings()
   }, [fetchRecordings])
+
+  // Auto-seed sample data if empty
+  useEffect(() => {
+    if (fetching || recordings.length > 0 || !session || autoSeededRef.current) return
+    autoSeededRef.current = true
+    fetch('/api/dev/seed-recordings', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    }).then(() => fetchRecordings())
+  }, [fetching, recordings.length, session, fetchRecordings])
 
   // Realtime: re-fetch on recording status updates
   useEffect(() => {
@@ -148,7 +158,7 @@ export default function RecordingsPage() {
       </div>
 
       {filtered.length === 0 ? (
-        <EmptyState session={session} onSeeded={fetchRecordings} />
+        <EmptyState />
 
       ) : (
         <>
@@ -257,22 +267,7 @@ export default function RecordingsPage() {
   )
 }
 
-function EmptyState({ session, onSeeded }: { session: Session | null; onSeeded: () => void }) {
-  const [seeding, setSeeding] = useState(false)
-  const [done, setDone] = useState(false)
-
-  async function handleSeed() {
-    if (!session) return
-    setSeeding(true)
-    await fetch('/api/dev/seed-recordings', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${session.access_token}` },
-    })
-    setSeeding(false)
-    setDone(true)
-    onSeeded()
-  }
-
+function EmptyState() {
   return (
     <div className="text-center py-16 text-slate-400">
       <svg className="w-12 h-12 mx-auto mb-4 text-slate-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -280,21 +275,7 @@ function EmptyState({ session, onSeeded }: { session: Session | null; onSeeded: 
           d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
       </svg>
       <p className="text-sm font-medium text-slate-500 mb-1">상담 목록이 없습니다</p>
-      <p className="text-sm mb-6">CaseFront 앱에서 상담을 녹음하면 여기에 표시됩니다.</p>
-      {!done && (
-        <button
-          onClick={handleSeed}
-          disabled={seeding}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 disabled:opacity-50 transition-colors"
-        >
-          {seeding ? (
-            <>
-              <span className="w-3.5 h-3.5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#64748b', borderTopColor: 'transparent' }} />
-              샘플 생성 중...
-            </>
-          ) : '샘플 데이터 생성'}
-        </button>
-      )}
+      <p className="text-sm">CaseFront 앱에서 상담을 녹음하면 여기에 표시됩니다.</p>
     </div>
   )
 }

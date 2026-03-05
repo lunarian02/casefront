@@ -280,7 +280,7 @@ export default function CaseDetailPage() {
     }
   }
 
-  async function handleStatusChange(nextStatus: 'reviewing' | 'done') {
+  async function handleStatusChange(nextStatus: 'new' | 'reviewing' | 'done') {
     if (!session || !sessionId || statusUpdating) return
     setStatusUpdating(true)
     try {
@@ -455,15 +455,28 @@ export default function CaseDetailPage() {
 
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-sm font-medium" style={{ color: status.color }}>{status.label}</span>
-          {status.next && (
-            <button
-              onClick={() => handleStatusChange(status.next!)}
+          {caseData.status === 'done' ? (
+            <select
+              onChange={(e) => { if (e.target.value) handleStatusChange(e.target.value as 'new' | 'reviewing') }}
               disabled={statusUpdating}
-              className="px-3 py-1.5 text-sm font-medium text-white rounded-lg disabled:opacity-50 transition-colors"
-              style={{ background: '#1a2b5a' }}
+              value=""
+              className="px-3 py-1.5 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg disabled:opacity-50 cursor-pointer"
             >
-              {statusUpdating ? '처리 중...' : status.nextLabel}
-            </button>
+              <option value="" disabled>상태 변경</option>
+              <option value="reviewing">검토중으로</option>
+              <option value="new">신규로</option>
+            </select>
+          ) : (
+            status.next && (
+              <button
+                onClick={() => handleStatusChange(status.next!)}
+                disabled={statusUpdating}
+                className="px-3 py-1.5 text-sm font-medium text-white rounded-lg disabled:opacity-50 transition-colors"
+                style={{ background: '#1a2b5a' }}
+              >
+                {statusUpdating ? '처리 중...' : status.nextLabel}
+              </button>
+            )
           )}
           <a
             href={`tel:${caseData.client_phone}`}

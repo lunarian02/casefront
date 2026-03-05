@@ -6,8 +6,7 @@ type FirmSettings = {
   name: string
   lawyer_name: string
   phone: string
-  notify_email: string
-  notification_email: boolean
+  email: string
 }
 
 const INPUT_CLASS =
@@ -19,8 +18,7 @@ export default function SettingsPage() {
     name: '',
     lawyer_name: '',
     phone: '',
-    notify_email: '',
-    notification_email: true,
+    email: '',
   })
   const [fetching, setFetching] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -43,8 +41,7 @@ export default function SettingsPage() {
           name: firm.name ?? '',
           lawyer_name: firm.lawyer_name ?? '',
           phone: firm.phone ?? '',
-          notify_email: (firm as { notify_email?: string }).notify_email ?? '',
-          notification_email: firm.notification_email ?? true,
+          email: firm.email ?? '',
         })
       })
       .catch(() => setFetchError('네트워크 오류가 발생했습니다.'))
@@ -53,8 +50,8 @@ export default function SettingsPage() {
 
   async function handleSave() {
     if (!session) return
-    if (form.notify_email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.notify_email.trim())) {
-      setError('알림 이메일 형식이 올바르지 않습니다.')
+    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      setError('이메일 형식이 올바르지 않습니다.')
       return
     }
     setSaving(true); setSaved(false); setError('')
@@ -118,29 +115,15 @@ export default function SettingsPage() {
                 className={INPUT_CLASS}
               />
             </Field>
-          </div>
-        </section>
-
-        {/* Notifications */}
-        <section className="bg-white rounded-xl border border-slate-200 p-5">
-          <h2 className="text-sm font-semibold text-slate-700 mb-4">알림 설정</h2>
-          <div className="space-y-4">
-            <Field label="알림 이메일">
+            <Field label="이메일">
               <input
                 type="email"
-                value={form.notify_email}
-                onChange={(e) => setForm((p) => ({ ...p, notify_email: e.target.value }))}
-                placeholder="알림을 받을 이메일 주소"
+                value={form.email}
+                onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
+                placeholder="예) info@lawfirm.com"
                 className={INPUT_CLASS}
               />
-              <p className="text-xs text-slate-400 mt-1">비워두면 가입 이메일로 전송됩니다.</p>
             </Field>
-            <Toggle
-              checked={form.notification_email}
-              onChange={(v) => setForm((p) => ({ ...p, notification_email: v }))}
-              label="이메일 알림"
-              desc="리포트 생성 완료 시 이메일로 알림을 받습니다."
-            />
           </div>
         </section>
 
@@ -167,35 +150,6 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     <div>
       <label className="block text-xs font-medium text-slate-500 mb-1.5">{label}</label>
       {children}
-    </div>
-  )
-}
-
-function Toggle({ checked, onChange, label, desc }: {
-  checked: boolean
-  onChange: (v: boolean) => void
-  label: string
-  desc: string
-}) {
-  return (
-    <div className="flex items-center gap-3">
-      <button
-        type="button"
-        role="switch"
-        aria-checked={checked}
-        onClick={() => onChange(!checked)}
-        className="relative flex-shrink-0 w-11 h-6 rounded-full overflow-hidden transition-colors duration-200 focus:outline-none"
-        style={{ background: checked ? '#2d4a8a' : '#cbd5e1' }}
-      >
-        <span
-          className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200"
-          style={{ transform: checked ? 'translateX(22px)' : 'translateX(2px)' }}
-        />
-      </button>
-      <div>
-        <p className="text-sm font-medium text-slate-700">{label}</p>
-        <p className="text-xs text-slate-400 mt-0.5">{desc}</p>
-      </div>
     </div>
   )
 }

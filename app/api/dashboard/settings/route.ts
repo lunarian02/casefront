@@ -34,9 +34,8 @@ export async function PATCH(request: Request) {
   const body = await request.json()
 
   const allowedCols = [
-    'name', 'lawyer_name', 'phone', 'hours', 'specialties',
-    'greeting', 'notification_email', 'notification_new_case', 'notification_urgent_only',
-    'notify_email',
+    'name', 'lawyer_name', 'phone', 'email',
+    'hours', 'specialties', 'greeting',
   ]
 
   const updates: Record<string, unknown> = {}
@@ -44,8 +43,8 @@ export async function PATCH(request: Request) {
     if (key in body) updates[key] = body[key]
   }
   // Normalize email to lowercase
-  if (typeof updates.notify_email === 'string') {
-    updates.notify_email = updates.notify_email.toLowerCase().trim()
+  if (typeof updates.email === 'string') {
+    updates.email = updates.email.toLowerCase().trim()
   }
 
   if (Object.keys(updates).length === 0) {
