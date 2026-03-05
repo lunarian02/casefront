@@ -25,7 +25,7 @@ export async function GET(
   // Recording
   const { data: recording, error: recErr } = await supabaseAdmin
     .from('recordings')
-    .select('id, title, status, duration_seconds, created_at, firm_id, client_id, file_path, client:clients(id, name, phone, email)')
+    .select('id, title, status, duration_seconds, created_at, firm_id, client_id, file_path, recording_type, client:clients(id, name, phone, email)')
     .eq('id', recordingId)
     .eq('firm_id', firm.id)
     .maybeSingle()
@@ -74,4 +74,67 @@ export async function GET(
     signedUrl,
     linkedCases,
   })
+}
+
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id: recordingId } = await params
+  const firm = await getAuthFirm(request)
+  if (!firm) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const body = await request.json()
+  const { title } = body
+
+  if (!title || typeof title !== 'string' || title.trim().length === 0) {
+    return NextResponse.json({ error: 'Invalid title' }, { status: 400 })
+  }
+
+  const { data, error } = await supabaseAdmin
+    .from('recordings')
+    .update({ title: title.trim() })
+    .eq('id', recordingId)
+    .eq('firm_id', firm.id)
+    .select('id, title, status, duration_seconds, created_at, firm_id, client_id, file_path, recording_type')
+    .single()
+
+  if (error || !data) return NextResponse.json({ error: 'Failed to update' }, { status: 500 })
+
+  return NextResponse.json({ recording: data })
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id: recordingId } = await params
+  const firm = await getAuthFirm(request)
+  if (!firm) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  // First check if recording exists and belongs to firm
+  const { data: recording } = await supabaseAdmin
+    .from('recordings')
+    .select('id, file_path, firm_id')
+    .eq('id', recordingId)
+    .eq('firm_id', firm.id)
+    .maybeSingle()
+
+  if (!recording) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
+  // Delete file from storage if exists
+  if (recording.file_path) {
+    await supabaseAdmin.storage.from('recordings').remove([recording.file_path])
+  }
+
+  // Delete recording (CASCADE will handle reports, transcripts, links)
+  const { error } = await supabaseAdmin
+    .from('recordings')
+    .delete()
+    .eq('id', recordingId)
+    .eq('firm_id', firm.id)
+
+  if (error) return NextResponse.json({ error: 'Failed to delete' }, { status: 500 })
+
+  return NextResponse.json({ success: true })
 }
