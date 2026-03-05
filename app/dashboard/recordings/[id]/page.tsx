@@ -850,15 +850,15 @@ export default function RecordingDetailPage() {
                       const alreadyLinked = linkedCases.some((l) => l.case_id === c.id)
                       return (
                         <button
-                          key={c.session_id}
+                          key={c.id}
                           onClick={() => !alreadyLinked && handleLink(c)}
                           disabled={alreadyLinked || linkSaving}
                           className={`w-full text-left px-4 py-3 rounded-lg border transition-colors ${
                             alreadyLinked ? 'border-blue-200 bg-blue-50 cursor-default' : 'border-slate-200 hover:bg-slate-50 disabled:opacity-50'
                           }`}
                         >
-                          <span className="text-sm font-medium text-slate-800">{c.client?.name ?? '고객 정보 없음'}</span>
-                          <span className="ml-2 text-sm text-slate-500">{c.case_type}</span>
+                          <span className="text-sm font-semibold text-gray-950">{c.client?.name ?? '고객 정보 없음'}</span>
+                          <span className="ml-2 text-sm font-medium text-slate-900">{c.case_type}</span>
                           {alreadyLinked && <span className="ml-2 text-xs text-blue-600">✓ 연결됨</span>}
                         </button>
                       )
