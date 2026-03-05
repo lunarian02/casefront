@@ -48,7 +48,10 @@ export async function GET(request: Request) {
       .eq('firm_id', firm.id),
     supabaseAdmin
       .from('case_summaries')
-      .select('id, session_id, client_name, client_phone, client_email, case_type, status, is_proxy, contact_name, contact_relation, created_at')
+      .select(`
+        id, session_id, case_type, status, is_proxy, contact_name, contact_relation, created_at,
+        client:clients(id, name, phone, email, referrer)
+      `)
       .eq('firm_id', firm.id)
       .order('created_at', { ascending: false })
       .range(offset, offset + PAGE_LIMIT - 1),
@@ -79,14 +82,34 @@ export async function POST(request: Request) {
   if (!client_name?.trim()) return NextResponse.json({ error: '이름을 입력해 주세요.' }, { status: 400 })
   if (!client_phone?.trim()) return NextResponse.json({ error: '전화번호를 입력해 주세요.' }, { status: 400 })
 
+  const normalizedPhone = normalizePhone(client_phone.trim())
+
+  // Step 1: UPSERT client (phone 기준으로 기존 고객 찾기 or 생성)
+  const { data: client, error: clientError } = await supabaseAdmin
+    .from('clients')
+    .upsert(
+      {
+        firm_id: firm.id,
+        phone: normalizedPhone,
+        name: client_name.trim(),
+      },
+      { onConflict: 'firm_id,phone', ignoreDuplicates: false }
+    )
+    .select('id')
+    .single()
+
+  if (clientError || !client) {
+    return NextResponse.json({ error: clientError?.message ?? '고객 생성 실패' }, { status: 500 })
+  }
+
+  // Step 2: Create case_summary with client_id
   const sessionId = randomUUID()
   const { data, error } = await supabaseAdmin
     .from('case_summaries')
     .insert({
       firm_id: firm.id,
       session_id: sessionId,
-      client_name: client_name.trim(),
-      client_phone: normalizePhone(client_phone.trim()),
+      client_id: client.id,
       case_type: case_type?.trim() || null,
       status: 'new',
       summary: {
@@ -95,7 +118,10 @@ export async function POST(request: Request) {
         conversation_turns: 0, timestamp: new Date().toISOString(),
       },
     })
-    .select('id, session_id, client_name, client_phone, case_type, status, created_at')
+    .select(`
+      id, session_id, case_type, status, created_at,
+      client:clients(id, name, phone, email, referrer)
+    `)
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

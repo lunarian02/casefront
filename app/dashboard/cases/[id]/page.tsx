@@ -8,9 +8,6 @@ type CaseDetail = {
   id: number
   session_id: string
   client_id: string | null
-  client_name: string
-  client_phone: string
-  client_email?: string | null
   is_proxy: boolean | null
   contact_name?: string | null
   contact_phone?: string | null
@@ -448,7 +445,7 @@ export default function CaseDetailPage() {
             </svg>
           </button>
           <div>
-            <h1 className="text-xl font-bold text-slate-900">{caseData.client_name}</h1>
+            <h1 className="text-xl font-bold text-slate-900">{liveClient?.name ?? '고객 정보 없음'}</h1>
             <p className="text-sm text-slate-500 mt-0.5">{caseData.case_type}</p>
           </div>
         </div>
@@ -550,10 +547,10 @@ export default function CaseDetailPage() {
                 )}
               </div>
               <div className="space-y-2.5">
-                <InfoRow label="이름" value={liveClient?.name ?? caseData.client_name} />
-                <InfoRow label="연락처" value={liveClient?.phone ?? caseData.client_phone} isPhone />
-                {(liveClient?.email ?? caseData.client_email) && (
-                  <InfoRow label="이메일" value={(liveClient?.email ?? caseData.client_email) as string} isEmail />
+                <InfoRow label="이름" value={liveClient?.name ?? '정보 없음'} />
+                <InfoRow label="연락처" value={liveClient?.phone ?? '-'} isPhone />
+                {liveClient?.email && (
+                  <InfoRow label="이메일" value={liveClient.email} isEmail />
                 )}
                 {liveClient?.referrer && <InfoRow label="추천인" value={liveClient.referrer} />}
                 <InfoRow label="접수일" value={new Date(caseData.created_at).toLocaleString('ko-KR', {
@@ -1179,7 +1176,7 @@ export default function CaseDetailPage() {
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
             <h3 className="text-base font-semibold text-slate-900 mb-1">사건을 삭제하시겠어요?</h3>
             <p className="text-sm text-slate-500 mb-1">
-              <span className="font-medium text-slate-700">{caseData.client_name}</span>님의{' '}
+              <span className="font-medium text-slate-700">{liveClient?.name ?? '고객'}</span>님의{' '}
               <span className="font-medium text-slate-700">{caseData.case_type}</span> 사건이 삭제됩니다.
             </p>
             <p className="text-xs text-red-500 mb-6">삭제된 사건은 복구할 수 없습니다.</p>

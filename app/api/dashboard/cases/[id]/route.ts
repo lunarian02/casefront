@@ -33,7 +33,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
   const { data: caseData, error: caseError } = await supabaseAdmin
     .from('case_summaries')
-    .select('id, session_id, client_id, client_name, client_phone, client_email, is_proxy, contact_name, contact_phone, contact_email, contact_relation, case_type, status, summary, parent_case_id, created_at')
+    .select('id, session_id, client_id, is_proxy, contact_name, contact_phone, contact_email, contact_relation, case_type, status, summary, parent_case_id, created_at')
     .eq('session_id', sessionId)
     .eq('firm_id', firm.id)
     .maybeSingle()
@@ -120,12 +120,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     return NextResponse.json({ case: data })
   }
 
-  // Edit case fields
+  // Edit case fields (client info는 clients 테이블에서만 수정 가능)
   const allowedEdits: Record<string, unknown> = {}
   if ('case_type' in body) allowedEdits.case_type = body.case_type
-  if ('client_name' in body) allowedEdits.client_name = body.client_name
-  if ('client_phone' in body) allowedEdits.client_phone = normalizePhone(String(body.client_phone))
-  if ('client_email' in body) allowedEdits.client_email = body.client_email ? String(body.client_email).toLowerCase().trim() : null
   // Update summary JSONB sub-fields
   if ('summary_patch' in body && typeof body.summary_patch === 'object') {
     // Fetch current summary

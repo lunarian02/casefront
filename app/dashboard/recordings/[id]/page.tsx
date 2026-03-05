@@ -57,7 +57,12 @@ type LinkedCase = {
 type CaseRow = {
   id: number
   session_id: string
-  client_name: string
+  client?: {
+    id: string
+    name: string
+    phone: string
+    email: string | null
+  } | null
   case_type: string
   status: string | null
 }
@@ -442,7 +447,7 @@ export default function RecordingDetailPage() {
       const linkRes = await fetch(`/api/dashboard/recordings/${recordingId}/links`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
-        body: JSON.stringify({ case_id: newCase.id, case_client_name: newCase.client_name, case_type: newCase.case_type }),
+        body: JSON.stringify({ case_id: newCase.id, case_client_name: newCase.client?.name ?? null, case_type: newCase.case_type }),
       })
       if (linkRes.ok) {
         const linkData = await linkRes.json()
@@ -460,7 +465,7 @@ export default function RecordingDetailPage() {
     const res = await fetch(`/api/dashboard/recordings/${recordingId}/links`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
-      body: JSON.stringify({ case_id: c.id, case_client_name: c.client_name, case_type: c.case_type }),
+      body: JSON.stringify({ case_id: c.id, case_client_name: c.client?.name ?? null, case_type: c.case_type }),
     })
     if (res.ok) {
       const data = await res.json()
@@ -883,7 +888,7 @@ export default function RecordingDetailPage() {
                             alreadyLinked ? 'border-blue-200 bg-blue-50 cursor-default' : 'border-slate-200 hover:bg-slate-50 disabled:opacity-50'
                           }`}
                         >
-                          <span className="text-sm font-medium text-slate-800">{c.client_name}</span>
+                          <span className="text-sm font-medium text-slate-800">{c.client?.name ?? '고객 정보 없음'}</span>
                           <span className="ml-2 text-sm text-slate-500">{c.case_type}</span>
                           {alreadyLinked && <span className="ml-2 text-xs text-blue-600">✓ 연결됨</span>}
                         </button>

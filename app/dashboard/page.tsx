@@ -6,15 +6,18 @@ import { useAuth } from '@/hooks/useAuth'
 type CaseRow = {
   id: string
   session_id: string
-  client_name: string
-  client_phone: string
-  client_email?: string
+  client?: {
+    id: string
+    name: string
+    phone: string
+    email: string | null
+    referrer: string | null
+  } | null
   case_type: string
   status: 'new' | 'reviewing' | 'done' | null
   is_proxy: boolean | null
   contact_name: string | null
   contact_relation: string | null
-  channel: string | null
   created_at: string
 }
 
@@ -165,7 +168,7 @@ export default function DashboardPage() {
                     className="cursor-pointer"
                   >
                     <div className={`font-semibold text-base leading-snug mb-0.5 ${isPast ? 'text-slate-400' : 'text-slate-900'}`}>
-                      {c.client_name}
+                      {c.client?.name ?? '고객 정보 없음'}
                       {c.is_proxy && c.contact_name && (
                         <span className="ml-1.5 text-xs font-normal text-slate-400">(대리: {c.contact_name})</span>
                       )}
@@ -206,7 +209,7 @@ export default function DashboardPage() {
                       className="hover:bg-slate-50 cursor-pointer transition-colors group"
                     >
                       <td className="px-4 py-3">
-                        <span className={`text-sm font-medium ${isPast ? 'text-slate-400' : 'text-slate-900'}`}>{c.client_name}</span>
+                        <span className={`text-sm font-medium ${isPast ? 'text-slate-400' : 'text-slate-900'}`}>{c.client?.name ?? '고객 정보 없음'}</span>
                         {proxyLabel && <span className="ml-1.5 text-xs text-slate-400">{proxyLabel}</span>}
                       </td>
                       <td className="px-4 py-3 text-sm text-slate-600 max-w-xs truncate">{c.case_type}</td>
@@ -263,7 +266,7 @@ export default function DashboardPage() {
           <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-6">
             <h2 className="text-base font-semibold text-slate-900 mb-1">사건을 삭제하시겠어요?</h2>
             <p className="text-sm text-slate-500 mb-1">
-              <span className="font-medium text-slate-700">{deleteTarget.client_name}</span>님의{' '}
+              <span className="font-medium text-slate-700">{deleteTarget.client?.name ?? '고객'}</span>님의{' '}
               <span className="font-medium text-slate-700">{deleteTarget.case_type}</span> 사건이 삭제됩니다.
             </p>
             <p className="text-xs text-red-500 mb-6">삭제된 사건은 복구할 수 없습니다.</p>
