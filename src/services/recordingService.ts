@@ -18,7 +18,7 @@ const TRANSCRIPTION_PROMPT = `당신은 법률사무소의 AI 접수 비서입�
 주의사항:
 - 통화에서 고객의 이름, 전화번호, 이메일이 언급되면 추출
 - 언급되지 않았으면 해당 필드는 null로 남김
-- 사건유형, 요건사실, 긴급도 판단은 웹챗과 동일 기준 적용
+- 사건유형, 요건사실 판단은 웹챗과 동일 기준 적용
 - events[]는 통화에서 언급된 사실관계를 시간순 정리
 - 변호사의 법률 조언 내용은 ai_notes에 포함
 - conversation_turns는 고객 발언 횟수
@@ -47,8 +47,6 @@ const TRANSCRIPTION_PROMPT = `당신은 법률사무소의 AI 접수 비서입�
   "document_request": [],
   "client_request": "...",
   "ai_notes": "...",
-  "urgency": "normal",
-  "urgency_reason": "...",
   "summary_text": "...",
   "conversation_turns": 0,
   "timestamp": "${new Date().toISOString()}"
