@@ -621,13 +621,14 @@ export default function RecordingDetailPage() {
             </div>
           ) : report ? (
             <div className="bg-white rounded-xl border border-slate-200 p-6">
-              <div className="prose prose-slate prose-sm max-w-none
-                prose-headings:font-semibold prose-headings:text-black
+              <div className="prose prose-sm max-w-none
+                prose-headings:font-bold prose-headings:text-gray-950
                 prose-h2:text-base prose-h2:mt-6 prose-h2:mb-2
                 prose-h3:text-sm prose-h3:mt-4 prose-h3:mb-1
-                prose-p:text-black prose-p:leading-relaxed
-                prose-li:text-black prose-ul:my-1 prose-ol:my-1
-                prose-strong:text-black prose-strong:font-semibold
+                prose-p:text-gray-950 prose-p:leading-relaxed
+                prose-li:text-gray-950 prose-ul:my-1 prose-ol:my-1
+                prose-strong:text-gray-950 prose-strong:font-bold
+                [&_*]:text-gray-950
               ">
                 <ReactMarkdown>{report.content}</ReactMarkdown>
               </div>
