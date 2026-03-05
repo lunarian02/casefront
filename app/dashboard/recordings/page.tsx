@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { supabaseBrowser } from '@/lib/supabaseClient'
@@ -61,7 +61,6 @@ export default function RecordingsPage() {
   const [page, setPage] = useState(0)
   const [fetching, setFetching] = useState(true)
   const [statusFilter, setStatusFilter] = useState<'all' | 'completed' | 'processing'>('all')
-  const autoSeededRef = useRef(false)
 
   const fetchRecordings = useCallback(() => {
     if (!session) return
@@ -80,16 +79,6 @@ export default function RecordingsPage() {
   useEffect(() => {
     fetchRecordings()
   }, [fetchRecordings])
-
-  // Auto-seed sample data if empty
-  useEffect(() => {
-    if (fetching || recordings.length > 0 || !session || autoSeededRef.current) return
-    autoSeededRef.current = true
-    fetch('/api/dev/seed-recordings', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${session.access_token}` },
-    }).then(() => fetchRecordings())
-  }, [fetching, recordings.length, session, fetchRecordings])
 
   // Realtime: re-fetch on recording status updates
   useEffect(() => {

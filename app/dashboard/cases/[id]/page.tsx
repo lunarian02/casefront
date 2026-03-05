@@ -478,16 +478,6 @@ export default function CaseDetailPage() {
               </button>
             )
           )}
-          <a
-            href={`tel:${caseData.client_phone}`}
-            className="px-3 py-1.5 text-sm font-medium text-white rounded-lg flex items-center gap-1.5 hover:opacity-90 transition-opacity"
-            style={{ background: '#1a2b5a' }}
-          >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 015.13 12.7a19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
-            </svg>
-            콜백
-          </a>
           {clientCases.length > 0 && (
             <button
               onClick={() => setShowConnectModal(true)}
@@ -792,7 +782,7 @@ export default function CaseDetailPage() {
             {(editingSection === 'events' || (summary?.events?.length > 0)) && (
               <div className="bg-white rounded-xl border border-slate-200 p-4">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">사건 경위</h2>
+                  <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">사실관계</h2>
                   {editingSection !== 'events' && (
                     <button
                       onClick={openEventsEdit}
@@ -815,11 +805,11 @@ export default function CaseDetailPage() {
                             </svg>
                           </button>
                         </div>
-                        <textarea value={ev.summary} onChange={(e) => setEditEvents((prev) => prev.map((v, j) => j === i ? { ...v, summary: e.target.value } : v))} rows={2} className={`${inputCls} resize-none`} placeholder="사건 경위 내용" />
+                        <textarea value={ev.summary} onChange={(e) => setEditEvents((prev) => prev.map((v, j) => j === i ? { ...v, summary: e.target.value } : v))} rows={2} className={`${inputCls} resize-none`} placeholder="사실관계 내용" />
                       </div>
                     ))}
                     <button onClick={() => setEditEvents((prev) => [...prev, { date: '', summary: '' }])} className="w-full py-2 border border-dashed border-slate-300 rounded-lg text-sm text-slate-500 hover:border-blue-300 hover:text-blue-500 transition-colors">
-                      + 경위 추가
+                      + 사실관계 추가
                     </button>
                     <div className="flex justify-end gap-2">
                       <button onClick={() => setEditingSection(null)} className="px-3 py-1.5 text-sm text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50">취소</button>
