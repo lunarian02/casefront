@@ -589,9 +589,6 @@ export default function RecordingDetailPage() {
             style={activeTab === tab.key ? { color: '#1a2b5a', borderColor: '#1a2b5a' } : {}}
           >
             {tab.label}
-            {tab.key === 'schedule' && appointments.length > 0 && (
-              <span className="ml-1.5 text-xs opacity-60">{appointments.length}</span>
-            )}
           </button>
         ))}
       </div>
