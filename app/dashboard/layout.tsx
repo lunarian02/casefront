@@ -61,7 +61,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const navItems = [
     {
       href: '/dashboard/recordings',
-      label: '상담 기록',
+      label: '상담 목록',
       exact: false,
       icon: (
         <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
