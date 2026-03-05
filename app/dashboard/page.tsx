@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
+import Pagination from '@/components/Pagination'
 
 type CaseRow = {
   id: string
@@ -236,27 +237,12 @@ export default function DashboardPage() {
           </div>
 
           {/* Pagination */}
-          {total > PAGE_SIZE && (
-            <div className="flex items-center justify-between pt-3">
-              <button
-                onClick={() => setPage((p) => p - 1)}
-                disabled={page === 0}
-                className="px-3 py-1.5 text-sm text-slate-600 border border-slate-200 rounded-lg bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                이전
-              </button>
-              <span className="text-sm text-slate-500">
-                {page + 1} / {Math.ceil(total / PAGE_SIZE)} 페이지
-              </span>
-              <button
-                onClick={() => setPage((p) => p + 1)}
-                disabled={(page + 1) * PAGE_SIZE >= total}
-                className="px-3 py-1.5 text-sm text-slate-600 border border-slate-200 rounded-lg bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                다음
-              </button>
-            </div>
-          )}
+          <Pagination
+            currentPage={page}
+            totalItems={total}
+            pageSize={PAGE_SIZE}
+            onPageChange={setPage}
+          />
         </>
       )}
 
