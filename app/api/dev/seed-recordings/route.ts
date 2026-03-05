@@ -218,7 +218,7 @@ export async function POST(request: Request) {
   for (const sample of SAMPLE_RECORDINGS) {
     const createdAt = new Date(Date.now() - sample.daysAgo * 24 * 60 * 60 * 1000).toISOString()
     const fakeId = crypto.randomUUID()
-    const filePath = `recordings/${firm.id}/${fakeId}.m4a`
+    const filePath = `${firm.id}/${fakeId}.m4a`
 
     // 1. Insert recording
     const { data: recording, error: rErr } = await supabaseAdmin
