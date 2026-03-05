@@ -15,7 +15,7 @@ export function createQueryChain(
 
   const methods = [
     'select', 'insert', 'update', 'delete', 'upsert',
-    'eq', 'neq', 'not', 'in', 'order', 'limit', 'range', 'filter',
+    'eq', 'neq', 'not', 'in', 'is', 'order', 'limit', 'range', 'filter',
   ]
   for (const m of methods) {
     chain[m] = vi.fn().mockReturnValue(chain)

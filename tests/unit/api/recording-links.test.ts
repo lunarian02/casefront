@@ -130,15 +130,20 @@ describe('POST /api/dashboard/recordings/[id]/links', () => {
 
   it('링크 생성 시 201과 link를 반환한다', async () => {
     const firm = mockFirm()
+    const caseData = { client_id: 'client-001' }
     const link = { id: 'link-001', recording_id: 'rec-001', case_id: 1 }
     mockAuth()
 
     const firmChain = createQueryChain(firm, null)
+    const caseChain = createQueryChain(caseData, null)
     const insertChain = createQueryChain(link, null)
+    const updateChain = createQueryChain({}, null)
 
     vi.mocked(supabaseAdmin.from)
       .mockReturnValueOnce(firmChain as never)
+      .mockReturnValueOnce(caseChain as never)
       .mockReturnValueOnce(insertChain as never)
+      .mockReturnValueOnce(updateChain as never)
 
     const { POST } = await import('~app/api/dashboard/recordings/[id]/links/route')
     const req = new Request('http://localhost/api/dashboard/recordings/rec-001/links', {
@@ -156,13 +161,16 @@ describe('POST /api/dashboard/recordings/[id]/links', () => {
 
   it('이미 연결된 사건은 409를 반환한다', async () => {
     const firm = mockFirm()
+    const caseData = { client_id: 'client-001' }
     mockAuth()
 
     const firmChain = createQueryChain(firm, null)
+    const caseChain = createQueryChain(caseData, null)
     const insertChain = createQueryChain(null, { code: '23505', message: 'unique violation' })
 
     vi.mocked(supabaseAdmin.from)
       .mockReturnValueOnce(firmChain as never)
+      .mockReturnValueOnce(caseChain as never)
       .mockReturnValueOnce(insertChain as never)
 
     const { POST } = await import('~app/api/dashboard/recordings/[id]/links/route')
