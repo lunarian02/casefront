@@ -461,18 +461,22 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
   </div>
 </section>
 
-<footer><div class="container"><p>© 2026 CaseFront · 변호사 상담을 사건 리포트로</p></div></footer>
+<footer><div class="container"><p>© 2026 CaseFront · 변호사 상담을 사건 리포트로 &nbsp;·&nbsp; <a href="/privacy.html" style="color:var(--text-light);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-light)'">개인정보처리방침</a></p></div></footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 window.addEventListener('scroll',()=>{document.getElementById('nav').classList.toggle('scrolled',window.scrollY>20)});
-function submitInquiry(){
+const _sb=supabase.createClient('https://psihfrowcngdmpjrhekp.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBzaWhmcm93Y25nZG1wanJoZWtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwNzI3MTYsImV4cCI6MjA4NzY0ODcxNn0.g1qTuVztmiJhxheJVY-hOylkUs3Z1-khgBpjMac39IY');
+async function submitInquiry(){
   const name=document.getElementById('inq-name').value.trim();
   const email=document.getElementById('inq-email').value.trim();
   const firm=document.getElementById('inq-firm').value.trim();
   if(!name||!email){alert('이름과 이메일을 입력해주세요.');return;}
-  fetch('https://formspree.io/f/xovdpvrp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,firm,source:'landing'})})
-  .then(()=>{document.getElementById('inq-msg').style.display='block';document.getElementById('inq-btn').disabled=true;document.getElementById('inq-btn').textContent='접수 완료';})
-  .catch(()=>{alert('전송 실패. 다시 시도해주세요.');});
+  const btn=document.getElementById('inq-btn');
+  btn.disabled=true;btn.textContent='전송 중...';
+  const{error}=await _sb.from('inquiries').insert({name,email,firm_name:firm||null,source:'landing'});
+  if(error){btn.disabled=false;btn.textContent='문의하기';alert('전송 실패. 다시 시도해주세요.');return;}
+  document.getElementById('inq-msg').style.display='block';btn.textContent='접수 완료';
 }
 </script>
 </body>
