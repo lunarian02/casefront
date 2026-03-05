@@ -341,17 +341,6 @@ export default function RecordingDetailPage() {
     return () => { supabaseBrowser.removeChannel(channel) }
   }, [session, recordingId, fetchDetail])
 
-  // Fetch appointments when schedule tab opens
-  useEffect(() => {
-    if (!session || !recordingId || activeTab !== 'schedule') return
-    setAptLoading(true)
-    fetch(`/api/dashboard/recordings/${recordingId}/appointments`, {
-      headers: { Authorization: `Bearer ${session.access_token}` },
-    })
-      .then((r) => r.json())
-      .then((data) => setAppointments(data.appointments ?? []))
-      .finally(() => setAptLoading(false))
-  }, [session, recordingId, activeTab])
 
   // Scroll to active segment
   useEffect(() => {
