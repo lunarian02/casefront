@@ -20,14 +20,14 @@ export async function GET(request: Request) {
 
   const { data: firm } = await supabaseAdmin
     .from('firms')
-    .select('id, name, slug, lawyer_name, phone, hours, specialties, greeting, logo_url')
+    .select('id, name, lawyer_name, phone, notify_email')
     .eq('lawyer_email', user.email)
     .maybeSingle()
 
   return NextResponse.json({ firm: firm ?? null })
 }
 
-// POST: create firm (onboarding step 1)
+// POST: create firm + subscription (onboarding)
 export async function POST(request: Request) {
   const user = await getAuthUser(request)
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -44,31 +44,44 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json()
-  const { name, lawyer_name, phone, hours, specialties, greeting } = body
+  const { name, lawyer_name, phone, notify_email } = body
 
-  if (!name || !lawyer_name) {
-    return NextResponse.json({ error: '사무소명과 변호사 이름은 필수입니다.' }, { status: 400 })
+  if (!name || !lawyer_name || !phone || !notify_email) {
+    return NextResponse.json({ error: '모든 필수 항목을 입력해주세요.' }, { status: 400 })
   }
 
-  // Generate unique slug (8 alphanumeric chars)
-  const slug = Math.random().toString(36).slice(2, 10)
-
-  const { data: firm, error } = await supabaseAdmin
+  // Create firm
+  const { data: firm, error: firmError } = await supabaseAdmin
     .from('firms')
     .insert({
       name,
-      slug,
       lawyer_name,
       lawyer_email: user.email,
-      phone: phone ?? null,
-      hours: hours ?? null,
-      specialties: specialties ?? [],
-      greeting: greeting ?? `안녕하세요, ${name}입니다. 어떤 일로 연락 주셨나요?`,
+      phone,
+      notify_email,
     })
     .select()
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (firmError) return NextResponse.json({ error: firmError.message }, { status: 500 })
+
+  // Create free trial subscription
+  const { error: subError } = await supabaseAdmin
+    .from('subscriptions')
+    .insert({
+      firm_id: firm.id,
+      plan: 'free_trial',
+      status: 'active',
+      minutes_used: 0,
+      free_trial_used: false,
+      base_fee_krw: 19900,
+      per_minute_krw: 250,
+    })
+
+  if (subError) {
+    console.error('Subscription creation failed:', subError.message)
+    // Don't fail onboarding if subscription fails — can retry later
+  }
 
   return NextResponse.json({ firm })
 }
@@ -87,7 +100,7 @@ export async function PATCH(request: Request) {
   if (!firm) return NextResponse.json({ error: 'Firm not found' }, { status: 404 })
 
   const body = await request.json()
-  const allowedCols = ['name', 'lawyer_name', 'phone', 'hours', 'specialties', 'greeting', 'logo_url']
+  const allowedCols = ['name', 'lawyer_name', 'phone', 'notify_email']
 
   const updates: Record<string, unknown> = {}
   for (const key of allowedCols) {
