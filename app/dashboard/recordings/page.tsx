@@ -11,6 +11,7 @@ type RecordingRow = {
   status: string
   duration_seconds: number | null
   created_at: string
+  recording_type: string
   case_type: string | null
   client?: {
     id: string
@@ -49,6 +50,11 @@ function statusLabel(status: string): { text: string; color: string } {
   if (status === 'completed') return { text: '완료', color: '#16A34A' }
   if (status === 'failed') return { text: '오류', color: '#DC2626' }
   return { text: '분석중', color: '#D97706' }
+}
+
+function consultationType(recordingType: string): string {
+  if (recordingType === 'call') return '전화'
+  return '대면'
 }
 
 const PAGE_SIZE = 20
@@ -133,8 +139,13 @@ export default function RecordingsPage() {
                   <div className="font-semibold text-slate-900 text-base leading-snug mb-1">
                     {r.client?.name ?? '의뢰인 미지정'}
                   </div>
+                  {r.title && (
+                    <div className="text-sm text-slate-600 mb-1">{r.title}</div>
+                  )}
                   <div className="flex items-center gap-2 text-sm text-slate-500">
                     <span>{formatDate(r.created_at)}</span>
+                    <span className="text-slate-300">·</span>
+                    <span>{consultationType(r.recording_type)}</span>
                     {r.case_type && (
                       <>
                         <span className="text-slate-300">·</span>
@@ -154,6 +165,8 @@ export default function RecordingsPage() {
                 <tr>
                   <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">의뢰인</th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">상담일</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">상담요약</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">상담방식</th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">유형</th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">상태</th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">녹음시간</th>
@@ -173,6 +186,12 @@ export default function RecordingsPage() {
                       </td>
                       <td className="px-4 py-3 text-sm text-slate-500">
                         {formatDate(r.created_at)}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-slate-600 max-w-xs truncate">
+                        {r.title || '—'}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-slate-600">
+                        {consultationType(r.recording_type)}
                       </td>
                       <td className="px-4 py-3 text-sm text-slate-600">
                         {r.case_type ? caseCategory(r.case_type) : '—'}

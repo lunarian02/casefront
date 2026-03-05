@@ -31,7 +31,7 @@ export async function GET(request: Request) {
       .in('status', ['completed', 'failed']),
     supabaseAdmin
       .from('recordings')
-      .select('id, title, status, duration_seconds, created_at, reports(case_type), client:clients(id, name, phone)')
+      .select('id, title, status, duration_seconds, created_at, recording_type, reports(case_type), client:clients(id, name, phone)')
       .eq('firm_id', firm.id)
       .in('status', ['completed', 'failed'])
       .order('created_at', { ascending: false })
