@@ -12,6 +12,11 @@ type RecordingRow = {
   duration_seconds: number | null
   created_at: string
   case_type: string | null
+  client?: {
+    id: string
+    name: string
+    phone: string
+  } | null
 }
 
 function caseCategory(caseType: string | null): string {
@@ -121,20 +126,21 @@ export default function RecordingsPage() {
                   onClick={() => router.push(`/dashboard/recordings/${r.id}`)}
                   className="bg-white rounded-xl p-4 border border-slate-200 active:bg-slate-50 cursor-pointer"
                 >
-                  <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-medium" style={{ color: s.color }}>{s.text}</span>
                     <span className="text-xs text-slate-400">{formatDuration(r.duration_seconds)}</span>
                   </div>
-                  <div className="font-semibold text-slate-900 text-base leading-snug mb-0.5">
-                    {r.title || '제목 없음'}
+                  <div className="font-semibold text-slate-900 text-base leading-snug mb-1">
+                    {r.client?.name ?? '의뢰인 미지정'}
                   </div>
-                  {r.case_type && (
-                    <div className="text-sm text-slate-500 mb-0.5">{r.case_type}</div>
-                  )}
-                  <div className="flex items-center gap-2 mt-1">
-                    {r.case_type && <span className="text-xs text-slate-400">{caseCategory(r.case_type)}</span>}
-                    {r.case_type && <span className="text-xs text-slate-300">·</span>}
-                    <span className="text-xs text-slate-400">{formatDate(r.created_at)}</span>
+                  <div className="flex items-center gap-2 text-sm text-slate-500">
+                    <span>{formatDate(r.created_at)}</span>
+                    {r.case_type && (
+                      <>
+                        <span className="text-slate-300">·</span>
+                        <span>{caseCategory(r.case_type)}</span>
+                      </>
+                    )}
                   </div>
                 </div>
               )
@@ -146,12 +152,11 @@ export default function RecordingsPage() {
             <table className="w-full">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">제목</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">사건 요약</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">의뢰인</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">상담일</th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">유형</th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">상태</th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">녹음시간</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">접수일</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -163,13 +168,13 @@ export default function RecordingsPage() {
                       onClick={() => router.push(`/dashboard/recordings/${r.id}`)}
                       className="hover:bg-slate-50 cursor-pointer transition-colors"
                     >
-                      <td className="px-4 py-3 text-sm font-medium text-slate-900 max-w-[160px] truncate">
-                        {r.title || '제목 없음'}
+                      <td className="px-4 py-3 text-sm font-medium text-slate-900">
+                        {r.client?.name ?? '—'}
                       </td>
-                      <td className="px-4 py-3 text-sm text-slate-600 max-w-xs truncate">
-                        {r.case_type ?? '—'}
+                      <td className="px-4 py-3 text-sm text-slate-500">
+                        {formatDate(r.created_at)}
                       </td>
-                      <td className="px-4 py-3 text-sm text-slate-400">
+                      <td className="px-4 py-3 text-sm text-slate-600">
                         {r.case_type ? caseCategory(r.case_type) : '—'}
                       </td>
                       <td className="px-4 py-3">
@@ -177,9 +182,6 @@ export default function RecordingsPage() {
                       </td>
                       <td className="px-4 py-3 text-sm text-slate-500">
                         {formatDuration(r.duration_seconds)}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-slate-500">
-                        {formatDate(r.created_at)}
                       </td>
                     </tr>
                   )
