@@ -572,7 +572,7 @@ export default function RecordingDetailPage() {
     : segments
 
   const TABS: { key: TabKey; label: string }[] = [
-    { key: 'report', label: '리포트' },
+    { key: 'report', label: '정리' },
     { key: 'transcript', label: '녹취록' },
   ]
 
