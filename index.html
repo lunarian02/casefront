@@ -472,6 +472,8 @@ async function submitInquiry(){
   const email=document.getElementById('inq-email').value.trim();
   const firm=document.getElementById('inq-firm').value.trim();
   if(!name||!email){alert('이름과 이메일을 입력해주세요.');return;}
+  const emailRegex=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if(!emailRegex.test(email)){alert('올바른 이메일 주소를 입력해주세요.');return;}
   const btn=document.getElementById('inq-btn');
   btn.disabled=true;btn.textContent='전송 중...';
   const{error}=await _sb.from('inquiries').insert({name,email,firm_name:firm||null,source:'landing'});
