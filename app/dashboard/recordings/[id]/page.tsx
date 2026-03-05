@@ -72,7 +72,7 @@ type CaseRow = {
   status: string | null
 }
 
-type TabKey = 'report' | 'transcript' | 'schedule'
+type TabKey = 'report' | 'transcript'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -514,7 +514,6 @@ export default function RecordingDetailPage() {
   const TABS: { key: TabKey; label: string }[] = [
     { key: 'report', label: '리포트' },
     { key: 'transcript', label: '스크립트' },
-    { key: 'schedule', label: '일정' },
   ]
 
   return (
@@ -721,128 +720,6 @@ export default function RecordingDetailPage() {
         </div>
       )}
 
-      {/* ── 일정 탭 ── */}
-      {activeTab === 'schedule' && (
-        <div className="max-w-2xl">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-slate-700">
-              일정 <span className="font-normal text-slate-400">{appointments.length}개</span>
-            </h2>
-            <button
-              onClick={openAddApt}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-white text-sm font-medium"
-              style={{ background: '#1a2b5a' }}
-            >
-              <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-              </svg>
-              일정 추가
-            </button>
-          </div>
-
-          {aptLoading ? (
-            <div className="flex items-center justify-center h-32">
-              <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#1a2b5a', borderTopColor: 'transparent' }} />
-            </div>
-          ) : appointments.length === 0 ? (
-            <div className="text-center py-16 text-slate-400">
-              <svg className="w-10 h-10 mx-auto mb-3 text-slate-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <p className="text-sm">등록된 일정이 없습니다.</p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {appointments.map((apt) => {
-                const isPast = new Date(apt.scheduled_at) < new Date()
-                return (
-                  <div key={apt.id} className={`bg-white rounded-xl border border-slate-200 p-4 ${isPast ? 'opacity-50' : ''}`}>
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-baseline gap-2 flex-wrap mb-1">
-                          <span className="text-xs text-slate-400">{APPT_TYPE_LABEL[apt.appointment_type] ?? apt.appointment_type}</span>
-                          <span className="text-sm font-semibold text-slate-900">{apt.title}</span>
-                        </div>
-                        <p className="text-sm text-slate-500">{formatScheduledAt(apt.scheduled_at)}</p>
-                        {apt.memo && <p className="text-xs text-slate-400 mt-1">{apt.memo}</p>}
-                      </div>
-                      <div className="flex items-center gap-1 flex-shrink-0">
-                        <button onClick={() => openEditApt(apt)} className="p-1.5 text-slate-300 hover:text-slate-500 transition-colors">
-                          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                          </svg>
-                        </button>
-                        <button onClick={() => handleDeleteApt(apt)} className="p-1.5 text-slate-300 hover:text-red-400 transition-colors">
-                          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ── 일정 추가/수정 모달 ── */}
-      {showAptModal && (
-        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.5)' }}>
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl">
-            <div className="px-5 pt-5 pb-4 border-b border-slate-100 flex items-center justify-between">
-              <h2 className="text-base font-semibold text-slate-900">{editingApt ? '일정 수정' : '일정 추가'}</h2>
-              <button onClick={() => setShowAptModal(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-100">
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
-                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-              </button>
-            </div>
-            <div className="px-5 py-4 space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1.5">유형</label>
-                <div className="flex gap-2 flex-wrap">
-                  {(['consultation', 'hearing', 'deadline', 'other'] as const).map((t) => (
-                    <button key={t} onClick={() => setAptType(t)}
-                      className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${aptType === t ? 'text-white border-transparent' : 'text-slate-600 border-slate-200 hover:border-slate-300'}`}
-                      style={aptType === t ? { background: '#1a2b5a' } : {}}
-                    >{APPT_TYPE_LABEL[t]}</button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1.5">제목 *</label>
-                <input value={aptTitle} onChange={(e) => setAptTitle(e.target.value)} placeholder="예: 1차 변론기일"
-                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400" />
-              </div>
-              <div className="flex gap-2">
-                <div className="flex-1">
-                  <label className="block text-xs font-medium text-slate-500 mb-1.5">날짜 *</label>
-                  <input type="date" value={aptDate} onChange={(e) => setAptDate(e.target.value)}
-                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400" />
-                </div>
-                <div className="w-28">
-                  <label className="block text-xs font-medium text-slate-500 mb-1.5">시간</label>
-                  <input type="time" value={aptTime} onChange={(e) => setAptTime(e.target.value)}
-                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400" />
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1.5">메모 (선택)</label>
-                <textarea value={aptMemo} onChange={(e) => setAptMemo(e.target.value)} rows={2} placeholder="추가 메모..."
-                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400 resize-none" />
-              </div>
-            </div>
-            <div className="px-5 pb-5 flex gap-3">
-              <button onClick={() => setShowAptModal(false)} className="flex-1 h-11 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50" disabled={aptSaving}>취소</button>
-              <button onClick={handleSaveApt} disabled={aptSaving || !aptTitle.trim() || !aptDate}
-                className="flex-1 h-11 rounded-xl text-white text-sm font-medium disabled:opacity-50"
-                style={{ background: '#1a2b5a' }}>{aptSaving ? '저장 중...' : '저장'}</button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ── 사건 연결 모달 ── */}
       {showLinkModal && (
