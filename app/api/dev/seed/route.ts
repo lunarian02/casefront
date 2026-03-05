@@ -193,11 +193,30 @@ export async function POST() {
     }))
     await supabaseAdmin.from('messages').insert(messages)
 
-    // 3. Insert case_summary
+    // 3. Upsert client
+    const { data: client, error: clientErr } = await supabaseAdmin
+      .from('clients')
+      .upsert(
+        {
+          firm_id: FIRM_ID,
+          phone: mock.client_phone,
+          name: mock.client_name,
+          email: mock.client_email || null,
+          created_at: createdAt,
+          last_contact_at: createdAt,
+        },
+        { onConflict: 'firm_id,phone', ignoreDuplicates: false }
+      )
+      .select('id')
+      .single()
+
+    if (clientErr || !client) {
+      results.push(`❌ Client upsert failed for ${mock.client_name}: ${clientErr?.message}`)
+      continue
+    }
+
+    // 4. Insert case_summary
     const summary = {
-      client_name: mock.client_name,
-      client_phone: mock.client_phone,
-      client_email: mock.client_email,
       is_returning: false,
       case_type: mock.case_type,
       events: mock.events,
@@ -209,9 +228,8 @@ export async function POST() {
     const { error: cErr } = await supabaseAdmin.from('case_summaries').insert({
       session_id: session.id,
       firm_id: FIRM_ID,
+      client_id: client.id,
       kakao_user_id: `mock_${mock.client_phone}`,
-      client_name: mock.client_name,
-      client_phone: mock.client_phone,
       case_type: mock.case_type,
       summary: summary,
       created_at: createdAt,
