@@ -41,7 +41,7 @@ describe('GET /api/dashboard/cases/[id]/recordings', () => {
     mockAuth()
 
     const firmChain = createQueryChain(firm, null)
-    // case_summaries lookup (caseRow = null → returns [] early)
+    // cases lookup (caseRow = null → returns [] early)
     const caseChain = createQueryChain(null, null)
 
     vi.mocked(supabaseAdmin.from)
@@ -70,13 +70,13 @@ describe('GET /api/dashboard/cases/[id]/recordings', () => {
     mockAuth()
 
     const firmChain = createQueryChain(firm, null)
-    const caseChain = createQueryChain({ id: 1 }, null) // case_summaries lookup
+    const caseChain = createQueryChain({ id: 1 }, null) // cases lookup
     const linksChain = createQueryChain(links, null)
     const recordingsChain = createQueryChain(recordings, null)
 
     vi.mocked(supabaseAdmin.from)
       .mockReturnValueOnce(firmChain as never)
-      .mockReturnValueOnce(caseChain as never)       // case_summaries → caseId
+      .mockReturnValueOnce(caseChain as never)       // cases → caseId
       .mockReturnValueOnce(linksChain as never)
       .mockReturnValueOnce(recordingsChain as never)
 

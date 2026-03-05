@@ -65,7 +65,7 @@ describe('GET /api/dashboard/recordings/[id]/links', () => {
   it('링크된 사건 목록을 반환한다', async () => {
     const firm = mockFirm()
     const links = [
-      { id: 'link-001', case_id: 1, case_client_name: '김철수', case_type: '교통사고', created_at: new Date().toISOString(), case_summaries: { session_id: 'sess-001' } },
+      { id: 'link-001', case_id: 1, case_client_name: '김철수', case_type: '교통사고', created_at: new Date().toISOString(), cases: { session_id: 'sess-001' } },
     ]
     mockAuth()
 

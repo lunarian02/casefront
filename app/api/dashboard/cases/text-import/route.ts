@@ -160,7 +160,7 @@ export async function POST(request: Request) {
 
   // Save case_summary
   const { data: caseRecord, error: caseError } = await supabaseAdmin
-    .from('case_summaries')
+    .from('cases')
     .insert({
       session_id: sessionId,
       firm_id: auth.firm.id,

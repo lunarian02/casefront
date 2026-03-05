@@ -25,17 +25,16 @@ export async function GET(
 
   const { data, error } = await supabaseAdmin
     .from('recording_case_links')
-    .select('id, case_id, case_client_name, case_type, created_at, case_summaries(session_id)')
+    .select('id, case_id, case_client_name, case_type, created_at')
     .eq('recording_id', recordingId)
     .eq('user_id', firm.id)
     .order('created_at', { ascending: false })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Flatten session_id for navigation
+  // Map case_id as session_id for backward compatibility
   const links = (data ?? []).map((l: Record<string, unknown>) => {
-    const cs = l.case_summaries as { session_id?: string } | null
-    return { ...l, session_id: cs?.session_id ?? null, case_summaries: undefined }
+    return { ...l, session_id: l.case_id }
   })
 
   return NextResponse.json({ links })
@@ -55,9 +54,9 @@ export async function POST(
     return NextResponse.json({ error: 'case_id is required' }, { status: 400 })
   }
 
-  // 1. Get client_id from case_summaries
+  // 1. Get client_id from cases
   const { data: caseData } = await supabaseAdmin
-    .from('case_summaries')
+    .from('cases')
     .select('client_id')
     .eq('id', case_id)
     .eq('firm_id', firm.id)

@@ -151,7 +151,7 @@ export async function POST() {
   }
 
   // Cleanup existing mock data before re-seeding
-  await supabaseAdmin.from('case_summaries').delete().like('kakao_user_id', 'mock_%')
+  await supabaseAdmin.from('cases').delete().like('kakao_user_id', 'mock_%')
   const mockSessions = await supabaseAdmin.from('sessions').select('id').like('kakao_user_id', 'mock_%')
   if (mockSessions.data?.length) {
     const ids = mockSessions.data.map((s) => s.id)
@@ -225,7 +225,7 @@ export async function POST() {
       summary_text: mock.summary_text,
     }
 
-    const { error: cErr } = await supabaseAdmin.from('case_summaries').insert({
+    const { error: cErr } = await supabaseAdmin.from('cases').insert({
       session_id: session.id,
       firm_id: FIRM_ID,
       client_id: client.id,

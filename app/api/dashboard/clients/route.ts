@@ -91,7 +91,7 @@ export async function GET(request: Request) {
   // case count per client
   const clientIds = clients.map((c) => c.id)
   const { data: summaryRows } = await supabaseAdmin
-    .from('case_summaries')
+    .from('cases')
     .select('client_id')
     .eq('firm_id', firmId)
     .in('client_id', clientIds)

@@ -350,17 +350,17 @@ describe('DELETE /api/dashboard/clients/[id]', () => {
     expect(res.status).toBe(401)
   })
 
-  it('고객 삭제 시 case_summaries 언링크 후 삭제한다', async () => {
+  it('고객 삭제 시 cases 언링크 후 삭제한다', async () => {
     const firm = mockFirm()
     mockAuth()
 
     const firmChain        = createQueryChain(firm, null)
-    const casesUnlinkChain = createQueryChain(null, null)  // case_summaries update
+    const casesUnlinkChain = createQueryChain(null, null)  // cases update
     const deleteChain      = createQueryChain(null, null)  // clients delete
 
     vi.mocked(supabaseAdmin.from)
       .mockReturnValueOnce(firmChain as never)           // getAuthFirmId firms
-      .mockReturnValueOnce(casesUnlinkChain as never)    // case_summaries update
+      .mockReturnValueOnce(casesUnlinkChain as never)    // cases update
       .mockReturnValueOnce(deleteChain as never)         // clients delete
 
     const { DELETE } = await import('~app/api/dashboard/clients/[id]/route')

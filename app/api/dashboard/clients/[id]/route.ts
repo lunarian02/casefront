@@ -56,8 +56,8 @@ export async function DELETE(
   const firmId = await getAuthFirmId(request)
   if (!firmId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // Unlink client from case_summaries before deleting
-  await supabaseAdmin.from('case_summaries').update({ client_id: null }).eq('client_id', clientId).eq('firm_id', firmId)
+  // Unlink client from cases before deleting
+  await supabaseAdmin.from('cases').update({ client_id: null }).eq('client_id', clientId).eq('firm_id', firmId)
 
   const { error } = await supabaseAdmin
     .from('clients')
@@ -94,7 +94,7 @@ export async function GET(
 
   // Fetch all cases for this client
   const { data: cases } = await supabaseAdmin
-    .from('case_summaries')
+    .from('cases')
     .select('id, session_id, case_type, status, summary, created_at')
     .eq('client_id', clientId)
     .order('created_at', { ascending: false })

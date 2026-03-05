@@ -32,7 +32,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   }
 
   const { data: caseData, error: caseError } = await supabaseAdmin
-    .from('case_summaries')
+    .from('cases')
     .select('id, session_id, client_id, is_proxy, contact_name, contact_phone, contact_email, contact_relation, case_type, status, summary, parent_case_id, created_at')
     .eq('session_id', sessionId)
     .eq('firm_id', firm.id)
@@ -60,7 +60,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   let clientCases: Array<{ id: number; session_id: string; case_type: string; created_at: string }> = []
   if (caseData.client_id) {
     const { data: cc } = await supabaseAdmin
-      .from('case_summaries')
+      .from('cases')
       .select('id, session_id, case_type, created_at')
       .eq('client_id', caseData.client_id)
       .eq('firm_id', firm.id)
@@ -95,7 +95,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     const { data, error } = await supabaseAdmin
-      .from('case_summaries')
+      .from('cases')
       .update({ status: body.status })
       .eq('session_id', sessionId)
       .eq('firm_id', firm.id)
@@ -109,7 +109,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   // Connect to parent case
   if ('parent_case_id' in body) {
     const { data, error } = await supabaseAdmin
-      .from('case_summaries')
+      .from('cases')
       .update({ parent_case_id: body.parent_case_id })
       .eq('session_id', sessionId)
       .eq('firm_id', firm.id)
@@ -127,7 +127,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if ('summary_patch' in body && typeof body.summary_patch === 'object') {
     // Fetch current summary
     const { data: current } = await supabaseAdmin
-      .from('case_summaries')
+      .from('cases')
       .select('summary')
       .eq('session_id', sessionId)
       .eq('firm_id', firm.id)
@@ -146,7 +146,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   }
 
   const { data, error } = await supabaseAdmin
-    .from('case_summaries')
+    .from('cases')
     .update(allowedEdits)
     .eq('session_id', sessionId)
     .eq('firm_id', firm.id)
@@ -167,7 +167,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
 
   // Get case_summary id first (needed to delete related records)
   const { data: caseData, error: findError } = await supabaseAdmin
-    .from('case_summaries')
+    .from('cases')
     .select('id')
     .eq('session_id', sessionId)
     .eq('firm_id', firm.id)
@@ -184,7 +184,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   await supabaseAdmin.from('files').delete().eq('case_id', caseId)
 
   const { error: deleteError } = await supabaseAdmin
-    .from('case_summaries')
+    .from('cases')
     .delete()
     .eq('id', caseId)
     .eq('firm_id', firm.id)

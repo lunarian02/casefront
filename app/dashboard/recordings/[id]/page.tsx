@@ -54,7 +54,7 @@ type Appointment = {
 type LinkedCase = {
   id: string
   case_id: number
-  session_id: string | null  // from JOIN on case_summaries, for navigation
+  session_id: string | null  // from JOIN on cases, for navigation
   case_client_name: string | null
   case_type: string | null
 }

@@ -266,10 +266,10 @@ describe('DELETE /api/dashboard/cases/[id]', () => {
 
     vi.mocked(supabaseAdmin.from)
       .mockReturnValueOnce(firmChain as never)   // getAuthFirm
-      .mockReturnValueOnce(findChain as never)   // case_summaries find
+      .mockReturnValueOnce(findChain as never)   // cases find
       .mockReturnValueOnce(notesChain as never)  // case_notes delete
       .mockReturnValueOnce(filesChain as never)  // files delete
-      .mockReturnValueOnce(deleteChain as never) // case_summaries delete
+      .mockReturnValueOnce(deleteChain as never) // cases delete
 
     const { DELETE } = await import('~app/api/dashboard/cases/[id]/route')
     const req = new Request('http://localhost/api/dashboard/cases/sess-001', {

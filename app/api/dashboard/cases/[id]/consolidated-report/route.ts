@@ -50,7 +50,7 @@ export async function GET(
 
   // Look up case integer ID
   const { data: caseRow } = await supabaseAdmin
-    .from('case_summaries')
+    .from('cases')
     .select('id')
     .eq('session_id', sessionId)
     .eq('firm_id', firm.id)
@@ -81,7 +81,7 @@ export async function POST(
 
   // Look up case integer ID
   const { data: caseRow } = await supabaseAdmin
-    .from('case_summaries')
+    .from('cases')
     .select('id')
     .eq('session_id', sessionId)
     .eq('firm_id', firm.id)

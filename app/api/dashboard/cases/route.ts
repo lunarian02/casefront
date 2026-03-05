@@ -43,11 +43,11 @@ export async function GET(request: Request) {
 
   const [countResult, casesResult] = await Promise.all([
     supabaseAdmin
-      .from('case_summaries')
+      .from('cases')
       .select('id', { count: 'exact', head: true })
       .eq('firm_id', firm.id),
     supabaseAdmin
-      .from('case_summaries')
+      .from('cases')
       .select(`
         id, session_id, case_type, status, is_proxy, contact_name, contact_relation, created_at,
         client:clients(id, name, phone, email, referrer)
@@ -105,7 +105,7 @@ export async function POST(request: Request) {
   // Step 2: Create case_summary with client_id
   const sessionId = randomUUID()
   const { data, error } = await supabaseAdmin
-    .from('case_summaries')
+    .from('cases')
     .insert({
       firm_id: firm.id,
       session_id: sessionId,

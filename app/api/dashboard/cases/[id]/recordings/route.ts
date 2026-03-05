@@ -24,7 +24,7 @@ export async function GET(
 
   // Look up case integer ID from session_id
   const { data: caseRow } = await supabaseAdmin
-    .from('case_summaries')
+    .from('cases')
     .select('id')
     .eq('session_id', sessionId)
     .eq('firm_id', firm.id)
