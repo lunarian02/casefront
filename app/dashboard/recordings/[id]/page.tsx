@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import ReactMarkdown from 'react-markdown'
@@ -73,6 +73,9 @@ export default function RecordingDetailPage() {
   const [activeTab, setActiveTab] = useState<TabKey>('summary')
   const [showRawReport, setShowRawReport] = useState(false)
   const [creating, setCreating] = useState(false)
+  const [currentTime, setCurrentTime] = useState(0)
+  const audioRef = useRef<HTMLAudioElement>(null)
+  const activeSegmentRef = useRef<HTMLDivElement>(null)
 
   const recordingId = params?.id as string
 
@@ -142,6 +145,22 @@ export default function RecordingDetailPage() {
   }
 
   const structured = report?.structured
+
+  // Auto-scroll to active segment
+  useEffect(() => {
+    if (activeSegmentRef.current) {
+      activeSegmentRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      })
+    }
+  }, [currentTime])
+
+  function formatTime(seconds: number): string {
+    const mins = Math.floor(seconds / 60)
+    const secs = Math.floor(seconds % 60)
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
 
   return (
     <div className="p-4 md:p-6 max-w-4xl mx-auto">
@@ -380,14 +399,54 @@ export default function RecordingDetailPage() {
       {activeTab === 'transcript' && (
         <div className="space-y-4">
           {signedUrl && (
-            <div className="bg-white border border-slate-200 rounded-xl p-4">
-              <audio controls className="w-full">
+            <div className="bg-white border border-slate-200 rounded-xl p-4 sticky top-0 z-10">
+              <audio
+                ref={audioRef}
+                controls
+                className="w-full"
+                onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
+              >
                 <source src={signedUrl} type="audio/mpeg" />
               </audio>
             </div>
           )}
 
-          {transcript?.full_text ? (
+          {transcript?.segments && transcript.segments.length > 0 ? (
+            <Card title="스크립트">
+              <div className="space-y-2">
+                {transcript.segments.map((segment, i) => {
+                  const isActive = currentTime >= segment.start && currentTime < segment.end
+                  return (
+                    <div
+                      key={i}
+                      ref={isActive ? activeSegmentRef : null}
+                      className={`p-3 rounded-lg transition-colors cursor-pointer ${
+                        isActive
+                          ? 'bg-blue-50 border-l-4 border-blue-500'
+                          : 'hover:bg-slate-50'
+                      }`}
+                      onClick={() => {
+                        if (audioRef.current) {
+                          audioRef.current.currentTime = segment.start
+                        }
+                      }}
+                    >
+                      <div className="flex items-start gap-3">
+                        <span className="text-xs text-slate-400 font-mono mt-0.5 min-w-[60px]">
+                          {formatTime(segment.start)}
+                        </span>
+                        <p className={`text-sm leading-relaxed ${
+                          isActive ? 'text-slate-900 font-medium' : 'text-slate-700'
+                        }`}>
+                          {segment.text}
+                        </p>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </Card>
+          ) : transcript?.full_text ? (
             <Card title="전체 스크립트">
               <div className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
                 {transcript.full_text}
