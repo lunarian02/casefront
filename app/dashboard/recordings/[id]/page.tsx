@@ -71,7 +71,6 @@ export default function RecordingDetailPage() {
   const [fetching, setFetching] = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [activeTab, setActiveTab] = useState<TabKey>('summary')
-  const [showRawReport, setShowRawReport] = useState(false)
   const [creating, setCreating] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const audioRef = useRef<HTMLAudioElement>(null)
@@ -370,31 +369,6 @@ export default function RecordingDetailPage() {
                   </ol>
                 </Card>
               )}
-
-              {/* Raw Report Toggle */}
-              <div className="pt-4">
-                <button
-                  onClick={() => setShowRawReport(!showRawReport)}
-                  className="text-sm text-slate-600 hover:text-slate-900 flex items-center gap-2"
-                >
-                  <svg
-                    className={`w-4 h-4 transition-transform ${showRawReport ? 'rotate-90' : ''}`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                  원본 AI 리포트 보기
-                </button>
-                {showRawReport && report?.content && (
-                  <div className="mt-4 p-4 bg-slate-50 border border-slate-200 rounded-lg">
-                    <div className="prose prose-sm max-w-none">
-                      <ReactMarkdown>{report.content}</ReactMarkdown>
-                    </div>
-                  </div>
-                )}
-              </div>
             </>
           ) : (
             <Card title="상담 정리">
