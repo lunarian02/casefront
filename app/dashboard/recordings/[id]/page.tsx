@@ -486,7 +486,7 @@ export default function RecordingDetailPage() {
                     {activeReport.structured.evidence.map((item, i) => (
                       <li key={i} className="flex gap-2 text-sm text-slate-700">
                         <span className="text-blue-600">•</span>
-                        <span>{item}</span>
+                        <span>{typeof item === 'string' ? item : (item as any)?.item || '—'}</span>
                       </li>
                     ))}
                   </ul>
