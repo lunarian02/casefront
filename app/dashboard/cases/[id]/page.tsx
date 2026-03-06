@@ -230,7 +230,7 @@ export default function CaseDetailPage() {
                 : 'border-transparent text-slate-500 hover:text-slate-700'
             }`}
           >
-            {tab === 'report' ? '리포트' : '연결된 상담'}
+            {tab === 'report' ? '리포트' : `상담(${linkedRecordings.length})`}
           </button>
         ))}
       </div>
@@ -270,6 +270,42 @@ export default function CaseDetailPage() {
               <p className="text-sm text-slate-700 whitespace-pre-wrap">
                 {detail.overview || <span className="text-slate-400">아직 내용이 없습니다. 수정 버튼을 눌러 입력하세요.</span>}
               </p>
+            )}
+          </Section>
+
+          {/* Client Info (read-only) */}
+          <Section title="고객 정보" hideEdit>
+            {liveClient ? (
+              <div className="space-y-2 text-sm">
+                <div className="flex gap-3">
+                  <span className="text-slate-500 w-16">이름</span>
+                  <span className="text-slate-900 font-medium">{liveClient.name}</span>
+                </div>
+                <div className="flex gap-3">
+                  <span className="text-slate-500 w-16">연락처</span>
+                  <a href={`tel:${liveClient.phone}`} className="text-blue-600 hover:underline">{liveClient.phone}</a>
+                </div>
+                {liveClient.email && (
+                  <div className="flex gap-3">
+                    <span className="text-slate-500 w-16">이메일</span>
+                    <a href={`mailto:${liveClient.email}`} className="text-blue-600 hover:underline">{liveClient.email}</a>
+                  </div>
+                )}
+                {liveClient.referrer && (
+                  <div className="flex gap-3">
+                    <span className="text-slate-500 w-16">추천인</span>
+                    <span className="text-slate-700">{liveClient.referrer}</span>
+                  </div>
+                )}
+                <button
+                  onClick={() => router.push(`/dashboard/clients/${liveClient.id}`)}
+                  className="text-xs text-blue-600 hover:underline"
+                >
+                  고객 상세에서 수정 →
+                </button>
+              </div>
+            ) : (
+              <span className="text-sm text-slate-400">고객 정보가 없습니다.</span>
             )}
           </Section>
 
@@ -411,46 +447,6 @@ export default function CaseDetailPage() {
                   <span className="text-sm text-slate-400">아직 내용이 없습니다. 수정 버튼을 눌러 입력하세요.</span>
                 )}
               </div>
-            )}
-          </Section>
-
-          {/* Client Info (read-only) */}
-          <Section title="고객 정보" hideEdit>
-            {liveClient ? (
-              <div className="space-y-2 text-sm">
-                <div className="flex gap-3">
-                  <span className="text-slate-500 w-16">이름</span>
-                  <span className="text-slate-900 font-medium">{liveClient.name}</span>
-                </div>
-                <div className="flex gap-3">
-                  <span className="text-slate-500 w-16">연락처</span>
-                  <a href={`tel:${liveClient.phone}`} className="text-blue-600 hover:underline">{liveClient.phone}</a>
-                </div>
-                {liveClient.email && (
-                  <div className="flex gap-3">
-                    <span className="text-slate-500 w-16">이메일</span>
-                    <a href={`mailto:${liveClient.email}`} className="text-blue-600 hover:underline">{liveClient.email}</a>
-                  </div>
-                )}
-                {liveClient.referrer && (
-                  <div className="flex gap-3">
-                    <span className="text-slate-500 w-16">추천인</span>
-                    <span className="text-slate-700">{liveClient.referrer}</span>
-                  </div>
-                )}
-                <button
-                  onClick={() => router.push(`/dashboard/clients/${liveClient.id}`)}
-                  className="text-xs text-blue-600 hover:underline"
-                >
-                  고객 상세에서 수정 →
-                </button>
-              </div>
-            ) : (
-              <button
-                className="text-sm text-blue-600 hover:underline"
-              >
-                + 고객 연결
-              </button>
             )}
           </Section>
         </div>
