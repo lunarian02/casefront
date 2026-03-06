@@ -151,6 +151,26 @@ export default function RecordingDetailPage() {
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
+  function handleSeeked(time: number) {
+    if (!transcript?.segments) return
+
+    // Find active segment index
+    const activeIndex = transcript.segments.findIndex(
+      (seg) => time >= seg.start && time < seg.end
+    )
+
+    if (activeIndex >= 0) {
+      // Scroll to the active segment
+      const element = document.getElementById(`segment-${activeIndex}`)
+      if (element) {
+        element.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        })
+      }
+    }
+  }
+
   return (
     <div className="p-4 md:p-6 max-w-4xl mx-auto">
       {/* Header */}
@@ -394,6 +414,7 @@ export default function RecordingDetailPage() {
                 controls
                 className="w-full"
                 onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
+                onSeeked={(e) => handleSeeked(e.currentTarget.currentTime)}
               >
                 <source src={signedUrl} type="audio/mpeg" />
               </audio>
@@ -408,6 +429,7 @@ export default function RecordingDetailPage() {
                   return (
                     <div
                       key={i}
+                      id={`segment-${i}`}
                       className={`p-3 rounded-lg transition-colors cursor-pointer ${
                         isActive
                           ? 'bg-blue-50 border-l-4 border-blue-500'
