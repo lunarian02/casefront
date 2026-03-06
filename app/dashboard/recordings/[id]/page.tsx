@@ -75,7 +75,6 @@ export default function RecordingDetailPage() {
   const [creating, setCreating] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const audioRef = useRef<HTMLAudioElement>(null)
-  const activeSegmentRef = useRef<HTMLDivElement>(null)
 
   const recordingId = params?.id as string
 
@@ -145,21 +144,6 @@ export default function RecordingDetailPage() {
   }
 
   const structured = report?.structured
-
-  // Calculate active segment index for auto-scroll
-  const activeSegmentIndex = transcript?.segments?.findIndex(
-    (seg) => currentTime >= seg.start && currentTime < seg.end
-  ) ?? -1
-
-  // Auto-scroll to active segment (only when active segment changes)
-  useEffect(() => {
-    if (activeSegmentIndex >= 0 && activeSegmentRef.current) {
-      activeSegmentRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-      })
-    }
-  }, [activeSegmentIndex])
 
   function formatTime(seconds: number): string {
     const mins = Math.floor(seconds / 60)
@@ -424,7 +408,6 @@ export default function RecordingDetailPage() {
                   return (
                     <div
                       key={i}
-                      ref={isActive ? activeSegmentRef : null}
                       className={`p-3 rounded-lg transition-colors cursor-pointer ${
                         isActive
                           ? 'bg-blue-50 border-l-4 border-blue-500'
