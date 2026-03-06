@@ -248,13 +248,21 @@ export async function POST(request: Request) {
       continue
     }
 
-    // 2. Insert transcript
+    // 2. Insert transcript with generated segments
+    const lines = sample.transcript.split('\n').filter(l => l.trim())
+    const avgSecondsPerLine = sample.duration_seconds / lines.length
+    const segments = lines.map((line, i) => ({
+      start: i * avgSecondsPerLine,
+      end: (i + 1) * avgSecondsPerLine,
+      text: line.trim(),
+    }))
+
     const { data: transcript, error: tErr } = await supabaseAdmin
       .from('transcripts')
       .insert({
         recording_id: recording.id,
         full_text: sample.transcript,
-        segments: [],
+        segments,
         language: 'ko',
         stt_model: 'whisper-1',
         stt_cost_usd: (sample.duration_seconds / 60) * 0.006,
