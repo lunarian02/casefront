@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import Pagination from '@/components/Pagination'
+import { formatDate } from '@/lib/utils'
 
 type ClientRow = {
   id: string
@@ -12,6 +13,7 @@ type ClientRow = {
   referrer: string | null
   created_at: string
   last_contact_at: string
+  last_consultation_date: string | null
   case_count: number
 }
 
@@ -28,12 +30,6 @@ function formatPhone(raw: string | null | undefined): string {
   if (digits.length === 11) return digits.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3')
   if (digits.length === 10) return digits.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3')
   return raw
-}
-
-function formatDate(dateStr: string) {
-  if (!dateStr) return '-'
-  const d = new Date(dateStr)
-  return d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
 const PAGE_SIZE = 20
@@ -247,8 +243,8 @@ export default function ClientsPage() {
                 <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">전화번호</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider hidden sm:table-cell">이메일</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider hidden md:table-cell">추천인</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">총 접수</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">최근 접수일</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">사건</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">최근 상담일</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -281,7 +277,9 @@ export default function ClientsPage() {
                       {c.case_count}건
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-500">{formatDate(c.last_contact_at)}</td>
+                  <td className="px-4 py-3 text-sm text-slate-500">
+                    {c.last_consultation_date ? formatDate(c.last_consultation_date) : '-'}
+                  </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1 justify-end" onClick={(e) => e.stopPropagation()}>
                       <button
@@ -357,7 +355,7 @@ export default function ClientsPage() {
                   type="text"
                   value={form.referrer}
                   onChange={(e) => setForm((f) => ({ ...f, referrer: e.target.value }))}
-                  placeholder="소개해 주신 분 이름"
+                  placeholder="예: 김변호사, 이사무장"
                   className="w-full px-3 py-2 text-sm text-slate-900 border border-slate-200 rounded-lg bg-white outline-none focus:ring-2 focus:ring-[#4a7aef] focus:border-transparent"
                 />
               </div>

@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { supabaseBrowser } from '@/lib/supabaseClient'
+import { formatDate } from '@/lib/utils'
 import Pagination from '@/components/Pagination'
 
 type RecordingRow = {
@@ -36,14 +37,6 @@ function formatDuration(seconds: number | null): string {
   const m = Math.floor((seconds % 3600) / 60)
   if (h > 0) return `${h}시간 ${m}분`
   return `${m}분`
-}
-
-function formatDate(dateStr: string) {
-  const d = new Date(dateStr)
-  const year = d.getFullYear()
-  const month = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${year}.${month}.${day}`
 }
 
 function statusLabel(status: string): { text: string; color: string } {

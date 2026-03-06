@@ -90,22 +90,38 @@ export async function GET(request: Request) {
 
   // case count per client
   const clientIds = clients.map((c) => c.id)
-  const { data: summaryRows } = await supabaseAdmin
+  const { data: caseRows } = await supabaseAdmin
     .from('cases')
     .select('client_id')
     .eq('firm_id', firmId)
     .in('client_id', clientIds)
 
   const caseCountMap: Record<string, number> = {}
-  for (const row of summaryRows ?? []) {
+  for (const row of caseRows ?? []) {
     if (row.client_id) {
       caseCountMap[row.client_id] = (caseCountMap[row.client_id] ?? 0) + 1
+    }
+  }
+
+  // last consultation date per client (from recordings)
+  const { data: recordingRows } = await supabaseAdmin
+    .from('recordings')
+    .select('client_id, created_at')
+    .eq('firm_id', firmId)
+    .in('client_id', clientIds)
+    .order('created_at', { ascending: false })
+
+  const lastConsultationMap: Record<string, string> = {}
+  for (const row of recordingRows ?? []) {
+    if (row.client_id && !lastConsultationMap[row.client_id]) {
+      lastConsultationMap[row.client_id] = row.created_at
     }
   }
 
   const result = clients.map((c) => ({
     ...c,
     case_count: caseCountMap[c.id] ?? 0,
+    last_consultation_date: lastConsultationMap[c.id] ?? null,
   }))
 
   return NextResponse.json({ clients: result, total: countResult.count ?? 0 })

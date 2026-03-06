@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
+import { formatDate } from '@/lib/utils'
 import type { CaseSummary } from '@/types'
 
 type ClientDetail = {
@@ -43,12 +44,6 @@ const REC_STATUS: Record<string, { label: string; color: string }> = {
   uploaded:   { label: '업로드됨', color: '#4a7aef' },
   uploading:  { label: '업로드중', color: '#94a3b8' },
   failed:     { label: '실패',   color: '#DC2626' },
-}
-
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleString('ko-KR', {
-    year: 'numeric', month: 'long', day: 'numeric',
-  })
 }
 
 function formatDuration(seconds: number | null) {

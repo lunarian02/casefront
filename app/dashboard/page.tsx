@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
+import { formatDate } from '@/lib/utils'
 import Pagination from '@/components/Pagination'
 
 type CaseRow = {
@@ -22,14 +23,6 @@ const STATUS_CONFIG = {
   new:       { label: '신규',  color: '#4a7aef' },
   reviewing: { label: '검토중', color: '#D97706' },
   done:      { label: '완료',  color: '#16A34A' },
-}
-
-function formatDate(dateStr: string) {
-  const d = new Date(dateStr)
-  const year = d.getFullYear()
-  const month = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${year}.${month}.${day}`
 }
 
 const PAGE_SIZE = 20

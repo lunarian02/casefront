@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
+import { formatDate } from '@/lib/utils'
 import ReactMarkdown from 'react-markdown'
 
 type CaseDetail = {
@@ -35,7 +36,7 @@ type LinkedRecording = {
   created_at: string
 }
 
-type TabKey = 'report' | 'schedule' | 'recordings'
+type TabKey = 'report' | 'recordings'
 type EditingSection = null | 'overview' | 'facts' | 'legal_elements' | 'evidence'
 
 const STATUS_CONFIG = {
@@ -219,7 +220,7 @@ export default function CaseDetailPage() {
 
       {/* Tabs */}
       <div className="flex gap-1 mb-4 border-b border-slate-200">
-        {(['report', 'recordings', 'schedule'] as const).map((tab) => (
+        {(['report', 'recordings'] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -229,7 +230,7 @@ export default function CaseDetailPage() {
                 : 'border-transparent text-slate-500 hover:text-slate-700'
             }`}
           >
-            {tab === 'report' ? '리포트' : tab === 'recordings' ? '연결된 상담' : '일정'}
+            {tab === 'report' ? '리포트' : '연결된 상담'}
           </button>
         ))}
       </div>
@@ -469,18 +470,11 @@ export default function CaseDetailPage() {
               >
                 <div className="font-medium text-slate-900">{rec.title || '제목 없음'}</div>
                 <div className="text-xs text-slate-500 mt-1">
-                  {new Date(rec.created_at).toLocaleDateString('ko-KR')}
+                  {formatDate(rec.created_at)}
                 </div>
               </div>
             ))
           )}
-        </div>
-      )}
-
-      {/* Schedule Tab */}
-      {activeTab === 'schedule' && (
-        <div className="text-center py-8 text-slate-400">
-          <p className="text-sm">일정 관리 기능은 추후 구현 예정입니다.</p>
         </div>
       )}
     </div>
