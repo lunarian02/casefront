@@ -10,22 +10,25 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 import { supabaseAdmin } from '@/lib/supabase'
 
 const CONSOLIDATED_SYSTEM_PROMPT = `당신은 대한민국 변호사를 위한 AI 사건 분석 어시스턴트입니다.
-아래는 동일 사건과 관련된 여러 차례의 상담 녹음 전문(轉文)입니다.
-모든 상담 내용을 종합하여 통합 사건 리포트를 작성하세요.
+아래는 동일 사건과 관련된 여러 차례의 상담 분석 결과와 기존 사건 정보입니다.
+중복을 제거하고 시간순으로 통합하여 JSON 구조로 정리하세요.
+변호사가 수정한 기존 사건 정보의 내용을 우선 유지하세요.
 
-리포트 형식:
-1. 사건 개요 (유형, 의뢰인 정보, 상담 횟수)
-2. 사실관계 종합 (시간순, 각 상담에서 추가된 정보 통합)
-3. 핵심 쟁점 (유리한 점 / 불리한 점)
-4. 증거 현황 (확보 / 추가 필요, 변화 추이)
-5. 상담별 변호사 조언 요약
-6. 다음 단계 (To-Do, 우선순위, 최신 기준)
-7. 예상 금액 (언급된 것만)
+응답 형식 (JSON):
+{
+  "overview": "통합된 사건 개요 (2~3문장)",
+  "facts": "통합된 사실관계 (시간순, 마크다운 가능)",
+  "legal_elements": "통합된 요건사실 (법적 요건 분석)",
+  "evidence": [
+    {"item": "증거명", "status": "확보|미확보|확보 가능", "url": null}
+  ]
+}
 
 규칙:
-- 상담 간 모순되는 내용은 명확히 표시
-- 가장 최근 상담 기준으로 현재 상황 정리
-- STT 오류는 문맥으로 보정`
+- 상담 간 모순되는 내용은 최신 상담 기준
+- 변호사가 수정한 내용(existing_detail)은 최대한 보존
+- evidence는 중복 제거 후 통합
+- 반드시 위 JSON 형식으로만 응답`
 
 async function getAuthFirm(request: Request) {
   const token = request.headers.get('Authorization')?.replace('Bearer ', '')
@@ -78,17 +81,19 @@ export async function POST(
   const firm = await getAuthFirm(request)
   if (!firm) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // Verify case exists
+  // Fetch case with existing detail
   const { data: caseRow } = await supabaseAdmin
     .from('cases')
-    .select('id')
+    .select('id, detail, case_type')
     .eq('id', caseId)
     .eq('firm_id', firm.id)
     .maybeSingle()
 
   if (!caseRow) return NextResponse.json({ error: 'Case not found' }, { status: 404 })
 
-  // Fetch all linked recording IDs
+  const existingDetail = (caseRow.detail as Record<string, unknown>) || {}
+
+  // Fetch all linked recordings
   const { data: links, error: linkErr } = await supabaseAdmin
     .from('recording_case_links')
     .select('recording_id')
@@ -101,25 +106,26 @@ export async function POST(
 
   const recordingIds = links.map((l: { recording_id: string }) => l.recording_id)
 
-  // Fetch transcripts with recording info
-  const { data: transcriptRows, error: transErr } = await supabaseAdmin
-    .from('transcripts')
-    .select('id, recording_id, full_text, recordings(title, created_at)')
+  // Fetch reports with structured data
+  const { data: reports, error: reportsErr } = await supabaseAdmin
+    .from('reports')
+    .select('id, structured, case_type, created_at')
     .in('recording_id', recordingIds)
     .order('created_at', { ascending: true })
 
-  if (transErr || !transcriptRows || transcriptRows.length === 0) {
-    return NextResponse.json({ error: '상담 전문(轉文)을 찾을 수 없습니다.' }, { status: 404 })
+  if (reportsErr || !reports || reports.length === 0) {
+    return NextResponse.json({ error: '상담 분석 리포트를 찾을 수 없습니다.' }, { status: 404 })
   }
 
-  // Build combined transcript text
-  const combinedText = transcriptRows
-    .map((t: { recordings: unknown; full_text: string }, i: number) => {
-      const rec = t.recordings as { title?: string; created_at?: string } | null
-      const title = rec?.title ?? `상담 ${i + 1}`
-      return `[${i + 1}번째 상담: ${title}]\n${t.full_text}`
-    })
-    .join('\n\n---\n\n')
+  // Build prompt with structured data
+  const structuredList = reports.map((r, i) => JSON.stringify({ index: i + 1, ...r.structured }, null, 2)).join('\n\n')
+  const promptText = `기존 사건 정보 (변호사가 수정한 내용, 최대한 보존):
+${JSON.stringify(existingDetail, null, 2)}
+
+상담 분석 결과 (${reports.length}개):
+${structuredList}
+
+위 내용을 통합하여 JSON 형식으로 응답하세요.`
 
   // Call Gemini 2.5 Flash
   const apiKey = process.env.GOOGLE_AI_API_KEY
@@ -128,39 +134,62 @@ export async function POST(
   const genAI = new GoogleGenerativeAI(apiKey)
   const model = genAI.getGenerativeModel({
     model: 'gemini-2.5-flash',
-    generationConfig: { maxOutputTokens: 8192, temperature: 0.3 },
+    generationConfig: { maxOutputTokens: 8192, temperature: 0.3, responseMimeType: 'application/json' },
     systemInstruction: CONSOLIDATED_SYSTEM_PROMPT,
   })
 
-  const result = await model.generateContent(
-    `다음은 동일 사건의 여러 차례 상담 전문입니다 (총 ${transcriptRows.length}회):\n\n${combinedText}`
-  )
-  const reportContent = result.response.text()
-  if (!reportContent) {
+  const result = await model.generateContent(promptText)
+  const responseText = result.response.text()
+  if (!responseText) {
     return NextResponse.json({ error: 'AI가 리포트를 생성하지 못했습니다.' }, { status: 502 })
   }
 
-  // Detect case type from content
-  const caseType = detectCaseType(reportContent)
+  // Parse JSON
+  let consolidatedDetail: Record<string, unknown>
+  try {
+    consolidatedDetail = JSON.parse(responseText)
+  } catch (err) {
+    return NextResponse.json({ error: 'AI 응답 파싱 실패' }, { status: 502 })
+  }
 
-  // Insert consolidated report
-  const { data: report, error: insertErr } = await supabaseAdmin
+  // Update cases.detail
+  const { error: updateErr } = await supabaseAdmin
+    .from('cases')
+    .update({ detail: consolidatedDetail })
+    .eq('id', caseId)
+
+  if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 })
+
+  // Also insert consolidated report for history
+  const reportContent = `# 통합 사건 리포트
+
+## 사건 개요
+${consolidatedDetail.overview || ''}
+
+## 사실관계
+${consolidatedDetail.facts || ''}
+
+## 요건사실
+${consolidatedDetail.legal_elements || ''}
+
+## 관련 증거
+${Array.isArray(consolidatedDetail.evidence) ? consolidatedDetail.evidence.map((e: { item: string }) => `- ${e.item}`).join('\n') : ''}`
+
+  await supabaseAdmin
     .from('reports')
     .insert({
       case_id: caseId,
       recording_id: null,
       transcript_id: null,
       content: reportContent,
+      structured: consolidatedDetail,
       report_type: 'consolidated',
-      case_type: caseType,
+      case_type: caseRow.case_type,
       llm_model: 'gemini-2.5-flash',
       llm_cost_usd: 0,
     })
-    .select('id, content, case_type, llm_model, created_at')
-    .single()
 
-  if (insertErr) return NextResponse.json({ error: insertErr.message }, { status: 500 })
-  return NextResponse.json({ report })
+  return NextResponse.json({ success: true, detail: consolidatedDetail })
 }
 
 function detectCaseType(content: string): string | null {

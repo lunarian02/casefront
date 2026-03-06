@@ -77,7 +77,37 @@ export async function POST(request: Request) {
   if (!firm) return NextResponse.json({ error: 'Firm not found' }, { status: 404 })
 
   const body = await request.json()
-  const { client_name, client_phone, case_type } = body as Record<string, string>
+  const { client_name, client_phone, case_type, report_id } = body as Record<string, string>
+
+  // If report_id provided, use structured data from report
+  let caseTypeFromReport: string | null = null
+  let detail: object | null = null
+  let summaryText: string | null = null
+
+  if (report_id) {
+    const { data: report } = await supabaseAdmin
+      .from('reports')
+      .select('case_type, structured')
+      .eq('id', report_id)
+      .maybeSingle()
+
+    if (report?.structured) {
+      const structured = report.structured as Record<string, unknown>
+      caseTypeFromReport = report.case_type
+
+      // Map structured to detail
+      detail = {
+        overview: structured.overview || '',
+        facts: structured.facts || '',
+        legal_elements: structured.legal_elements || '',
+        evidence: structured.evidence || [],
+      }
+
+      // Use first sentence of overview as summary
+      const overview = (structured.overview as string) || ''
+      summaryText = overview.split('.')[0] + '.'
+    }
+  }
 
   if (!client_name?.trim()) return NextResponse.json({ error: '이름을 입력해 주세요.' }, { status: 400 })
   if (!client_phone?.trim()) return NextResponse.json({ error: '전화번호를 입력해 주세요.' }, { status: 400 })
@@ -108,16 +138,13 @@ export async function POST(request: Request) {
     .insert({
       firm_id: firm.id,
       client_id: client.id,
-      case_type: case_type?.trim() || null,
+      case_type: caseTypeFromReport || case_type?.trim() || null,
       status: 'new',
-      summary: {
-        events: [], requirements: [], evidence: [], unconfirmed: [],
-        document_request: [], client_request: '', ai_notes: '', summary_text: '',
-        conversation_turns: 0, timestamp: new Date().toISOString(),
-      },
+      summary: summaryText || null,
+      detail: detail,
     })
     .select(`
-      id, case_type, status, created_at,
+      id, case_type, status, summary, detail, created_at,
       client:clients(id, name, phone, email, referrer)
     `)
     .single()

@@ -35,7 +35,7 @@ export async function GET(
   // Report
   const { data: report } = await supabaseAdmin
     .from('reports')
-    .select('id, case_type, content, created_at')
+    .select('id, case_type, content, structured, created_at')
     .eq('recording_id', recordingId)
     .maybeSingle()
 

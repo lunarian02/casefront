@@ -31,9 +31,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { data: caseData, error: caseError } = await supabaseAdmin
+  const { data: caseData, error: caseError} = await supabaseAdmin
     .from('cases')
-    .select('id, client_id, case_type, status, summary, parent_case_id, created_at')
+    .select('id, client_id, case_type, status, summary, detail, parent_case_id, created_at')
     .eq('id', caseId)
     .eq('firm_id', firm.id)
     .maybeSingle()
@@ -123,7 +123,27 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   // Edit case fields (client info는 clients 테이블에서만 수정 가능)
   const allowedEdits: Record<string, unknown> = {}
   if ('case_type' in body) allowedEdits.case_type = body.case_type
-  // Update summary JSONB sub-fields
+  if ('summary' in body) allowedEdits.summary = body.summary
+  if ('status' in body) allowedEdits.status = body.status
+
+  // Update detail JSONB (merge with existing)
+  if ('detail' in body && typeof body.detail === 'object') {
+    // Fetch current detail
+    const { data: current } = await supabaseAdmin
+      .from('cases')
+      .select('detail')
+      .eq('id', caseId)
+      .eq('firm_id', firm.id)
+      .single()
+
+    const existingDetail = (current?.detail as object) || {}
+    allowedEdits.detail = {
+      ...existingDetail,
+      ...body.detail,
+    }
+  }
+
+  // Update summary JSONB sub-fields (deprecated — kept for backward compatibility)
   if ('summary_patch' in body && typeof body.summary_patch === 'object') {
     // Fetch current summary
     const { data: current } = await supabaseAdmin
