@@ -146,15 +146,20 @@ export default function RecordingDetailPage() {
 
   const structured = report?.structured
 
-  // Auto-scroll to active segment
+  // Calculate active segment index for auto-scroll
+  const activeSegmentIndex = transcript?.segments?.findIndex(
+    (seg) => currentTime >= seg.start && currentTime < seg.end
+  ) ?? -1
+
+  // Auto-scroll to active segment (only when active segment changes)
   useEffect(() => {
-    if (activeSegmentRef.current) {
+    if (activeSegmentIndex >= 0 && activeSegmentRef.current) {
       activeSegmentRef.current.scrollIntoView({
         behavior: 'smooth',
         block: 'center',
       })
     }
-  }, [currentTime])
+  }, [activeSegmentIndex])
 
   function formatTime(seconds: number): string {
     const mins = Math.floor(seconds / 60)
