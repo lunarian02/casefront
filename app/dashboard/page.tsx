@@ -138,8 +138,9 @@ export default function DashboardPage() {
           {/* Mobile: card list */}
           <div className="md:hidden space-y-3 pb-24">
             {filtered.map((c) => {
-              const s = STATUS_CONFIG[c.status ?? 'new']
-              const isPast = (c.status ?? 'new') === 'done'
+              const status = c.status ?? 'new'
+              const s = STATUS_CONFIG[status] ?? STATUS_CONFIG['new']
+              const isPast = status === 'done'
               return (
                 <div
                   key={c.id}
@@ -187,8 +188,9 @@ export default function DashboardPage() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filtered.map((c) => {
-                  const s = STATUS_CONFIG[c.status ?? 'new']
-                  const isPast = (c.status ?? 'new') === 'done'
+                  const status = c.status ?? 'new'
+                  const s = STATUS_CONFIG[status] ?? STATUS_CONFIG['new']
+                  const isPast = status === 'done'
                   return (
                     <tr
                       key={c.id}
