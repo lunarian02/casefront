@@ -5,16 +5,22 @@ import { useAuth } from '@/hooks/useAuth'
 import { formatDate } from '@/lib/utils'
 import ReactMarkdown from 'react-markdown'
 
+type LegalElement = {
+  fulfilled: boolean
+  content: string
+}
+
 type CaseDetail = {
   id: number
   client_id: string | null
-  case_type: string
+  category: string | null
+  subcategory: string | null
   status: 'new' | 'in_progress' | 'done' | null
   summary: string | null
   detail: {
     overview?: string
     facts?: string
-    legal_elements?: string
+    legal_elements?: Record<string, LegalElement>
     evidence?: Array<{ item: string; status: string; url: string | null }>
   } | null
   created_at: string
@@ -63,6 +69,9 @@ export default function CaseDetailPage() {
   // Evidence editing
   const [editEvidence, setEditEvidence] = useState<Array<{ item: string; status: string; url: string | null }>>([])
 
+  // Legal elements editing
+  const [editLegalElements, setEditLegalElements] = useState<Record<string, LegalElement>>({})
+
   const caseId = params?.id as string
 
   useEffect(() => {
@@ -97,7 +106,9 @@ export default function CaseDetailPage() {
 
     if (section === 'overview') setEditText(caseData.detail.overview || '')
     else if (section === 'facts') setEditText(caseData.detail.facts || '')
-    else if (section === 'legal_elements') setEditText(caseData.detail.legal_elements || '')
+    else if (section === 'legal_elements') {
+      setEditLegalElements(caseData.detail.legal_elements || {})
+    }
     else if (section === 'evidence') {
       setEditEvidence(caseData.detail.evidence || [])
     }
@@ -107,6 +118,7 @@ export default function CaseDetailPage() {
     setEditingSection(null)
     setEditText('')
     setEditEvidence([])
+    setEditLegalElements({})
   }
 
   async function saveEdit() {
@@ -117,6 +129,8 @@ export default function CaseDetailPage() {
       const patch: Record<string, unknown> = {}
       if (editingSection === 'evidence') {
         patch.detail = { evidence: editEvidence }
+      } else if (editingSection === 'legal_elements') {
+        patch.detail = { legal_elements: editLegalElements }
       } else {
         patch.detail = { [editingSection]: editText.trim() }
       }
@@ -133,6 +147,7 @@ export default function CaseDetailPage() {
         setEditingSection(null)
         setEditText('')
         setEditEvidence([])
+        setEditLegalElements({})
       }
     } finally {
       setEditSaving(false)
@@ -149,6 +164,33 @@ export default function CaseDetailPage() {
 
   function updateEvidence(index: number, field: 'item' | 'status' | 'url', value: string) {
     setEditEvidence(editEvidence.map((e, i) => i === index ? { ...e, [field]: value || null } : e))
+  }
+
+  function addLegalElement() {
+    const newKey = `요건 ${Object.keys(editLegalElements).length + 1}`
+    setEditLegalElements({ ...editLegalElements, [newKey]: { fulfilled: false, content: '' } })
+  }
+
+  function removeLegalElement(key: string) {
+    const newElements = { ...editLegalElements }
+    delete newElements[key]
+    setEditLegalElements(newElements)
+  }
+
+  function updateLegalElement(key: string, field: 'fulfilled' | 'content', value: boolean | string) {
+    setEditLegalElements({
+      ...editLegalElements,
+      [key]: { ...editLegalElements[key], [field]: value }
+    })
+  }
+
+  function renameLegalElement(oldKey: string, newKey: string) {
+    if (oldKey === newKey || !newKey.trim()) return
+    const newElements: Record<string, LegalElement> = {}
+    Object.entries(editLegalElements).forEach(([k, v]) => {
+      newElements[k === oldKey ? newKey : k] = v
+    })
+    setEditLegalElements(newElements)
   }
 
   async function generateConsolidatedReport() {
@@ -191,6 +233,9 @@ export default function CaseDetailPage() {
 
   const status = STATUS_CONFIG[caseData.status || 'new'] || STATUS_CONFIG.new
   const detail = caseData.detail || {}
+  const caseType = caseData.category
+    ? `${caseData.category}${caseData.subcategory ? ' > ' + caseData.subcategory : ''}`
+    : '사건'
 
   return (
     <div className="p-4 md:p-6 max-w-4xl mx-auto">
@@ -205,7 +250,7 @@ export default function CaseDetailPage() {
           </svg>
         </button>
         <div className="flex-1">
-          <h1 className="text-xl font-bold text-slate-900">{caseData.case_type || '사건'}</h1>
+          <h1 className="text-xl font-bold text-slate-900">{caseType}</h1>
           <div className="flex items-center gap-2 mt-1">
             <span className="text-sm font-medium" style={{ color: status.color }}>{status.label}</span>
             {liveClient && (
@@ -337,9 +382,9 @@ export default function CaseDetailPage() {
             )}
           </Section>
 
-          {/* Legal Elements */}
+          {/* Legal Elements Checklist */}
           <Section
-            title="요건사실"
+            title="요건사실 체크리스트"
             isEditing={editingSection === 'legal_elements'}
             onEdit={() => startEdit('legal_elements')}
             onCancel={cancelEdit}
@@ -347,19 +392,81 @@ export default function CaseDetailPage() {
             saving={editSaving}
           >
             {editingSection === 'legal_elements' ? (
-              <textarea
-                value={editText}
-                onChange={(e) => setEditText(e.target.value)}
-                rows={6}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                placeholder="법적 요건사항을 입력하세요"
-              />
+              <div className="space-y-3">
+                {Object.entries(editLegalElements).map(([elementName, element]) => (
+                  <div key={elementName} className="border border-slate-200 rounded-lg p-3 space-y-2">
+                    <div className="flex gap-2 items-start">
+                      <input
+                        type="checkbox"
+                        checked={element.fulfilled}
+                        onChange={(e) => updateLegalElement(elementName, 'fulfilled', e.target.checked)}
+                        className="mt-1 w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                      />
+                      <input
+                        type="text"
+                        value={elementName}
+                        onChange={(e) => renameLegalElement(elementName, e.target.value)}
+                        placeholder="요건 이름"
+                        className="flex-1 px-2 py-1 text-sm font-medium border-b border-transparent hover:border-slate-300 focus:outline-none focus:border-blue-500"
+                      />
+                      <button
+                        onClick={() => removeLegalElement(elementName)}
+                        className="p-1 text-red-500 hover:bg-red-50 rounded"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                    <textarea
+                      value={element.content}
+                      onChange={(e) => updateLegalElement(elementName, 'content', e.target.value)}
+                      placeholder="상세 내용"
+                      rows={2}
+                      className="w-full px-2 py-1 text-sm border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    />
+                  </div>
+                ))}
+                <button
+                  onClick={addLegalElement}
+                  className="w-full px-3 py-2 border border-dashed border-slate-300 rounded-lg text-sm text-slate-600 hover:border-slate-400 hover:text-slate-800"
+                >
+                  + 요건 추가
+                </button>
+              </div>
             ) : (
-              <div className="text-sm text-slate-700 whitespace-pre-wrap">
-                {detail.legal_elements ? (
-                  <ReactMarkdown>{detail.legal_elements}</ReactMarkdown>
+              <div className="space-y-3">
+                {detail.legal_elements && Object.keys(detail.legal_elements).length > 0 ? (
+                  Object.entries(detail.legal_elements).map(([elementName, element]) => (
+                    <div key={elementName} className="flex gap-3 p-3 bg-slate-50 rounded-lg">
+                      <div className="flex-shrink-0 mt-0.5">
+                        {element.fulfilled ? (
+                          <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                        ) : (
+                          <svg className="w-5 h-5 text-slate-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                          </svg>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm font-medium text-slate-900">{elementName}</span>
+                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                            element.fulfilled ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-600'
+                          }`}>
+                            {element.fulfilled ? '충족' : '미충족'}
+                          </span>
+                        </div>
+                        {element.content && (
+                          <p className="text-sm text-slate-600">{element.content}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))
                 ) : (
-                  <span className="text-slate-400">아직 내용이 없습니다. 수정 버튼을 눌러 입력하세요.</span>
+                  <span className="text-sm text-slate-400">아직 내용이 없습니다. 수정 버튼을 눌러 입력하세요.</span>
                 )}
               </div>
             )}

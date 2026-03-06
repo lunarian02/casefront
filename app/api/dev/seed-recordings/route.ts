@@ -9,7 +9,8 @@ const SAMPLE_RECORDINGS = [
     title: '이상호 — 폭행 피해 상담',
     client_name: '이상호',
     duration_seconds: 1860, // 31분
-    case_type: '형사-폭행',
+    category: '형사',
+    subcategory: '폭행',
     daysAgo: 1,
     transcript: `변호사: 안녕하세요. 어떤 일로 오셨나요?
 이상호: 네, 지난주에 직장 동료한테 맞았어요. 그냥 넘어가기가 싫어서요.
@@ -70,7 +71,8 @@ const SAMPLE_RECORDINGS = [
     title: '박민정 — 전세보증금 반환 상담',
     client_name: '박민정',
     duration_seconds: 2340, // 39분
-    case_type: '민사-임대차',
+    category: '부동산',
+    subcategory: '임대차',
     daysAgo: 3,
     transcript: `변호사: 안녕하세요, 어떤 일로 오셨나요?
 박민정: 전세 계약이 끝났는데 집주인이 보증금을 안 돌려주고 있어요.
@@ -127,7 +129,8 @@ const SAMPLE_RECORDINGS = [
     title: '최지수 — 이혼 및 양육권 상담',
     client_name: '최지수',
     duration_seconds: 2820, // 47분
-    case_type: '가사-이혼',
+    category: '가사',
+    subcategory: '이혼',
     daysAgo: 7,
     transcript: `변호사: 안녕하세요. 오늘 어떤 문제로 오셨나요?
 최지수: 이혼을 하고 싶어요. 남편이 2년 전부터 외도를 해왔고, 최근에 증거를 찾았어요.
@@ -273,7 +276,8 @@ export async function POST(request: Request) {
         transcript_id: transcript.id,
         content: sample.report,
         report_type: 'legal_consultation',
-        case_type: sample.case_type,
+        category: sample.category,
+        subcategory: sample.subcategory,
         llm_model: 'gemini-2.5-flash',
         llm_cost_usd: 0.002,
         created_at: new Date(new Date(createdAt).getTime() + 8 * 60 * 1000).toISOString(),
@@ -282,7 +286,7 @@ export async function POST(request: Request) {
     if (rpErr) {
       results.push(`⚠️ ${sample.client_name}: report 실패 — ${rpErr.message}`)
     } else {
-      results.push(`✅ ${sample.client_name} — ${sample.case_type} (${Math.floor(sample.duration_seconds / 60)}분)`)
+      results.push(`✅ ${sample.client_name} — ${sample.category} > ${sample.subcategory} (${Math.floor(sample.duration_seconds / 60)}분)`)
     }
   }
 

@@ -46,7 +46,7 @@ export async function GET(
 
   const { data: recordings, error: recErr } = await supabaseAdmin
     .from('recordings')
-    .select('id, title, status, duration_seconds, created_at, reports(id, case_type, content, report_type)')
+    .select('id, title, status, duration_seconds, created_at, reports(id, category, subcategory, content, report_type)')
     .in('id', recordingIds)
     .order('created_at', { ascending: false })
 

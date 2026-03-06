@@ -95,7 +95,7 @@ export async function GET(
   // Fetch all cases for this client
   const { data: cases } = await supabaseAdmin
     .from('cases')
-    .select('id, case_type, status, summary, created_at')
+    .select('id, category, subcategory, status, summary, created_at')
     .eq('client_id', clientId)
     .order('created_at', { ascending: false })
 

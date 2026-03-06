@@ -11,7 +11,8 @@ const MOCK_CASES = [
     client_name: '이민우',
     client_phone: '010-3821-4490',
     client_email: 'minwoo.lee@gmail.com',
-    case_type: '민사',
+    category: '민사',
+    subcategory: '손해배상',
     summary_text: '대여금 3,500만원 미변제 — 차용증 있음, 상대방 잠적',
     events: [
       { date: '2022-03-15', subject: '이민우', object: '채무자 김XX', action: '3,500만원 대여', summary: '이민우는 2022. 3. 15. 김XX에게 3,500만원을 대여하였다' },
@@ -39,7 +40,8 @@ const MOCK_CASES = [
     client_name: '박지훈',
     client_phone: '010-5562-8833',
     client_email: 'jihoon.park@naver.com',
-    case_type: '형사',
+    category: '형사',
+    subcategory: '사기',
     summary_text: '중고거래 사기 — 300만원 피해, 경찰 미신고 상태',
     events: [
       { date: '2026-01-20', subject: '박지훈', object: '사기꾼 이XX', action: '중고 명품가방 대금 300만원 송금', summary: '박지훈은 2026. 1. 20. 이XX의 허위 판매글을 믿고 300만원을 송금하였다' },
@@ -66,7 +68,8 @@ const MOCK_CASES = [
     client_name: '김수연',
     client_phone: '010-9914-2277',
     client_email: 'suyeon.kim@kakao.com',
-    case_type: '가사',
+    category: '가사',
+    subcategory: '이혼',
     summary_text: '이혼 소송 — 혼인 7년, 자녀 1명, 재산분할 협의 결렬',
     events: [
       { date: '2019-05-10', subject: '김수연', object: '배우자', action: '혼인신고', summary: '김수연은 2019. 5. 10. 배우자와 혼인신고를 하였다' },
@@ -93,7 +96,8 @@ const MOCK_CASES = [
     client_name: '최성훈',
     client_phone: '010-7743-1156',
     client_email: 'seonghun.choi@gmail.com',
-    case_type: '교통사고',
+    category: '민사',
+    subcategory: '교통사고',
     summary_text: '교통사고 손해배상 — 과실비율 30:70 이의, 후유증 치료 중',
     events: [
       { date: '2025-12-08', subject: '피의자 차량', object: '최성훈', action: '신호 위반 추돌', summary: '2025. 12. 8. 피의자 차량이 신호를 위반하여 최성훈 차량을 추돌하였다' },
@@ -120,7 +124,8 @@ const MOCK_CASES = [
     client_name: '이지아',
     client_phone: '010-2298-6641',
     client_email: 'jia.lee@daum.net',
-    case_type: '민사',
+    category: '부동산',
+    subcategory: '임대차',
     summary_text: '전세보증금 반환 분쟁 — 계약 만료 후 집주인 반환 거부',
     events: [
       { date: '2024-02-01', subject: '이지아', object: '임대인', action: '전세계약 체결 (보증금 2억)', summary: '이지아는 2024. 2. 1. 임대인과 보증금 2억원의 전세계약을 체결하였다' },
@@ -218,7 +223,8 @@ export async function POST() {
     // 4. Insert case_summary
     const summary = {
       is_returning: false,
-      case_type: mock.case_type,
+      category: mock.category,
+      subcategory: mock.subcategory,
       events: mock.events,
       requirements: mock.requirements,
       document_request: mock.document_request,
@@ -230,7 +236,8 @@ export async function POST() {
       firm_id: FIRM_ID,
       client_id: client.id,
       kakao_user_id: `mock_${mock.client_phone}`,
-      case_type: mock.case_type,
+      category: mock.category,
+      subcategory: mock.subcategory,
       summary: summary,
       created_at: createdAt,
     })
@@ -238,7 +245,7 @@ export async function POST() {
     if (cErr) {
       results.push(`❌ Case failed for ${mock.client_name}: ${cErr.message}`)
     } else {
-      results.push(`✅ ${mock.client_name} — ${mock.case_type}`)
+      results.push(`✅ ${mock.client_name} — ${mock.category} > ${mock.subcategory}`)
     }
   }
 

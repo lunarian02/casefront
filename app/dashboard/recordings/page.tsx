@@ -13,7 +13,8 @@ type RecordingRow = {
   duration_seconds: number | null
   created_at: string
   recording_type: string
-  case_type: string | null
+  category: string | null
+  subcategory: string | null
   client?: {
     id: string
     name: string
@@ -21,14 +22,10 @@ type RecordingRow = {
   } | null
 }
 
-function caseCategory(caseType: string | null): string {
-  const t = caseType ?? ''
-  if (/형사|폭행|상해|절도|사기|횡령|배임|음주|살인|강도|성범죄|마약|협박/.test(t)) return '형사'
-  if (/가사|이혼|양육|면접교섭|재산분할|혼인/.test(t)) return '가사'
-  if (/행정소송|행정처분|행정심판|조세|국세|지방세|행정|허가|면허/.test(t)) return '행정'
-  if (/노동|임금|해고|근로|산재|직장/.test(t)) return '노동'
-  if (t) return '민사'
-  return '기타'
+function formatCaseType(category: string | null, subcategory: string | null): string {
+  if (!category) return '—'
+  if (!subcategory) return category
+  return `${category} > ${subcategory}`
 }
 
 function formatDuration(seconds: number | null): string {
@@ -154,10 +151,10 @@ export default function RecordingsPage() {
                     <span>{formatDate(r.created_at)}</span>
                     <span className="text-slate-300">·</span>
                     <span>{consultationType(r.recording_type)}</span>
-                    {r.case_type && (
+                    {r.category && (
                       <>
                         <span className="text-slate-300">·</span>
-                        <span>{caseCategory(r.case_type)}</span>
+                        <span>{r.category}{r.subcategory && ` > ${r.subcategory}`}</span>
                       </>
                     )}
                   </div>
@@ -202,7 +199,7 @@ export default function RecordingsPage() {
                         {consultationType(r.recording_type)}
                       </td>
                       <td className="px-4 py-3 text-sm text-slate-600">
-                        {r.case_type ? caseCategory(r.case_type) : '—'}
+                        {formatCaseType(r.category, r.subcategory)}
                       </td>
                       <td className="px-4 py-3">
                         <span className="text-sm font-medium" style={{ color: s.color }}>{s.text}</span>

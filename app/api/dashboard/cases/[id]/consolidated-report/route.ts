@@ -63,7 +63,7 @@ export async function GET(
 
   const { data: report } = await supabaseAdmin
     .from('reports')
-    .select('id, content, case_type, llm_model, created_at')
+    .select('id, content, category, subcategory, llm_model, created_at')
     .eq('case_id', caseId)
     .eq('report_type', 'consolidated')
     .order('created_at', { ascending: false })
@@ -84,7 +84,7 @@ export async function POST(
   // Fetch case with existing detail
   const { data: caseRow } = await supabaseAdmin
     .from('cases')
-    .select('id, detail, case_type')
+    .select('id, detail, category, subcategory')
     .eq('id', caseId)
     .eq('firm_id', firm.id)
     .maybeSingle()
@@ -109,7 +109,7 @@ export async function POST(
   // Fetch reports with structured data
   const { data: reports, error: reportsErr } = await supabaseAdmin
     .from('reports')
-    .select('id, structured, case_type, created_at')
+    .select('id, structured, category, subcategory, created_at')
     .in('recording_id', recordingIds)
     .order('created_at', { ascending: true })
 
@@ -184,29 +184,11 @@ ${Array.isArray(consolidatedDetail.evidence) ? consolidatedDetail.evidence.map((
       content: reportContent,
       structured: consolidatedDetail,
       report_type: 'consolidated',
-      case_type: caseRow.case_type,
+      category: caseRow.category,
+      subcategory: caseRow.subcategory,
       llm_model: 'gemini-2.5-flash',
       llm_cost_usd: 0,
     })
 
   return NextResponse.json({ success: true, detail: consolidatedDetail })
-}
-
-function detectCaseType(content: string): string | null {
-  const patterns: Array<[string, RegExp]> = [
-    ['형사-폭행', /폭행|상해|쌍방폭행/],
-    ['민사-교통사고', /교통사고|과실비율|대차료|수리비/],
-    ['민사-손해배상', /손해배상|위자료|치료비/],
-    ['가사-이혼', /이혼|재산분할|양육권|면접교섭/],
-    ['형사-성범죄', /성추행|성폭행|강제추행/],
-    ['민사-부동산', /임대차|전세|보증금|명도/],
-    ['형사-사기', /사기|횡령|배임/],
-    ['노동', /부당해고|임금체불|퇴직금/],
-    ['상속', /상속|유언|유류분/],
-    ['형사-마약', /마약|대마|필로폰/],
-  ]
-  for (const [type, pattern] of patterns) {
-    if (pattern.test(content)) return type
-  }
-  return null
 }

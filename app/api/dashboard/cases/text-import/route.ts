@@ -13,8 +13,8 @@ const TEXT_IMPORT_PROMPT = `당신은 법률 사건 정보를 구조화하는 AI
 
 텍스트에서 추출할 항목:
 - 당사자 이름, 전화번호, 이메일
-- 사건 유형 (민사/형사/가사/도산/노동 중 하나)
-- 사건 소분류 (대여금/부동산/사기/폭행·상해/통매음·명예훼손/스토킹/이혼/상속/손해배상/성범죄/파산·회생/해고·임금체불/기타 중 하나)
+- 사건 대분류 category (형사/민사/가사/부동산/노동/행정 중 하나)
+- 사건 소분류 subcategory (폭행/사기/절도/손해배상/교통사고/이혼/상속/임대차/명도/부당해고/임금체불 등)
 - 주요 사건 경위 (시간순)
 - 요건사실 충족 여부
 - 증거 목록
@@ -29,7 +29,8 @@ const TEXT_IMPORT_PROMPT = `당신은 법률 사건 정보를 구조화하는 AI
   "client_phone": "010-1234-5678",
   "client_email": null,
   "is_returning": false,
-  "case_type": "민사",
+  "category": "민사",
+  "subcategory": "손해배상",
   "position": null,
   "events": [
     {
@@ -154,7 +155,8 @@ export async function POST(request: Request) {
     .insert({
       firm_id: auth.firm.id,
       client_id: clientId,
-      case_type: (caseSummary.case_type as string | null) ?? '기타',
+      category: (caseSummary.category as string | null) ?? null,
+      subcategory: (caseSummary.subcategory as string | null) ?? null,
       status: 'new',
       summary: caseSummary,
     })

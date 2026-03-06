@@ -25,7 +25,7 @@ export async function GET(
 
   const { data, error } = await supabaseAdmin
     .from('recording_case_links')
-    .select('id, case_id, case_client_name, case_type, created_at')
+    .select('id, case_id, case_client_name, category, subcategory, created_at')
     .eq('recording_id', recordingId)
     .eq('user_id', firm.id)
     .order('created_at', { ascending: false })
@@ -44,7 +44,7 @@ export async function POST(
   const firm = await getAuthFirm(request)
   if (!firm) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { case_id, case_client_name, case_type } = await request.json()
+  const { case_id, case_client_name, category, subcategory } = await request.json()
   if (!case_id) {
     return NextResponse.json({ error: 'case_id is required' }, { status: 400 })
   }
@@ -65,7 +65,8 @@ export async function POST(
       case_id,
       user_id: firm.id,
       case_client_name: case_client_name ?? null,
-      case_type: case_type ?? null,
+      category: category ?? null,
+      subcategory: subcategory ?? null,
     })
     .select()
     .single()

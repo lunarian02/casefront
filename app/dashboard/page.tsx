@@ -14,9 +14,16 @@ type CaseRow = {
     email: string | null
     referrer: string | null
   } | null
-  case_type: string
+  category: string | null
+  subcategory: string | null
   status: 'new' | 'reviewing' | 'done' | null
   created_at: string
+}
+
+function formatCaseType(category: string | null, subcategory: string | null): string {
+  if (!category) return '—'
+  if (!subcategory) return category
+  return `${category} > ${subcategory}`
 }
 
 const STATUS_CONFIG = {
@@ -157,7 +164,7 @@ export default function DashboardPage() {
                     <div className={`font-semibold text-base leading-snug mb-0.5 ${isPast ? 'text-slate-400' : 'text-slate-900'}`}>
                       {c.client?.name ?? '고객 정보 없음'}
                     </div>
-                    <div className="text-sm text-slate-500 mb-0.5">{c.case_type}</div>
+                    <div className="text-sm text-slate-500 mb-0.5">{formatCaseType(c.category, c.subcategory)}</div>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-xs text-slate-400">{formatDate(c.created_at)}</span>
                     </div>
@@ -193,7 +200,7 @@ export default function DashboardPage() {
                       <td className="px-4 py-3">
                         <span className={`text-sm font-medium ${isPast ? 'text-slate-400' : 'text-slate-900'}`}>{c.client?.name ?? '고객 정보 없음'}</span>
                       </td>
-                      <td className="px-4 py-3 text-sm text-slate-600 max-w-xs truncate">{c.case_type}</td>
+                      <td className="px-4 py-3 text-sm text-slate-600 max-w-xs truncate">{formatCaseType(c.category, c.subcategory)}</td>
                       <td className="px-4 py-3">
                         <span className="text-sm font-medium" style={{ color: s.color }}>{s.label}</span>
                       </td>
@@ -233,7 +240,7 @@ export default function DashboardPage() {
             <h2 className="text-base font-semibold text-slate-900 mb-1">사건을 삭제하시겠어요?</h2>
             <p className="text-sm text-slate-500 mb-1">
               <span className="font-medium text-slate-700">{deleteTarget.client?.name ?? '고객'}</span>님의{' '}
-              <span className="font-medium text-slate-700">{deleteTarget.case_type}</span> 사건이 삭제됩니다.
+              <span className="font-medium text-slate-700">{formatCaseType(deleteTarget.category, deleteTarget.subcategory)}</span> 사건이 삭제됩니다.
             </p>
             <p className="text-xs text-red-500 mb-6">삭제된 사건은 복구할 수 없습니다.</p>
             <div className="flex gap-3">

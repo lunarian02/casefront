@@ -31,7 +31,7 @@ export async function GET(request: Request) {
       .in('status', ['completed', 'failed']),
     supabaseAdmin
       .from('recordings')
-      .select('id, title, status, duration_seconds, created_at, recording_type, reports(case_type), client:clients(id, name, phone)')
+      .select('id, title, status, duration_seconds, created_at, recording_type, reports(category, subcategory), client:clients(id, name, phone)')
       .eq('firm_id', firm.id)
       .in('status', ['completed', 'failed'])
       .order('created_at', { ascending: false })
@@ -42,9 +42,10 @@ export async function GET(request: Request) {
 
   // Flatten reports join
   const recordings = (dataResult.data ?? []).map((r: Record<string, unknown>) => {
-    const reports = r.reports as { case_type?: string } | { case_type?: string }[] | null
-    const caseType = Array.isArray(reports) ? reports[0]?.case_type : reports?.case_type
-    return { ...r, case_type: caseType ?? null, reports: undefined }
+    const reports = r.reports as { category?: string; subcategory?: string } | { category?: string; subcategory?: string }[] | null
+    const category = Array.isArray(reports) ? reports[0]?.category : reports?.category
+    const subcategory = Array.isArray(reports) ? reports[0]?.subcategory : reports?.subcategory
+    return { ...r, category: category ?? null, subcategory: subcategory ?? null, reports: undefined }
   })
 
   return NextResponse.json({ recordings, total: countResult.count ?? 0 })

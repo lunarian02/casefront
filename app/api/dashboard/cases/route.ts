@@ -49,7 +49,7 @@ export async function GET(request: Request) {
     supabaseAdmin
       .from('cases')
       .select(`
-        id, case_type, status, created_at,
+        id, category, subcategory, status, created_at,
         client:clients(id, name, phone, email, referrer)
       `)
       .eq('firm_id', firm.id)
@@ -77,23 +77,25 @@ export async function POST(request: Request) {
   if (!firm) return NextResponse.json({ error: 'Firm not found' }, { status: 404 })
 
   const body = await request.json()
-  const { client_name, client_phone, case_type, report_id } = body as Record<string, string>
+  const { client_name, client_phone, category, subcategory, report_id } = body as Record<string, string>
 
   // If report_id provided, use structured data from report
-  let caseTypeFromReport: string | null = null
+  let categoryFromReport: string | null = null
+  let subcategoryFromReport: string | null = null
   let detail: object | null = null
   let summaryText: string | null = null
 
   if (report_id) {
     const { data: report } = await supabaseAdmin
       .from('reports')
-      .select('case_type, structured')
+      .select('category, subcategory, structured')
       .eq('id', report_id)
       .maybeSingle()
 
     if (report?.structured) {
       const structured = report.structured as Record<string, unknown>
-      caseTypeFromReport = report.case_type
+      categoryFromReport = report.category
+      subcategoryFromReport = report.subcategory
 
       // Map structured to detail
       detail = {
@@ -138,13 +140,14 @@ export async function POST(request: Request) {
     .insert({
       firm_id: firm.id,
       client_id: client.id,
-      case_type: caseTypeFromReport || case_type?.trim() || null,
+      category: categoryFromReport || category?.trim() || null,
+      subcategory: subcategoryFromReport || subcategory?.trim() || null,
       status: 'new',
       summary: summaryText || null,
       detail: detail,
     })
     .select(`
-      id, case_type, status, summary, detail, created_at,
+      id, category, subcategory, status, summary, detail, created_at,
       client:clients(id, name, phone, email, referrer)
     `)
     .single()

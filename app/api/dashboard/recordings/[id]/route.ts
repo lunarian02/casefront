@@ -32,12 +32,12 @@ export async function GET(
 
   if (recErr || !recording) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  // Report
-  const { data: report } = await supabaseAdmin
+  // Reports (plural - one recording can have multiple reports for different case types)
+  const { data: reports } = await supabaseAdmin
     .from('reports')
-    .select('id, case_type, content, structured, created_at')
+    .select('id, category, subcategory, content, structured, created_at')
     .eq('recording_id', recordingId)
-    .maybeSingle()
+    .order('created_at', { ascending: false })
 
   // Transcript
   const { data: transcript } = await supabaseAdmin
@@ -58,7 +58,7 @@ export async function GET(
   // Linked cases
   const { data: links } = await supabaseAdmin
     .from('recording_case_links')
-    .select('id, case_id, case_client_name, case_type')
+    .select('id, case_id, case_client_name')
     .eq('recording_id', recordingId)
     .eq('user_id', firm.id)
 
@@ -66,7 +66,7 @@ export async function GET(
 
   return NextResponse.json({
     recording,
-    report: report ?? null,
+    reports: reports ?? [],
     transcript: transcript ?? null,
     signedUrl,
     linkedCases,

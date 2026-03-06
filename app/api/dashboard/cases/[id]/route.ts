@@ -33,7 +33,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
   const { data: caseData, error: caseError} = await supabaseAdmin
     .from('cases')
-    .select('id, client_id, case_type, status, summary, detail, parent_case_id, created_at')
+    .select('id, client_id, category, subcategory, status, summary, detail, parent_case_id, created_at')
     .eq('id', caseId)
     .eq('firm_id', firm.id)
     .maybeSingle()
@@ -57,11 +57,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   }
 
   // Fetch other cases for the same client (for connect modal)
-  let clientCases: Array<{ id: number; case_type: string; created_at: string }> = []
+  let clientCases: Array<{ id: number; category: string; subcategory: string | null; created_at: string }> = []
   if (caseData.client_id) {
     const { data: cc } = await supabaseAdmin
       .from('cases')
-      .select('id, case_type, created_at')
+      .select('id, category, subcategory, created_at')
       .eq('client_id', caseData.client_id)
       .eq('firm_id', firm.id)
       .neq('id', caseId)
@@ -86,6 +86,93 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   }
 
   const body = await request.json()
+
+  // Merge from report
+  if ('merge_report_id' in body && 'merge_decisions' in body) {
+    const { merge_report_id, merge_decisions } = body
+
+    // Fetch report
+    const { data: report } = await supabaseAdmin
+      .from('reports')
+      .select('structured')
+      .eq('id', merge_report_id)
+      .maybeSingle()
+
+    if (!report?.structured) {
+      return NextResponse.json({ error: 'Report not found' }, { status: 404 })
+    }
+
+    // Fetch current case detail
+    const { data: currentCase } = await supabaseAdmin
+      .from('cases')
+      .select('detail')
+      .eq('id', caseId)
+      .eq('firm_id', firm.id)
+      .single()
+
+    const existingDetail = (currentCase?.detail as Record<string, unknown>) || {}
+    const newDetail = report.structured as Record<string, unknown>
+    const mergedDetail: Record<string, unknown> = {}
+
+    // Overview
+    if (merge_decisions.overview === 'keep_existing') {
+      mergedDetail.overview = existingDetail.overview || ''
+    } else if (merge_decisions.overview === 'use_new') {
+      mergedDetail.overview = newDetail.overview || ''
+    } else {
+      mergedDetail.overview = `${existingDetail.overview || ''}\n\n${newDetail.overview || ''}`.trim()
+    }
+
+    // Facts
+    if (merge_decisions.facts === 'keep_existing') {
+      mergedDetail.facts = existingDetail.facts || ''
+    } else if (merge_decisions.facts === 'use_new') {
+      mergedDetail.facts = newDetail.facts || ''
+    } else {
+      mergedDetail.facts = `${existingDetail.facts || ''}\n\n${newDetail.facts || ''}`.trim()
+    }
+
+    // Legal elements - merge by key
+    const existingElements = (existingDetail.legal_elements as Record<string, unknown>) || {}
+    const newElements = (newDetail.legal_elements as Record<string, unknown>) || {}
+    mergedDetail.legal_elements = { ...existingElements, ...newElements }
+
+    // Evidence - merge arrays
+    type EvidenceItem = { item: string; status: string; url: string | null }
+    if (merge_decisions.evidence === 'keep_existing') {
+      mergedDetail.evidence = existingDetail.evidence || []
+    } else if (merge_decisions.evidence === 'use_new') {
+      const newEvidence = (newDetail.evidence as string[]) || []
+      mergedDetail.evidence = newEvidence.map((item: string): EvidenceItem => ({
+        item,
+        status: '미확보',
+        url: null,
+      }))
+    } else {
+      const existingEvidence = (existingDetail.evidence as EvidenceItem[]) || []
+      const newEvidence = (newDetail.evidence as string[]) || []
+      const existingItems = new Set(existingEvidence.map(e => e.item))
+      const merged: EvidenceItem[] = [...existingEvidence]
+      newEvidence.forEach((item: string) => {
+        if (!existingItems.has(item)) {
+          merged.push({ item, status: '미확보', url: null })
+        }
+      })
+      mergedDetail.evidence = merged
+    }
+
+    // Update case
+    const { data, error } = await supabaseAdmin
+      .from('cases')
+      .update({ detail: mergedDetail })
+      .eq('id', caseId)
+      .eq('firm_id', firm.id)
+      .select()
+      .single()
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ case: data })
+  }
 
   // Status update
   if ('status' in body) {
@@ -122,7 +209,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   // Edit case fields (client info는 clients 테이블에서만 수정 가능)
   const allowedEdits: Record<string, unknown> = {}
-  if ('case_type' in body) allowedEdits.case_type = body.case_type
+  if ('category' in body) allowedEdits.category = body.category
+  if ('subcategory' in body) allowedEdits.subcategory = body.subcategory
   if ('summary' in body) allowedEdits.summary = body.summary
   if ('status' in body) allowedEdits.status = body.status
 
