@@ -415,7 +415,8 @@ export default function CaseDetailPage() {
     )
   }
 
-  const status = STATUS_CONFIG[caseData.status ?? 'new']
+  const statusKey = caseData.status ?? 'new'
+  const status = STATUS_CONFIG[statusKey] ?? STATUS_CONFIG['new']
   const summary = caseData.summary
   const inputCls = 'w-full border border-blue-200 rounded-lg px-3 py-2 text-sm text-slate-900 bg-white focus:outline-none focus:border-blue-400'
 
