@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CaseFront — 변호사 상담을 AI 사건 리포트로</title>
+<title>CaseFront — Turn Legal Consultations into AI Case Reports</title>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 html{scroll-behavior:smooth}
@@ -28,6 +28,12 @@ nav.scrolled{box-shadow:0 1px 20px rgba(0,0,0,0.04)}
 .nav-links a:hover{color:var(--text)}
 .nav-cta{background:var(--navy);color:#fff!important;padding:8px 20px;border-radius:8px;font-weight:500;transition:transform 0.2s,box-shadow 0.2s}
 .nav-cta:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(26,43,90,0.18)}
+
+/* LANGUAGE SWITCHER */
+.lang-switcher{display:flex;align-items:center;gap:2px;background:var(--bg-alt);border:1px solid var(--border);border-radius:8px;padding:3px;flex-shrink:0}
+.lang-btn{font-size:12px;font-weight:600;color:var(--text-light);background:transparent;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-family:'JetBrains Mono',monospace;transition:all .2s;letter-spacing:0.3px}
+.lang-btn.active{background:var(--surface);color:var(--navy);box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+.lang-btn:hover:not(.active){color:var(--text)}
 
 .hero{padding:130px 0 40px;text-align:center;position:relative}
 .hero::before{content:'';position:absolute;top:40px;left:50%;transform:translateX(-50%);width:900px;height:500px;background:radial-gradient(ellipse,rgba(74,122,239,0.04) 0%,transparent 70%);pointer-events:none}
@@ -159,7 +165,7 @@ nav.scrolled{box-shadow:0 1px 20px rgba(0,0,0,0.04)}
 .price-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px 24px;text-align:center;transition:transform .3s}
 .price-card:hover{transform:translateY(-3px)}
 .price-card.featured{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue),0 12px 40px rgba(74,122,239,0.08);position:relative}
-.price-card.featured::before{content:'추천';position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--blue);color:#fff;font-size:11px;font-weight:600;padding:3px 14px;border-radius:100px}
+.price-card.featured::before{content:'Recommended';position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--blue);color:#fff;font-size:11px;font-weight:600;padding:3px 14px;border-radius:100px}
 .price-name{font-size:14px;font-weight:500;color:var(--text-secondary);margin-bottom:6px}
 .price-amount{font-family:'Source Serif 4',serif;font-size:32px;font-weight:700;color:var(--navy);margin-bottom:4px}
 .price-amount span{font-size:14px;color:var(--text-light);font-family:'DM Sans',sans-serif}
@@ -198,6 +204,7 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
 @media(max-width:640px){
   .nav-links a:not(.nav-cta){display:none}
   .proof-nums{gap:24px}
+  .lang-switcher{display:flex}
 }
 </style>
 </head>
@@ -209,34 +216,38 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
     <span class="nav-logo-text">CaseFront</span>
   </a>
   <div class="nav-links">
-    <a href="#report">리포트</a>
-    <a href="#workflow">사용법</a>
-    <a href="#pricing">가격</a>
-    <a href="#inquiry">도입 문의</a>
-    <a href="https://my.casefront.app/signup" class="nav-cta">무료체험</a>
+    <a href="#report" data-en="Reports" data-ko="리포트">Reports</a>
+    <a href="#workflow" data-en="How It Works" data-ko="사용법">How It Works</a>
+    <a href="#pricing" data-en="Pricing" data-ko="가격">Pricing</a>
+    <a href="#inquiry" data-en="Contact" data-ko="도입 문의">Contact</a>
+    <div class="lang-switcher">
+      <button class="lang-btn active" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" onclick="setLang('ko')">한국어</button>
+    </div>
+    <a href="https://my.casefront.app/signup" class="nav-cta" data-en="Free Trial" data-ko="무료체험">Free Trial</a>
   </div>
 </div></nav>
 
 <section class="hero">
   <div class="container">
-    <div class="hero-badge"><span class="pulse"></span>변호사를 위한 상담 리포트 AI</div>
-    <h1>변호사 상담을<br>요건사실 기반 사건 리포트로<br>자동 정리합니다</h1>
+    <div class="hero-badge"><span class="pulse"></span><span data-en="AI Consultation Reports for Attorneys" data-ko="변호사를 위한 상담 리포트 AI">AI Consultation Reports for Attorneys</span></div>
+    <h1 data-en="Turn Legal Consultations into<br>Structured Case Reports<br>— Automatically" data-ko="변호사 상담을<br>요건사실 기반 사건 리포트로<br>자동 정리합니다">Turn Legal Consultations into<br>Structured Case Reports<br>— Automatically</h1>
     <div class="hero-sub" style="text-align:center;">
-      녹음 파일 하나로 수임 검토에 필요한 모든 정보가 정리됩니다.
+      <span data-en="One recording. Every detail you need for intake review, organized and ready." data-ko="녹음 파일 하나로 수임 검토에 필요한 모든 정보가 정리됩니다.">One recording. Every detail you need for intake review, organized and ready.</span>
       <ul class="hero-sub-list">
-        <li>사실관계</li>
-        <li>요건사실</li>
-        <li>핵심 쟁점</li>
-        <li>증거 현황</li>
-        <li>다음 단계</li>
+        <li data-en="Facts &amp; Timeline" data-ko="사실관계">Facts &amp; Timeline</li>
+        <li data-en="Legal Elements" data-ko="요건사실">Legal Elements</li>
+        <li data-en="Key Issues" data-ko="핵심 쟁점">Key Issues</li>
+        <li data-en="Evidence Status" data-ko="증거 현황">Evidence Status</li>
+        <li data-en="Next Steps" data-ko="다음 단계">Next Steps</li>
       </ul>
     </div>
     <div class="hero-actions">
       <div style="display:flex;flex-direction:column;align-items:center;">
-        <a href="https://my.casefront.app/signup" class="btn-primary">무료체험 시작하기</a>
-        <p style="font-size:13px;color:var(--text-light);margin-top:8px;">상담 1건 (최대 30분) 무료</p>
+        <a href="https://my.casefront.app/signup" class="btn-primary" data-en="Start Free Trial" data-ko="무료체험 시작하기">Start Free Trial</a>
+        <p style="font-size:13px;color:var(--text-light);margin-top:8px;" data-en="1 free consultation (up to 30 min)" data-ko="상담 1건 (최대 30분) 무료">1 free consultation (up to 30 min)</p>
       </div>
-      <a href="#inquiry" class="btn-secondary" style="align-self:flex-start;">도입 문의</a>
+      <a href="#inquiry" class="btn-secondary" style="align-self:flex-start;" data-en="Contact Us" data-ko="도입 문의">Contact Us</a>
     </div>
   </div>
 </section>
@@ -247,56 +258,64 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
       <div class="phone-mock">
         <div class="phone-screen">
           <div class="phone-status"><span>9:41</span><div class="phone-notch"></div><span>●●●</span></div>
-          <div class="phone-app-header"><h3>CaseFront</h3><p>상담 녹음</p></div>
+          <div class="phone-app-header"><h3>CaseFront</h3><p data-en="Record Consultation" data-ko="상담 녹음">Record Consultation</p></div>
           <div class="rec-btn">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
           </div>
-          <div class="rec-info"><div class="rec-time">32:14</div><div class="rec-label">녹음 중</div></div>
+          <div class="rec-info"><div class="rec-time">32:14</div><div class="rec-label" data-en="Recording..." data-ko="녹음 중">Recording...</div></div>
           <div class="waveform"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
           <div class="phone-client">
-            <div class="phone-client-label">의뢰인</div>
-            <div class="phone-client-name">김○○</div>
-            <div class="phone-client-tag">폭행 피해 · 전화 상담</div>
+            <div class="phone-client-label" data-en="CLIENT" data-ko="의뢰인">CLIENT</div>
+            <div class="phone-client-name">J. Smith</div>
+            <div class="phone-client-tag" data-en="Assault victim · Phone consult" data-ko="폭행 피해 · 전화 상담">Assault victim · Phone consult</div>
           </div>
         </div>
       </div>
       <div class="flow-arrow">
-        <div class="flow-arrow-label">AI 분석</div>
+        <div class="flow-arrow-label" data-en="AI Analysis" data-ko="AI 분석">AI Analysis</div>
         <div class="flow-arrow-line"><div class="flow-arrow-dot"></div></div>
       </div>
       <div class="dash-mock">
         <div class="dash-body">
-          <div class="dash-title">AI 생성 사건 리포트</div>
+          <div class="dash-title" data-en="AI-Generated Case Report" data-ko="AI 생성 사건 리포트">AI-Generated Case Report</div>
           <div class="rpt">
             <div class="rpt-header">
-              <span class="rpt-badge criminal">형사</span>
-              <span class="rpt-title">폭행 피해</span>
-              <span style="margin-left:auto;font-size:11px;color:var(--text-light);">2026. 3. 4.</span>
+              <span class="rpt-badge criminal" data-en="Criminal" data-ko="형사">Criminal</span>
+              <span class="rpt-title" data-en="Assault — Battery" data-ko="폭행 피해">Assault — Battery</span>
+              <span style="margin-left:auto;font-size:11px;color:var(--text-light);">Mar 4, 2026</span>
             </div>
             <div class="rpt-body">
               <div class="rpt-card">
-                <div class="rpt-lbl">사건 개요</div>
-                <div class="rpt-val">2026. 2. 28. 22:30경 강남구 소재 음식점에서 피의자가 의뢰인의 얼굴을 주먹으로 1회 가격</div>
+                <div class="rpt-lbl" data-en="Case Summary" data-ko="사건 개요">Case Summary</div>
+                <div class="rpt-val" data-en="On Feb 28, 2026 at ~10:30 PM, suspect allegedly struck the client once in the face with a fist at a restaurant in downtown." data-ko="2026. 2. 28. 22:30경 강남구 소재 음식점에서 피의자가 의뢰인의 얼굴을 주먹으로 1회 가격">On Feb 28, 2026 at ~10:30 PM, suspect allegedly struck the client once in the face with a fist at a restaurant in downtown.</div>
               </div>
               <div class="rpt-card">
-                <div class="rpt-lbl">의뢰인 정보</div>
-                <div class="rpt-val"><div style="font-weight:600;">김○○</div><div style="font-size:11px;color:var(--text-light);">전화 상담 · 32분</div></div>
+                <div class="rpt-lbl" data-en="Client Info" data-ko="의뢰인 정보">Client Info</div>
+                <div class="rpt-val"><div style="font-weight:600;">J. Smith</div><div style="font-size:11px;color:var(--text-light);" data-en="Phone consult · 32 min" data-ko="전화 상담 · 32분">Phone consult · 32 min</div></div>
               </div>
               <div class="rpt-card full">
-                <div class="rpt-lbl">요건사실 체크리스트</div>
+                <div class="rpt-lbl" data-en="Legal Elements Checklist" data-ko="요건사실 체크리스트">Legal Elements Checklist</div>
                 <div style="display:flex;flex-direction:column;gap:6px;">
-                  <div style="display:flex;align-items:center;gap:8px;font-size:12px;"><span style="color:#16A34A;font-weight:600;flex-shrink:0;">충족</span><span style="color:var(--text);">폭행 행위 — 주먹으로 얼굴 1회 가격</span></div>
-                  <div style="display:flex;align-items:center;gap:8px;font-size:12px;"><span style="color:#16A34A;font-weight:600;flex-shrink:0;">충족</span><span style="color:var(--text);">고의성 — 언쟁 중 의도적 가격</span></div>
-                  <div style="display:flex;align-items:center;gap:8px;font-size:12px;"><span style="color:#CA8A04;font-weight:600;flex-shrink:0;">미확인</span><span style="color:var(--text-secondary);">상해 결과 — 진단서 확보 필요</span></div>
+                  <div style="display:flex;align-items:center;gap:8px;font-size:12px;"><span style="color:#16A34A;font-weight:600;flex-shrink:0;" data-en="MET" data-ko="충족">MET</span><span style="color:var(--text);" data-en="Physical force — punch to the face confirmed" data-ko="폭행 행위 — 주먹으로 얼굴 1회 가격">Physical force — punch to the face confirmed</span></div>
+                  <div style="display:flex;align-items:center;gap:8px;font-size:12px;"><span style="color:#16A34A;font-weight:600;flex-shrink:0;" data-en="MET" data-ko="충족">MET</span><span style="color:var(--text);" data-en="Intent — deliberate strike during altercation" data-ko="고의성 — 언쟁 중 의도적 가격">Intent — deliberate strike during altercation</span></div>
+                  <div style="display:flex;align-items:center;gap:8px;font-size:12px;"><span style="color:#CA8A04;font-weight:600;flex-shrink:0;" data-en="UNVERIFIED" data-ko="미확인">UNVERIFIED</span><span style="color:var(--text-secondary);" data-en="Injury — medical certificate needed" data-ko="상해 결과 — 진단서 확보 필요">Injury — medical certificate needed</span></div>
                 </div>
               </div>
               <div class="rpt-card">
-                <div class="rpt-lbl">증거 현황</div>
-                <div class="rpt-val" style="font-size:12px;line-height:1.8;"><div><span style="color:#16A34A;font-weight:600;">확보</span> CCTV (음식점)</div><div><span style="color:#16A34A;font-weight:600;">확보</span> 목격자 2명</div><div><span style="color:#CA8A04;font-weight:600;">미비</span> 진단서</div></div>
+                <div class="rpt-lbl" data-en="Evidence Status" data-ko="증거 현황">Evidence Status</div>
+                <div class="rpt-val" style="font-size:12px;line-height:1.8;">
+                  <div><span style="color:#16A34A;font-weight:600;" data-en="SECURED" data-ko="확보">SECURED</span> <span data-en="CCTV (restaurant)" data-ko="CCTV (음식점)">CCTV (restaurant)</span></div>
+                  <div><span style="color:#16A34A;font-weight:600;" data-en="SECURED" data-ko="확보">SECURED</span> <span data-en="2 witnesses" data-ko="목격자 2명">2 witnesses</span></div>
+                  <div><span style="color:#CA8A04;font-weight:600;" data-en="MISSING" data-ko="미비">MISSING</span> <span data-en="Medical certificate" data-ko="진단서">Medical certificate</span></div>
+                </div>
               </div>
               <div class="rpt-card">
-                <div class="rpt-lbl">다음 단계</div>
-                <div class="rpt-val" style="font-size:12px;line-height:1.8;"><div>1. 진단서 발급 (2주 이내)</div><div>2. CCTV 보존 요청</div><div>3. 고소장 작성 검토</div></div>
+                <div class="rpt-lbl" data-en="Next Steps" data-ko="다음 단계">Next Steps</div>
+                <div class="rpt-val" style="font-size:12px;line-height:1.8;">
+                  <div data-en="1. Obtain medical certificate (within 2 weeks)" data-ko="1. 진단서 발급 (2주 이내)">1. Obtain medical certificate (within 2 weeks)</div>
+                  <div data-en="2. Request CCTV footage preservation" data-ko="2. CCTV 보존 요청">2. Request CCTV footage preservation</div>
+                  <div data-en="3. Review complaint filing" data-ko="3. 고소장 작성 검토">3. Review complaint filing</div>
+                </div>
               </div>
             </div>
           </div>
@@ -307,35 +326,35 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
 </section>
 
 <div class="proof"><div class="container"><div class="proof-nums">
-  <div class="proof-num"><strong>30분 상담</strong><span>→ 5분 리포트</span></div>
-  <div class="proof-num"><strong>수작업 2시간</strong><span>→ 자동 생성</span></div>
+  <div class="proof-num"><strong data-en="30-min consult" data-ko="30분 상담">30-min consult</strong><span data-en="→ 5-min report" data-ko="→ 5분 리포트">→ 5-min report</span></div>
+  <div class="proof-num"><strong data-en="2 hrs of manual work" data-ko="수작업 2시간">2 hrs of manual work</strong><span data-en="→ auto-generated" data-ko="→ 자동 생성">→ auto-generated</span></div>
 </div></div></div>
 
 <!-- PROBLEM GRID -->
 <section class="problem">
   <div class="container">
     <div style="text-align:center;">
-      <div class="section-label">지금 변호사의 상담 후 업무</div>
-      <h2 class="section-title" style="font-size:28px;">매 상담마다 반복되는 작업</h2>
+      <div class="section-label" data-en="The Problem" data-ko="지금 변호사의 상담 후 업무">The Problem</div>
+      <h2 class="section-title" style="font-size:28px;" data-en="Tasks That Repeat After Every Consultation" data-ko="매 상담마다 반복되는 작업">Tasks That Repeat After Every Consultation</h2>
     </div>
     <div class="problem-grid">
       <div class="problem-card">
         <div class="problem-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="1.8" stroke-linecap="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3v5z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3v5z"/></svg></div>
-        <h4>상담 녹음 다시 들으며<br>사실관계 정리</h4>
-        <p>30분 상담을 되감기하며 메모</p>
+        <h4 data-en="Re-listening to recordings<br>to reconstruct facts" data-ko="상담 녹음 다시 들으며<br>사실관계 정리">Re-listening to recordings<br>to reconstruct facts</h4>
+        <p data-en="Rewinding a 30-min call to take notes" data-ko="30분 상담을 되감기하며 메모">Rewinding a 30-min call to take notes</p>
       </div>
       <div class="problem-card">
         <div class="problem-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="1.8" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
-        <h4>요건사실 검토하며<br>사건 기록 작성</h4>
-        <p>구성요건 하나하나 수작업 확인</p>
+        <h4 data-en="Manually reviewing legal elements<br>and writing case notes" data-ko="요건사실 검토하며<br>사건 기록 작성">Manually reviewing legal elements<br>and writing case notes</h4>
+        <p data-en="Checking each element one by one by hand" data-ko="구성요건 하나하나 수작업 확인">Checking each element one by one by hand</p>
       </div>
       <div class="problem-card">
         <div class="problem-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="1.8" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
-        <h4>증거와 쟁점<br>따로 메모해서 정리</h4>
-        <p>확보 증거, 미비 증거, 다음 단계를 문서화</p>
+        <h4 data-en="Separately documenting evidence<br>and key issues" data-ko="증거와 쟁점<br>따로 메모해서 정리">Separately documenting evidence<br>and key issues</h4>
+        <p data-en="Writing up secured evidence, gaps, and action items" data-ko="확보 증거, 미비 증거, 다음 단계를 문서화">Writing up secured evidence, gaps, and action items</p>
       </div>
     </div>
-    <p style="text-align:center;font-size:14px;color:var(--text-light);margin-top:24px;">CaseFront가 이 과정을 2시간 → 5분으로 줄입니다.</p>
+    <p style="text-align:center;font-size:14px;color:var(--text-light);margin-top:24px;" data-en="CaseFront compresses this process from 2 hours → 5 minutes." data-ko="CaseFront가 이 과정을 2시간 → 5분으로 줄입니다.">CaseFront compresses this process from 2 hours → 5 minutes.</p>
   </div>
 </section>
 
@@ -344,31 +363,31 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
   <div class="container">
     <div style="text-align:center;">
       <div class="section-label">How it works</div>
-      <h2 class="section-title" style="font-size:28px;">상담에서 리포트까지</h2>
+      <h2 class="section-title" style="font-size:28px;" data-en="From Consultation to Report" data-ko="상담에서 리포트까지">From Consultation to Report</h2>
     </div>
     <div class="wf-steps">
       <div class="wf-step">
         <div class="wf-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="1.8" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.11 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
-        <h4>전화 상담</h4>
-        <p>스마트폰 통화 녹음 또는 앱에서 대면 녹음</p>
+        <h4 data-en="Consult" data-ko="전화 상담">Consult</h4>
+        <p data-en="Record a phone call or use the app for in-person sessions" data-ko="스마트폰 통화 녹음 또는 앱에서 대면 녹음">Record a phone call or use the app for in-person sessions</p>
       </div>
       <div class="wf-arrow"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
       <div class="wf-step">
         <div class="wf-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="1.8" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
-        <h4>녹음 업로드</h4>
-        <p>의뢰인 이름 입력 후 업로드. 앱이면 한 탭</p>
+        <h4 data-en="Upload" data-ko="녹음 업로드">Upload</h4>
+        <p data-en="Enter the client name and upload — one tap from the app" data-ko="의뢰인 이름 입력 후 업로드. 앱이면 한 탭">Enter the client name and upload — one tap from the app</p>
       </div>
       <div class="wf-arrow"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
       <div class="wf-step">
         <div class="wf-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
-        <h4>AI 분석</h4>
-        <p>음성→텍스트 변환 + 요건사실 기반 분석</p>
+        <h4 data-en="AI Analysis" data-ko="AI 분석">AI Analysis</h4>
+        <p data-en="Speech-to-text transcription + legal element analysis" data-ko="음성→텍스트 변환 + 요건사실 기반 분석">Speech-to-text transcription + legal element analysis</p>
       </div>
       <div class="wf-arrow"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
       <div class="wf-step">
         <div class="wf-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="1.8" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
-        <h4>사건 리포트</h4>
-        <p>구조화된 사건 리포트를 대시보드에서 확인</p>
+        <h4 data-en="Case Report" data-ko="사건 리포트">Case Report</h4>
+        <p data-en="Structured case report available in your dashboard" data-ko="구조화된 사건 리포트를 대시보드에서 확인">Structured case report available in your dashboard</p>
       </div>
     </div>
   </div>
@@ -377,22 +396,22 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
 <section class="report-detail" id="report">
   <div class="container">
     <div style="text-align:center;">
-      <div class="section-label">AI 사건 리포트</div>
-      <h2 class="section-title">상담 한 통이 구조화된 리포트가 됩니다</h2>
-      <p style="font-size:15px;color:var(--text-secondary);max-width:520px;margin:0 auto;line-height:1.8;">30분 상담 녹음에서 변호사가 수임 검토에 필요한 정보만 추출합니다.</p>
+      <div class="section-label" data-en="AI Case Report" data-ko="AI 사건 리포트">AI Case Report</div>
+      <h2 class="section-title" data-en="One Consultation Becomes a Structured Report" data-ko="상담 한 통이 구조화된 리포트가 됩니다">One Consultation Becomes a Structured Report</h2>
+      <p style="font-size:15px;color:var(--text-secondary);max-width:520px;margin:0 auto;line-height:1.8;" data-en="From a 30-minute recording, we extract only what attorneys need for intake review." data-ko="30분 상담 녹음에서 변호사가 수임 검토에 필요한 정보만 추출합니다.">From a 30-minute recording, we extract only what attorneys need for intake review.</p>
     </div>
     <div class="report-grid">
       <div class="report-items">
-        <div class="report-item"><div class="report-item-num">01</div><h4>사건 개요</h4><p>일시, 장소, 당사자, 핵심 사실을 한 문단으로 요약합니다.</p></div>
-        <div class="report-item"><div class="report-item-num">02</div><h4>사실관계 타임라인</h4><p>상담에서 언급된 사건 경위를 시간순으로 정리합니다.</p></div>
-        <div class="report-item"><div class="report-item-num">03</div><h4>요건사실 체크리스트</h4><p>사건 유형별 구성요건을 자동 판단합니다. 충족/미확인을 색상으로 구분해 한눈에 파악합니다.</p></div>
-        <div class="report-item"><div class="report-item-num">04</div><h4>핵심 쟁점</h4><p>쟁점이 될 수 있는 사항을 미리 식별합니다.</p></div>
+        <div class="report-item"><div class="report-item-num">01</div><h4 data-en="Case Overview" data-ko="사건 개요">Case Overview</h4><p data-en="Date, location, parties, and key facts summarized in a single paragraph." data-ko="일시, 장소, 당사자, 핵심 사실을 한 문단으로 요약합니다.">Date, location, parties, and key facts summarized in a single paragraph.</p></div>
+        <div class="report-item"><div class="report-item-num">02</div><h4 data-en="Fact Timeline" data-ko="사실관계 타임라인">Fact Timeline</h4><p data-en="The sequence of events mentioned in the consultation, organized chronologically." data-ko="상담에서 언급된 사건 경위를 시간순으로 정리합니다.">The sequence of events mentioned in the consultation, organized chronologically.</p></div>
+        <div class="report-item"><div class="report-item-num">03</div><h4 data-en="Legal Elements Checklist" data-ko="요건사실 체크리스트">Legal Elements Checklist</h4><p data-en="Elements of the offense are automatically assessed by case type. Met vs. unverified shown at a glance with color coding." data-ko="사건 유형별 구성요건을 자동 판단합니다. 충족/미확인을 색상으로 구분해 한눈에 파악합니다.">Elements of the offense are automatically assessed by case type. Met vs. unverified shown at a glance with color coding.</p></div>
+        <div class="report-item"><div class="report-item-num">04</div><h4 data-en="Key Issues" data-ko="핵심 쟁점">Key Issues</h4><p data-en="Potential points of contention are identified in advance." data-ko="쟁점이 될 수 있는 사항을 미리 식별합니다.">Potential points of contention are identified in advance.</p></div>
       </div>
       <div class="report-items">
-        <div class="report-item"><div class="report-item-num">05</div><h4>증거 현황</h4><p>확보된 증거와 추가 확보가 필요한 증거를 분류합니다.</p></div>
-        <div class="report-item"><div class="report-item-num">06</div><h4>다음 단계</h4><p>수임 후 진행할 구체적 액션 아이템을 제안합니다.</p></div>
-        <div class="report-item"><div class="report-item-num">07</div><h4>전체 스크립트</h4><p>상담 녹음을 텍스트로 변환합니다. 타임스탬프로 원본 확인이 가능합니다.</p></div>
-        <div class="report-item" style="background:var(--blue-bg);border-color:var(--blue);"><div class="report-item-num" style="color:var(--navy);">TIP</div><h4 style="color:var(--navy);">변호사가 판단, AI가 정리</h4><p>AI는 법률 자문을 하지 않습니다. 상담 내용을 구조화해서 변호사의 검토 시간을 줄여드립니다.</p></div>
+        <div class="report-item"><div class="report-item-num">05</div><h4 data-en="Evidence Status" data-ko="증거 현황">Evidence Status</h4><p data-en="Secured evidence and evidence still needed are clearly separated." data-ko="확보된 증거와 추가 확보가 필요한 증거를 분류합니다.">Secured evidence and evidence still needed are clearly separated.</p></div>
+        <div class="report-item"><div class="report-item-num">06</div><h4 data-en="Next Steps" data-ko="다음 단계">Next Steps</h4><p data-en="Concrete action items to pursue after taking the case." data-ko="수임 후 진행할 구체적 액션 아이템을 제안합니다.">Concrete action items to pursue after taking the case.</p></div>
+        <div class="report-item"><div class="report-item-num">07</div><h4 data-en="Full Transcript" data-ko="전체 스크립트">Full Transcript</h4><p data-en="The consultation recording converted to text. Timestamps allow you to verify the source." data-ko="상담 녹음을 텍스트로 변환합니다. 타임스탬프로 원본 확인이 가능합니다.">The consultation recording converted to text. Timestamps allow you to verify the source.</p></div>
+        <div class="report-item" style="background:var(--blue-bg);border-color:var(--blue);"><div class="report-item-num" style="color:var(--navy);">TIP</div><h4 style="color:var(--navy);" data-en="Attorneys decide. AI organizes." data-ko="변호사가 판단, AI가 정리">Attorneys decide. AI organizes.</h4><p data-en="AI does not provide legal advice. It structures the consultation content to reduce the time attorneys spend on review." data-ko="AI는 법률 자문을 하지 않습니다. 상담 내용을 구조화해서 변호사의 검토 시간을 줄여드립니다.">AI does not provide legal advice. It structures the consultation content to reduce the time attorneys spend on review.</p></div>
       </div>
     </div>
   </div>
@@ -403,23 +422,23 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
   <div class="container">
     <div style="text-align:center;">
       <div class="section-label">Security</div>
-      <h2 class="section-title" style="font-size:28px;">변호사-의뢰인 비밀 보호</h2>
+      <h2 class="section-title" style="font-size:28px;" data-en="Attorney-Client Privilege Protected" data-ko="변호사-의뢰인 비밀 보호">Attorney-Client Privilege Protected</h2>
     </div>
     <div class="trust-grid">
       <div class="trust-card">
         <div class="trust-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-        <h4>암호화 저장</h4>
-        <p>녹음 파일과 리포트는 암호화되어 저장됩니다.</p>
+        <h4 data-en="Encrypted Storage" data-ko="암호화 저장">Encrypted Storage</h4>
+        <p data-en="Recordings and reports are stored with encryption." data-ko="녹음 파일과 리포트는 암호화되어 저장됩니다.">Recordings and reports are stored with encryption.</p>
       </div>
       <div class="trust-card">
         <div class="trust-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.8" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
-        <h4>접근 권한 통제</h4>
-        <p>녹음과 리포트는 본인 사무소 계정만 열람 가능합니다. 외부 공유 없이 사무소 내에서만 관리됩니다.</p>
+        <h4 data-en="Access Control" data-ko="접근 권한 통제">Access Control</h4>
+        <p data-en="Recordings and reports are accessible only by your firm account. No external sharing — managed entirely within your office." data-ko="녹음과 리포트는 본인 사무소 계정만 열람 가능합니다. 외부 공유 없이 사무소 내에서만 관리됩니다.">Recordings and reports are accessible only by your firm account. No external sharing — managed entirely within your office.</p>
       </div>
       <div class="trust-card">
         <div class="trust-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.8" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></div>
-        <h4>삭제 보장</h4>
-        <p>녹음 원본은 분석 완료 후 삭제 요청이 가능합니다. 데이터는 사무소가 통제합니다.</p>
+        <h4 data-en="Deletion on Request" data-ko="삭제 보장">Deletion on Request</h4>
+        <p data-en="Original recordings can be deleted upon request after analysis. Your firm controls the data." data-ko="녹음 원본은 분석 완료 후 삭제 요청이 가능합니다. 데이터는 사무소가 통제합니다.">Original recordings can be deleted upon request after analysis. Your firm controls the data.</p>
       </div>
     </div>
   </div>
@@ -428,20 +447,26 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
 <section class="pricing" id="pricing">
   <div class="container">
     <div class="section-label" style="text-align:center;">Pricing</div>
-    <h2 class="section-title" style="text-align:center;">기본료 + 분당 과금</h2>
+    <h2 class="section-title" style="text-align:center;" data-en="Base Fee + Per-Minute Billing" data-ko="기본료 + 분당 과금">Base Fee + Per-Minute Billing</h2>
     <div style="max-width:480px;margin:0 auto;">
       <div class="price-card" style="border-radius:20px;padding:40px 32px;border-color:var(--blue);box-shadow:0 0 0 1px var(--blue),0 12px 40px rgba(74,122,239,0.08);">
-        <div class="price-amount" style="font-size:40px;">₩19,900<span>/월</span></div>
-        <div class="price-minutes" style="margin-bottom:12px;font-size:15px;">기본료</div>
-        <div style="font-family:'Source Serif 4',serif;font-size:36px;font-weight:700;color:var(--navy);">+ ₩250<span style="font-size:16px;color:var(--text-light);font-family:'DM Sans',sans-serif;">/분</span></div>
+        <div class="price-amount" style="font-size:40px;" data-en="$14<span style='font-size:18px;color:var(--text-light);font-family:DM Sans,sans-serif'>/mo</span>" data-ko="₩19,900<span style='font-size:18px;color:var(--text-light);font-family:DM Sans,sans-serif'>/월</span>">$14<span style="font-size:18px;color:var(--text-light);font-family:'DM Sans',sans-serif">/mo</span></div>
+        <div class="price-minutes" style="margin-bottom:12px;font-size:15px;" data-en="Base fee" data-ko="기본료">Base fee</div>
+        <div style="font-family:'Source Serif 4',serif;font-size:36px;font-weight:700;color:var(--navy);" data-en="+ $0.17<span style='font-size:16px;color:var(--text-light);font-family:DM Sans,sans-serif'>/min</span>" data-ko="+ ₩250<span style='font-size:16px;color:var(--text-light);font-family:DM Sans,sans-serif'>/분</span>">+ $0.17<span style="font-size:16px;color:var(--text-light);font-family:'DM Sans',sans-serif">/min</span></div>
         <div style="font-size:15px;color:var(--text-secondary);margin-top:24px;margin-bottom:28px;line-height:2;text-align:left;padding:0 12px;">
-          <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);"><span>월 120분 사용 시</span><strong style="color:var(--navy);font-size:16px;">₩49,900</strong></div>
-          <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);"><span>월 300분 사용 시</span><strong style="color:var(--navy);font-size:16px;">₩94,900</strong></div>
-          <div style="display:flex;justify-content:space-between;padding:10px 0;"><span>월 500분 사용 시</span><strong style="color:var(--navy);font-size:16px;">₩144,900</strong></div>
+          <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);"><span data-en="120 min/mo" data-ko="월 120분 사용 시">120 min/mo</span><strong style="color:var(--navy);font-size:16px;" data-en="$34" data-ko="₩49,900">$34</strong></div>
+          <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);"><span data-en="300 min/mo" data-ko="월 300분 사용 시">300 min/mo</span><strong style="color:var(--navy);font-size:16px;" data-en="$65" data-ko="₩94,900">$65</strong></div>
+          <div style="display:flex;justify-content:space-between;padding:10px 0;"><span data-en="500 min/mo" data-ko="월 500분 사용 시">500 min/mo</span><strong style="color:var(--navy);font-size:16px;" data-en="$99" data-ko="₩144,900">$99</strong></div>
         </div>
-        <ul class="price-features" style="margin-bottom:28px;"><li style="font-size:15px;padding:7px 0;">AI 사건 리포트</li><li style="font-size:15px;padding:7px 0;">전체 스크립트 + 타임스탬프</li><li style="font-size:15px;padding:7px 0;">웹 대시보드</li><li style="font-size:15px;padding:7px 0;">파일 업로드 + 앱 업로드</li><li style="font-size:15px;padding:7px 0;">사건 연결 관리</li></ul>
-        <a href="https://my.casefront.app/signup" class="price-btn" style="padding:16px;font-size:16px;border-radius:12px;background:var(--navy);color:#fff;border-color:var(--navy);">무료체험 시작하기</a>
-        <p style="font-size:13px;color:var(--text-light);margin-top:10px;text-align:center;">상담 1건 (최대 30분) 무료</p>
+        <ul class="price-features" style="margin-bottom:28px;">
+          <li style="font-size:15px;padding:7px 0;" data-en="AI case reports" data-ko="AI 사건 리포트">AI case reports</li>
+          <li style="font-size:15px;padding:7px 0;" data-en="Full transcript + timestamps" data-ko="전체 스크립트 + 타임스탬프">Full transcript + timestamps</li>
+          <li style="font-size:15px;padding:7px 0;" data-en="Web dashboard" data-ko="웹 대시보드">Web dashboard</li>
+          <li style="font-size:15px;padding:7px 0;" data-en="File upload + app upload" data-ko="파일 업로드 + 앱 업로드">File upload + app upload</li>
+          <li style="font-size:15px;padding:7px 0;" data-en="Case link management" data-ko="사건 연결 관리">Case link management</li>
+        </ul>
+        <a href="https://my.casefront.app/signup" class="price-btn" style="padding:16px;font-size:16px;border-radius:12px;background:var(--navy);color:#fff;border-color:var(--navy);" data-en="Start Free Trial" data-ko="무료체험 시작하기">Start Free Trial</a>
+        <p style="font-size:13px;color:var(--text-light);margin-top:10px;text-align:center;" data-en="1 free consultation (up to 30 min)" data-ko="상담 1건 (최대 30분) 무료">1 free consultation (up to 30 min)</p>
       </div>
     </div>
   </div>
@@ -450,36 +475,99 @@ footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',mon
 <section class="inquiry" id="inquiry" style="padding:100px 0;">
   <div class="container" style="max-width:520px;">
     <div class="section-label" style="text-align:center;">Contact</div>
-    <h2 class="section-title" style="text-align:center;margin-bottom:16px;font-size:36px;">도입 문의</h2>
-    <p style="text-align:center;font-size:16px;color:var(--text-secondary);margin-bottom:40px;">사무소 도입 상담을 원하시면 이메일을 남겨주세요.</p>
+    <h2 class="section-title" style="text-align:center;margin-bottom:16px;font-size:36px;" data-en="Get in Touch" data-ko="도입 문의">Get in Touch</h2>
+    <p style="text-align:center;font-size:16px;color:var(--text-secondary);margin-bottom:40px;" data-en="Interested in CaseFront for your firm? Leave your email and we'll reach out." data-ko="사무소 도입 상담을 원하시면 이메일을 남겨주세요.">Interested in CaseFront for your firm? Leave your email and we'll reach out.</p>
     <div style="display:flex;flex-direction:column;gap:16px;">
-      <input type="text" id="inq-name" placeholder="이름" style="padding:16px 20px;border:1px solid var(--border);border-radius:12px;font-size:16px;font-family:inherit;outline:none;transition:border .2s;" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'">
-      <input type="email" id="inq-email" placeholder="이메일" style="padding:16px 20px;border:1px solid var(--border);border-radius:12px;font-size:16px;font-family:inherit;outline:none;transition:border .2s;" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'">
-      <input type="text" id="inq-firm" placeholder="사무소명" style="padding:16px 20px;border:1px solid var(--border);border-radius:12px;font-size:16px;font-family:inherit;outline:none;transition:border .2s;" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'">
-      <button id="inq-btn" onclick="submitInquiry()" class="btn-primary" style="width:100%;text-align:center;padding:16px;font-size:16px;border-radius:12px;">문의하기</button>
-      <p id="inq-msg" style="text-align:center;font-size:15px;color:var(--green);display:none;">접수되었습니다. 빠르게 연락드리겠습니다.</p>
+      <input type="text" id="inq-name" data-en-placeholder="Name" data-ko-placeholder="이름" placeholder="Name" style="padding:16px 20px;border:1px solid var(--border);border-radius:12px;font-size:16px;font-family:inherit;outline:none;transition:border .2s;" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'">
+      <input type="email" id="inq-email" data-en-placeholder="Email" data-ko-placeholder="이메일" placeholder="Email" style="padding:16px 20px;border:1px solid var(--border);border-radius:12px;font-size:16px;font-family:inherit;outline:none;transition:border .2s;" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'">
+      <input type="text" id="inq-firm" data-en-placeholder="Firm name (optional)" data-ko-placeholder="사무소명" placeholder="Firm name (optional)" style="padding:16px 20px;border:1px solid var(--border);border-radius:12px;font-size:16px;font-family:inherit;outline:none;transition:border .2s;" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'">
+      <button id="inq-btn" onclick="submitInquiry()" class="btn-primary" style="width:100%;text-align:center;padding:16px;font-size:16px;border-radius:12px;" data-en="Send Inquiry" data-ko="문의하기">Send Inquiry</button>
+      <p id="inq-msg" style="text-align:center;font-size:15px;color:var(--green);display:none;" data-en="Received! We'll be in touch shortly." data-ko="접수되었습니다. 빠르게 연락드리겠습니다.">Received! We'll be in touch shortly.</p>
     </div>
   </div>
 </section>
 
-<footer><div class="container"><p>© 2026 CaseFront · 변호사 상담을 사건 리포트로 &nbsp;·&nbsp; <a href="/privacy.html" style="color:var(--text-light);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-light)'">개인정보처리방침</a></p></div></footer>
+<footer><div class="container"><p>© 2026 CaseFront · <span data-en="Turn legal consultations into case reports" data-ko="변호사 상담을 사건 리포트로">Turn legal consultations into case reports</span> &nbsp;·&nbsp; <a href="/privacy.html" style="color:var(--text-light);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-light)'" data-en="Privacy Policy" data-ko="개인정보처리방침">Privacy Policy</a></p></div></footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-window.addEventListener('scroll',()=>{document.getElementById('nav').classList.toggle('scrolled',window.scrollY>20)});
-const _sb=supabase.createClient('https://psihfrowcngdmpjrhekp.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBzaWhmcm93Y25nZG1wanJoZWtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwNzI3MTYsImV4cCI6MjA4NzY0ODcxNn0.g1qTuVztmiJhxheJVY-hOylkUs3Z1-khgBpjMac39IY');
-async function submitInquiry(){
-  const name=document.getElementById('inq-name').value.trim();
-  const email=document.getElementById('inq-email').value.trim();
-  const firm=document.getElementById('inq-firm').value.trim();
-  if(!name||!email){alert('이름과 이메일을 입력해주세요.');return;}
-  const emailRegex=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if(!emailRegex.test(email)){alert('올바른 이메일 주소를 입력해주세요.');return;}
-  const btn=document.getElementById('inq-btn');
-  btn.disabled=true;btn.textContent='전송 중...';
-  const{error}=await _sb.from('inquiries').insert({name,email,firm_name:firm||null,source:'landing'});
-  if(error){btn.disabled=false;btn.textContent='문의하기';alert('전송 실패. 다시 시도해주세요.');return;}
-  document.getElementById('inq-msg').style.display='block';btn.textContent='접수 완료';
+// ── Language switcher ──────────────────────────────────────────
+let currentLang = 'en';
+
+function setLang(lang) {
+  currentLang = lang;
+  document.documentElement.lang = lang === 'ko' ? 'ko' : 'en';
+
+  // Toggle active button
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent.trim() === (lang === 'ko' ? '한국어' : 'EN'));
+  });
+
+  // Translate all data-en / data-ko text nodes
+  document.querySelectorAll('[data-en]').forEach(el => {
+    const text = lang === 'ko' ? el.getAttribute('data-ko') : el.getAttribute('data-en');
+    if (text) el.innerHTML = text;
+  });
+
+  // Translate placeholders
+  document.querySelectorAll('[data-en-placeholder]').forEach(el => {
+    el.placeholder = lang === 'ko'
+      ? el.getAttribute('data-ko-placeholder')
+      : el.getAttribute('data-en-placeholder');
+  });
+
+  // Update page title
+  document.title = lang === 'ko'
+    ? 'CaseFront — 변호사 상담을 AI 사건 리포트로'
+    : 'CaseFront — Turn Legal Consultations into AI Case Reports';
+
+  // Nav link labels
+  document.querySelectorAll('.nav-links a[data-en]').forEach(el => {
+    el.textContent = lang === 'ko' ? el.getAttribute('data-ko') : el.getAttribute('data-en');
+  });
+}
+
+// ── Nav scroll shadow ──────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 20);
+});
+
+// ── Inquiry form ───────────────────────────────────────────────
+const _sb = supabase.createClient(
+  'https://psihfrowcngdmpjrhekp.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBzaWhmcm93Y25nZG1wanJoZWtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwNzI3MTYsImV4cCI6MjA4NzY0ODcxNn0.g1qTuVztmiJhxheJVY-hOylkUs3Z1-khgBpjMac39IY'
+);
+
+async function submitInquiry() {
+  const name  = document.getElementById('inq-name').value.trim();
+  const email = document.getElementById('inq-email').value.trim();
+  const firm  = document.getElementById('inq-firm').value.trim();
+  const isKo  = currentLang === 'ko';
+
+  if (!name || !email) {
+    alert(isKo ? '이름과 이메일을 입력해주세요.' : 'Please enter your name and email.');
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    alert(isKo ? '올바른 이메일 주소를 입력해주세요.' : 'Please enter a valid email address.');
+    return;
+  }
+
+  const btn = document.getElementById('inq-btn');
+  btn.disabled = true;
+  btn.textContent = isKo ? '전송 중...' : 'Sending...';
+
+  const { error } = await _sb.from('inquiries').insert({ name, email, firm_name: firm || null, source: 'landing' });
+
+  if (error) {
+    btn.disabled = false;
+    btn.textContent = isKo ? '문의하기' : 'Send Inquiry';
+    alert(isKo ? '전송 실패. 다시 시도해주세요.' : 'Submission failed. Please try again.');
+    return;
+  }
+
+  document.getElementById('inq-msg').style.display = 'block';
+  btn.textContent = isKo ? '접수 완료' : 'Submitted!';
 }
 </script>
 </body>
