@@ -1,0 +1,41 @@
+접수해드렸습니다. 변호사님이 검토 후 연락드릴 예정입니다. 차용증과 계좌이체 내역을 준비해 두시면 좋겠습니다.
+---CASE_SUMMARY---
+{
+  "client_name": "홍길동",
+  "client_phone": "010-1234-5678",
+  "client_email": "hong@example.com",
+  "is_proxy": false,
+  "contact_name": null,
+  "contact_phone": null,
+  "contact_email": null,
+  "contact_relation": null,
+  "is_returning": false,
+  "case_type": "민사",
+  "case_subtype": "대여금",
+  "case_sub_tag": null,
+  "position": null,
+  "events": [
+    {
+      "date": "2024-01-15",
+      "subject": "홍길동",
+      "object": "김XX",
+      "action": "3,000만 원을 대여",
+      "summary": "홍길동은 2024. 1. 15. 김XX에게 3,000만 원을 대여하였다"
+    }
+  ],
+  "requirements": [
+    { "element": "금전교부", "status": "confirmed", "detail": "3,000만 원" },
+    { "element": "반환약정", "status": "confirmed", "detail": "차용증 있음" },
+    { "element": "변제기 도래", "status": "unknown", "detail": "미확인" }
+  ],
+  "evidence": ["차용증"],
+  "unconfirmed": ["변제기"],
+  "document_request": ["차용증 사본", "계좌이체 내역"],
+  "client_request": "대여금 회수",
+  "ai_notes": "차용증 있음. 변제기 확인 필요.",
+  "urgency": "normal",
+  "urgency_reason": "시한 압박 없음",
+  "summary_text": "대여금 3,000만 원 미변제 건 (차용증 있음)",
+  "conversation_turns": 8,
+  "timestamp": "2026-02-28T10:00:00+09:00"
+}

@@ -1,0 +1,40 @@
+접수해드렸습니다. 부친 분의 사건을 대신 문의 주셨군요. 변호사님이 검토 후 연락드릴 예정입니다.
+---CASE_SUMMARY---
+{
+  "client_name": "박정호",
+  "client_phone": "010-3333-4444",
+  "client_email": null,
+  "is_proxy": true,
+  "contact_name": "박지훈",
+  "contact_phone": "010-1111-2222",
+  "contact_email": "jhpark@example.com",
+  "contact_relation": "자녀",
+  "is_returning": false,
+  "case_type": "가사",
+  "case_subtype": "상속",
+  "case_sub_tag": null,
+  "position": null,
+  "events": [
+    {
+      "date": "2026-01-10",
+      "subject": "박정호",
+      "object": null,
+      "action": "배우자 사망",
+      "summary": "박정호의 배우자가 2026. 1. 10. 사망하였다"
+    }
+  ],
+  "requirements": [
+    { "element": "상속인 확인", "status": "confirmed", "detail": "자녀 2명" },
+    { "element": "상속 재산", "status": "unknown", "detail": "부동산 있음, 부채 미확인" }
+  ],
+  "evidence": ["사망진단서"],
+  "unconfirmed": ["부채 여부"],
+  "document_request": ["가족관계증명서", "사망진단서"],
+  "client_request": "상속 절차 진행",
+  "ai_notes": "자녀가 대리 문의. 배우자 사망 후 상속 절차. 상속포기 기간 임박.",
+  "urgency": "urgent",
+  "urgency_reason": "사망일로부터 약 49일 경과 — 상속포기 기간(3개월) 임박",
+  "summary_text": "배우자 사망 후 상속 절차 문의 (자녀 대리, 상속포기 기간 임박)",
+  "conversation_turns": 9,
+  "timestamp": "2026-02-28T10:00:00+09:00"
+}
