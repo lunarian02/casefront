@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — CaseFront</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+html{scroll-behavior:smooth}
+:root {
+  --bg: #fafbfd; --bg-alt: #f3f5fa; --surface: #ffffff; --surface-dark: #0f1629;
+  --navy: #1a2b5a; --navy-light: #2d4a8a; --blue: #4a7aef; --blue-light: #6b94f5;
+  --blue-bg: rgba(74,122,239,0.06); --border: #e4e8f1; --border-dark: #cdd3e0;
+  --text: #1a1f36; --text-secondary: #525a76; --text-light: #8b93ab;
+  --green: #22c55e; --amber: #f59e0b; --red: #ef4444;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',-apple-system,sans-serif;line-height:1.7;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.container{max-width:1120px;margin:0 auto;padding:0 24px}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(250,251,253,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+nav.scrolled{box-shadow:0 1px 20px rgba(0,0,0,0.04)}
+.nav-inner{max-width:1120px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-logo-text{font-family:'Source Serif 4',serif;font-size:20px;font-weight:600;color:var(--text)}
+.nav-links{display:flex;gap:28px;align-items:center}
+.nav-links a{font-size:14px;color:var(--text-secondary);text-decoration:none;transition:color 0.2s}
+.nav-links a:hover{color:var(--text)}
+.nav-cta{background:var(--navy);color:#fff!important;padding:8px 20px;border-radius:8px;font-weight:500;transition:transform 0.2s,box-shadow 0.2s}
+.nav-cta:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(26,43,90,0.18)}
+
+.lang-switcher{display:flex;align-items:center;gap:2px;background:var(--bg-alt);border:1px solid var(--border);border-radius:8px;padding:3px;flex-shrink:0}
+.lang-btn{font-size:12px;font-weight:600;color:var(--text-light);background:transparent;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-family:'JetBrains Mono',monospace;transition:all .2s;letter-spacing:0.3px}
+.lang-btn.active{background:var(--surface);color:var(--navy);box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+.lang-btn:hover:not(.active){color:var(--text)}
+
+/* PAGE HEADER */
+.page-header{padding:120px 0 60px;border-bottom:1px solid var(--border)}
+.page-header-inner{max-width:720px}
+.section-label{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--blue);margin-bottom:12px}
+.page-title{font-family:'Source Serif 4',serif;font-size:clamp(28px,4vw,42px);font-weight:700;line-height:1.25;letter-spacing:-0.5px;color:var(--navy);margin-bottom:16px}
+.page-meta{font-size:13px;color:var(--text-light);font-family:'JetBrains Mono',monospace;display:flex;gap:24px;flex-wrap:wrap}
+
+/* CONTENT LAYOUT */
+.content-wrap{display:grid;grid-template-columns:200px 1fr;gap:60px;align-items:start;padding:60px 0 100px}
+
+/* TOC */
+.toc{position:sticky;top:88px}
+.toc-title{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text-light);margin-bottom:16px;font-family:'JetBrains Mono',monospace}
+.toc-list{list-style:none;display:flex;flex-direction:column;gap:4px}
+.toc-list a{font-size:13px;color:var(--text-secondary);text-decoration:none;padding:4px 0 4px 12px;border-left:2px solid transparent;display:block;transition:all 0.2s;line-height:1.5}
+.toc-list a:hover,.toc-list a.active{color:var(--blue);border-left-color:var(--blue)}
+
+/* SECTIONS */
+.policy-section{margin-bottom:56px}
+.policy-section:last-child{margin-bottom:0}
+.policy-section-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue);font-weight:500;margin-bottom:6px;letter-spacing:0.5px}
+.policy-section h2{font-family:'Source Serif 4',serif;font-size:22px;font-weight:700;color:var(--navy);margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.policy-section h3{font-size:15px;font-weight:600;color:var(--text);margin:24px 0 10px}
+.policy-section p{font-size:14px;color:var(--text-secondary);line-height:1.85;margin-bottom:12px}
+.policy-section ul{list-style:none;margin-bottom:12px}
+.policy-section ul li{font-size:14px;color:var(--text-secondary);line-height:1.85;padding:3px 0 3px 16px;position:relative}
+.policy-section ul li::before{content:'—';position:absolute;left:0;color:var(--border-dark)}
+.policy-section ul li strong, .policy-section p strong{color:var(--text);font-weight:600}
+
+.info-block{background:var(--blue-bg);border:1px solid rgba(74,122,239,0.15);border-radius:12px;padding:20px 24px;margin:16px 0}
+.info-block p{margin:0;font-size:13.5px;color:var(--text-secondary);line-height:1.85}
+
+.warn-block{background:#FEF2F2;border:1px solid rgba(239,68,68,0.15);border-radius:12px;padding:20px 24px;margin:16px 0}
+.warn-block p{margin:0;font-size:13.5px;color:#7f1d1d;line-height:1.85}
+
+.policy-table-wrap{overflow-x:auto;margin:16px 0}
+.policy-table{width:100%;border-collapse:collapse;font-size:13.5px}
+.policy-table thead tr{background:var(--bg-alt)}
+.policy-table th{padding:12px 16px;text-align:left;font-weight:600;color:var(--text);font-size:12px;letter-spacing:0.3px;border-bottom:2px solid var(--border)}
+.policy-table td{padding:12px 16px;color:var(--text-secondary);border-bottom:1px solid var(--border);line-height:1.7;vertical-align:top}
+.policy-table tbody tr:last-child td{border-bottom:none}
+.policy-table tbody tr:hover{background:var(--bg-alt)}
+
+.contact-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px 32px;display:flex;flex-direction:column;gap:12px}
+.contact-row{display:flex;gap:16px;align-items:center;font-size:14px}
+.contact-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-light);min-width:64px}
+.contact-val{color:var(--text)}
+.contact-val a{color:var(--blue);text-decoration:none}
+.contact-val a:hover{text-decoration:underline}
+
+footer{padding:32px 0;border-top:1px solid var(--border);text-align:center}
+footer p{font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',monospace}
+footer a{color:var(--text-light);text-decoration:none;transition:color .2s}
+footer a:hover{color:var(--text)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.page-header-inner{animation:fadeUp .5s ease-out both}
+
+@media(max-width:860px){
+  .content-wrap{grid-template-columns:1fr}
+  .toc{display:none}
+}
+@media(max-width:640px){
+  .nav-links a:not(.nav-cta){display:none}
+  .page-header{padding:100px 0 48px}
+  .contact-card{padding:20px}
+}
+</style>
+</head>
+<body>
+
+<nav id="nav"><div class="nav-inner">
+  <a href="/" class="nav-logo">
+    <svg width="22" height="24" viewBox="0 0 44 48" fill="none"><path d="M13 4H7C5.34 4 4 5.34 4 7V41C4 42.66 5.34 44 7 44H13" stroke="#1a2b5a" stroke-width="3" stroke-linecap="round"/><path d="M31 4H37C38.66 4 40 5.34 40 7V41C40 42.66 38.66 44 37 44H31" stroke="#1a2b5a" stroke-width="3" stroke-linecap="round"/><line x1="14" y1="17" x2="30" y2="17" stroke="#1a2b5a" stroke-width="2" stroke-linecap="round"/><line x1="14" y1="24" x2="26" y2="24" stroke="#4a7aef" stroke-width="1.5" stroke-linecap="round" opacity="0.45"/></svg>
+    <span class="nav-logo-text">CaseFront</span>
+  </a>
+  <div class="nav-links">
+    <a href="/" data-en="Home" data-ko="홈">Home</a>
+    <a href="/#pricing" data-en="Pricing" data-ko="가격">Pricing</a>
+    <div class="lang-switcher">
+      <button class="lang-btn active" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" onclick="setLang('ko')">한국어</button>
+    </div>
+    <a href="https://my.casefront.app/signup" class="nav-cta" data-en="Free Trial" data-ko="무료체험">Free Trial</a>
+  </div>
+</div></nav>
+
+<section class="page-header">
+  <div class="container">
+    <div class="page-header-inner">
+      <div class="section-label">Legal</div>
+      <h1 class="page-title" data-en="Privacy Policy" data-ko="개인정보처리방침">Privacy Policy</h1>
+      <div class="page-meta">
+        <span data-en="Effective&nbsp;&nbsp;Mar 3, 2026" data-ko="시행일&nbsp;&nbsp;2026. 3. 3.">Effective&nbsp;&nbsp;Mar 3, 2026</span>
+        <span data-en="Last updated&nbsp;&nbsp;Mar 3, 2026" data-ko="최종 수정&nbsp;&nbsp;2026. 3. 3.">Last updated&nbsp;&nbsp;Mar 3, 2026</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+  <div class="content-wrap">
+
+    <!-- TOC Sidebar -->
+    <aside class="toc">
+      <div class="toc-title" data-en="Contents" data-ko="목차">Contents</div>
+      <ul class="toc-list">
+        <li><a href="#s1" data-en="1. Data We Collect" data-ko="1. 수집하는 개인정보">1. Data We Collect</a></li>
+        <li><a href="#s2" data-en="2. How We Use Your Data" data-ko="2. 수집 및 이용 목적">2. How We Use Your Data</a></li>
+        <li><a href="#s3" data-en="3. Retention Period" data-ko="3. 보유 및 이용 기간">3. Retention Period</a></li>
+        <li><a href="#s4" data-en="4. Third-Party Disclosure" data-ko="4. 제3자 제공">4. Third-Party Disclosure</a></li>
+        <li><a href="#s5" data-en="5. Data Processing Partners" data-ko="5. 처리 위탁">5. Data Processing Partners</a></li>
+        <li><a href="#s6" data-en="6. International Transfers" data-ko="6. 국외 이전">6. International Transfers</a></li>
+        <li><a href="#s7" data-en="7. Data Deletion" data-ko="7. 개인정보 파기">7. Data Deletion</a></li>
+        <li><a href="#s8" data-en="8. Your Rights" data-ko="8. 이용자의 권리">8. Your Rights</a></li>
+        <li><a href="#s9" data-en="9. Security Measures" data-ko="9. 안전성 확보 조치">9. Security Measures</a></li>
+        <li><a href="#s10" data-en="10. Recording Data Notice" data-ko="10. 녹음 데이터 안내">10. Recording Data Notice</a></li>
+        <li><a href="#s11" data-en="11. Privacy Officer" data-ko="11. 개인정보 보호책임자">11. Privacy Officer</a></li>
+        <li><a href="#s12" data-en="12. Policy Updates" data-ko="12. 방침 변경">12. Policy Updates</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main>
+
+      <div class="info-block" style="margin-bottom:40px">
+        <p data-en="CaseFront (the &quot;Company&quot;) has established and publishes this Privacy Policy in accordance with applicable data protection laws, in order to protect the personal information of users and provide a means of swift, smooth resolution of any related concerns." data-ko="케이스프론트(이하 &quot;회사&quot;)는 「개인정보 보호법」 제30조에 따라 이용자의 개인정보를 보호하고, 이와 관련한 고충을 신속하고 원활하게 처리할 수 있도록 하기 위하여 다음과 같이 개인정보 처리방침을 수립·공개합니다.">CaseFront (the "Company") has established and publishes this Privacy Policy in accordance with applicable data protection laws, in order to protect the personal information of users and provide a means of swift, smooth resolution of any related concerns.</p>
+      </div>
+
+      <!-- 1 -->
+      <section class="policy-section" id="s1">
+        <div class="policy-section-num">01</div>
+        <h2 data-en="Data We Collect and How" data-ko="수집하는 개인정보 항목 및 수집 방법">Data We Collect and How</h2>
+
+        <h3 data-en="Categories of Personal Data" data-ko="수집하는 개인정보 항목">Categories of Personal Data</h3>
+
+        <p><strong data-en="At sign-up (required)" data-ko="회원가입 시 (필수)">At sign-up (required)</strong></p>
+        <ul>
+          <li data-en="Email address, password" data-ko="이메일 주소, 비밀번호">Email address, password</li>
+          <li data-en="Firm name, attorney name" data-ko="사무소명, 변호사 이름">Firm name, attorney name</li>
+        </ul>
+
+        <p><strong data-en="At sign-up (optional)" data-ko="회원가입 시 (선택)">At sign-up (optional)</strong></p>
+        <ul>
+          <li data-en="Phone number, practice areas, firm logo" data-ko="전화번호, 전문분야, 사무소 로고">Phone number, practice areas, firm logo</li>
+        </ul>
+
+        <p><strong data-en="Collected automatically during service use" data-ko="서비스 이용 시 자동 수집">Collected automatically during service use</strong></p>
+        <ul>
+          <li data-en="Recording files (audio data), recording date/time, recording duration" data-ko="녹음 파일(음성 데이터), 녹음 일시, 녹음 길이">Recording files (audio data), recording date/time, recording duration</li>
+          <li data-en="AI speech-to-text (STT) transcriptions" data-ko="AI 음성인식(STT) 변환 텍스트">AI speech-to-text (STT) transcriptions</li>
+          <li data-en="AI-generated case reports" data-ko="AI 생성 사건 리포트">AI-generated case reports</li>
+          <li data-en="App usage logs, IP address, device information (OS, device model)" data-ko="앱 사용 로그, 접속 IP, 기기 정보(OS, 기기 모델)">App usage logs, IP address, device information (OS, device model)</li>
+        </ul>
+
+        <p><strong data-en="At payment" data-ko="결제 시">At payment</strong></p>
+        <p data-en="Payment method information is processed directly by external payment providers (Stripe / Toss Payments). The Company does not collect or store payment credentials directly." data-ko="결제 수단 정보는 외부 결제 서비스(Stripe/Toss Payments)에서 직접 처리하며, 회사는 결제 수단 정보를 직접 수집·저장하지 않습니다.">Payment method information is processed directly by external payment providers (Stripe / Toss Payments). The Company does not collect or store payment credentials directly.</p>
+
+        <h3 data-en="Collection Methods" data-ko="수집 방법">Collection Methods</h3>
+        <ul>
+          <li data-en="Direct input by the user during sign-up or service use" data-ko="회원가입 및 서비스 이용 과정에서 이용자가 직접 입력">Direct input by the user during sign-up or service use</li>
+          <li data-en="Audio data collected via the in-app recording feature" data-ko="앱 내 녹음 기능을 통한 음성 데이터 수집">Audio data collected via the in-app recording feature</li>
+          <li data-en="Automatically generated and collected during service use" data-ko="서비스 이용 과정에서 자동 생성·수집">Automatically generated and collected during service use</li>
+        </ul>
+      </section>
+
+      <!-- 2 -->
+      <section class="policy-section" id="s2">
+        <div class="policy-section-num">02</div>
+        <h2 data-en="How We Use Your Data" data-ko="개인정보의 수집 및 이용 목적">How We Use Your Data</h2>
+        <p data-en="The Company uses collected personal data for the following purposes." data-ko="회사는 수집한 개인정보를 다음의 목적을 위해 이용합니다.">The Company uses collected personal data for the following purposes.</p>
+        <ul>
+          <li data-en="<strong>Service delivery</strong> — AI speech-to-text transcription and case report generation from recordings" data-ko="<strong>서비스 제공</strong> — 녹음 파일의 AI 음성인식(STT) 변환 및 AI 사건 리포트 생성"><strong>Service delivery</strong> — AI speech-to-text transcription and case report generation from recordings</li>
+          <li data-en="<strong>Account management</strong> — Registration, identity verification, service access and restrictions" data-ko="<strong>회원 관리</strong> — 회원 가입, 본인 확인, 서비스 이용 및 제한"><strong>Account management</strong> — Registration, identity verification, service access and restrictions</li>
+          <li data-en="<strong>Service improvement</strong> — Enhancing service quality, error analysis and fixes" data-ko="<strong>서비스 개선</strong> — 서비스 품질 향상, 오류 분석 및 개선"><strong>Service improvement</strong> — Enhancing service quality, error analysis and fixes</li>
+          <li data-en="<strong>Customer support</strong> — Responding to inquiries, delivering notices" data-ko="<strong>고객 지원</strong> — 문의 응대, 공지사항 전달"><strong>Customer support</strong> — Responding to inquiries, delivering notices</li>
+          <li data-en="<strong>Subscription &amp; billing management</strong> — Managing paid subscriptions, tracking usage" data-ko="<strong>구독 및 결제 관리</strong> — 유료 구독 관리, 사용량 추적"><strong>Subscription &amp; billing management</strong> — Managing paid subscriptions, tracking usage</li>
+        </ul>
+      </section>
+
+      <!-- 3 -->
+      <section class="policy-section" id="s3">
+        <div class="policy-section-num">03</div>
+        <h2 data-en="Retention Period" data-ko="개인정보의 보유 및 이용 기간">Retention Period</h2>
+        <p data-en="In principle, the Company destroys personal data without delay once the purpose of collection and use has been achieved." data-ko="회사는 원칙적으로 개인정보 수집 및 이용 목적이 달성된 후에는 해당 정보를 지체 없이 파기합니다.">In principle, the Company destroys personal data without delay once the purpose of collection and use has been achieved.</p>
+        <div class="policy-table-wrap">
+          <table class="policy-table">
+            <thead>
+              <tr>
+                <th data-en="Data" data-ko="항목">Data</th>
+                <th data-en="Retention Period" data-ko="보유 기간">Retention Period</th>
+                <th data-en="Notes" data-ko="비고">Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td data-en="Account information" data-ko="회원 정보">Account information</td>
+                <td data-en="Until account deletion" data-ko="회원 탈퇴 시까지">Until account deletion</td>
+                <td data-en="Deleted immediately upon withdrawal" data-ko="탈퇴 후 즉시 파기">Deleted immediately upon withdrawal</td>
+              </tr>
+              <tr>
+                <td data-en="Recording files (mp3)" data-ko="녹음 파일 (mp3)">Recording files (mp3)</td>
+                <td data-en="1 year" data-ko="1년">1 year</td>
+                <td data-en="Deletion on request" data-ko="삭제 요청 가능">Deletion on request</td>
+              </tr>
+              <tr>
+                <td data-en="STT transcripts" data-ko="STT 텍스트">STT transcripts</td>
+                <td data-en="Until account deletion" data-ko="회원 탈퇴 시까지">Until account deletion</td>
+                <td data-en="Retained even after recording deletion (separate deletion request possible)" data-ko="녹음 삭제 시에도 유지 (별도 삭제 요청 가능)">Retained even after recording deletion (separate deletion request possible)</td>
+              </tr>
+              <tr>
+                <td data-en="AI reports" data-ko="AI 리포트">AI reports</td>
+                <td data-en="Until account deletion" data-ko="회원 탈퇴 시까지">Until account deletion</td>
+                <td data-en="Retained even after recording deletion (separate deletion request possible)" data-ko="녹음 삭제 시에도 유지 (별도 삭제 요청 가능)">Retained even after recording deletion (separate deletion request possible)</td>
+              </tr>
+              <tr>
+                <td data-en="Service usage logs" data-ko="서비스 이용 로그">Service usage logs</td>
+                <td data-en="3 years" data-ko="3년">3 years</td>
+                <td data-en="Retained per applicable telecommunications law" data-ko="「통신비밀보호법」에 따른 보관">Retained per applicable telecommunications law</td>
+              </tr>
+              <tr>
+                <td data-en="Payment records" data-ko="결제 기록">Payment records</td>
+                <td data-en="5 years" data-ko="5년">5 years</td>
+                <td data-en="Retained per applicable e-commerce law" data-ko="「전자상거래법」에 따른 보관">Retained per applicable e-commerce law</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 4 -->
+      <section class="policy-section" id="s4">
+        <div class="policy-section-num">04</div>
+        <h2 data-en="Third-Party Disclosure" data-ko="개인정보의 제3자 제공">Third-Party Disclosure</h2>
+        <p data-en="As a rule, the Company does not provide users' personal data to external parties. Exceptions apply in the following cases." data-ko="회사는 이용자의 개인정보를 원칙적으로 외부에 제공하지 않습니다. 다만, 아래의 경우에는 예외로 합니다.">As a rule, the Company does not provide users' personal data to external parties. Exceptions apply in the following cases.</p>
+        <ul>
+          <li data-en="Where the user has given prior consent" data-ko="이용자가 사전에 동의한 경우">Where the user has given prior consent</li>
+          <li data-en="Where required by law, or where a law enforcement agency requests data through legally prescribed procedures for investigative purposes" data-ko="법령의 규정에 의거하거나, 수사 목적으로 법령에 정해진 절차와 방법에 따라 수사기관의 요구가 있는 경우">Where required by law, or where a law enforcement agency requests data through legally prescribed procedures for investigative purposes</li>
+        </ul>
+      </section>
+
+      <!-- 5 -->
+      <section class="policy-section" id="s5">
+        <div class="policy-section-num">05</div>
+        <h2 data-en="Data Processing Partners" data-ko="개인정보 처리의 위탁">Data Processing Partners</h2>
+        <p data-en="The Company entrusts the following parties with personal data processing tasks in order to provide the service." data-ko="회사는 서비스 제공을 위해 다음과 같이 개인정보 처리 업무를 위탁하고 있습니다.">The Company entrusts the following parties with personal data processing tasks in order to provide the service.</p>
+        <div class="policy-table-wrap">
+          <table class="policy-table">
+            <thead>
+              <tr>
+                <th data-en="Vendor" data-ko="수탁자">Vendor</th>
+                <th data-en="Task" data-ko="위탁 업무">Task</th>
+                <th data-en="Country" data-ko="보관 국가">Country</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Supabase Inc.</td>
+                <td data-en="Database and file storage operation" data-ko="데이터베이스 및 파일 저장소 운영">Database and file storage operation</td>
+                <td data-en="USA" data-ko="미국">USA</td>
+              </tr>
+              <tr>
+                <td>OpenAI, Inc.</td>
+                <td data-en="Speech-to-text (STT) processing" data-ko="음성인식(STT) 처리">Speech-to-text (STT) processing</td>
+                <td data-en="USA" data-ko="미국">USA</td>
+              </tr>
+              <tr>
+                <td>Google LLC</td>
+                <td data-en="AI report generation (Gemini API)" data-ko="AI 리포트 생성 (Gemini API)">AI report generation (Gemini API)</td>
+                <td data-en="USA" data-ko="미국">USA</td>
+              </tr>
+              <tr>
+                <td>Stripe, Inc. / Toss Payments</td>
+                <td data-en="Payment processing" data-ko="결제 처리">Payment processing</td>
+                <td data-en="USA / Korea" data-ko="미국 / 한국">USA / Korea</td>
+              </tr>
+              <tr>
+                <td>Vercel Inc.</td>
+                <td data-en="Web service hosting" data-ko="웹 서비스 호스팅">Web service hosting</td>
+                <td data-en="USA" data-ko="미국">USA</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="info-block">
+          <p data-en="Audio and text data transmitted to partner vendors is used solely for the purpose of providing the service and is not separately stored on vendor servers after API processing." data-ko="위탁 업체에 전달되는 음성 데이터 및 텍스트 데이터는 서비스 제공 목적으로만 사용되며, API 처리 후 위탁 업체 서버에 별도 저장되지 않습니다.">Audio and text data transmitted to partner vendors is used solely for the purpose of providing the service and is not separately stored on vendor servers after API processing.</p>
+        </div>
+      </section>
+
+      <!-- 6 -->
+      <section class="policy-section" id="s6">
+        <div class="policy-section-num">06</div>
+        <h2 data-en="International Data Transfers" data-ko="개인정보의 국외 이전">International Data Transfers</h2>
+        <p data-en="The Company transfers personal data overseas as follows in order to provide the service." data-ko="회사는 서비스 제공을 위해 아래와 같이 개인정보를 국외로 이전합니다.">The Company transfers personal data overseas as follows in order to provide the service.</p>
+        <ul>
+          <li data-en="<strong>Data transferred</strong> — Recording files, STT transcripts, text used for AI report generation" data-ko="<strong>이전되는 항목</strong> — 녹음 파일, STT 텍스트, AI 리포트 생성을 위한 텍스트"><strong>Data transferred</strong> — Recording files, STT transcripts, text used for AI report generation</li>
+          <li data-en="<strong>Destination country</strong> — United States" data-ko="<strong>이전되는 국가</strong> — 미국"><strong>Destination country</strong> — United States</li>
+          <li data-en="<strong>Purpose</strong> — Provision of AI speech recognition and report generation services" data-ko="<strong>이전 목적</strong> — AI 음성인식 및 리포트 생성 서비스 제공"><strong>Purpose</strong> — Provision of AI speech recognition and report generation services</li>
+          <li data-en="<strong>Method</strong> — API transmission over network" data-ko="<strong>이전 방법</strong> — 네트워크를 통한 API 전송"><strong>Method</strong> — API transmission over network</li>
+          <li data-en="<strong>Retention</strong> — Deleted immediately upon completion of API processing (not stored separately on vendor servers)" data-ko="<strong>보유 기간</strong> — API 처리 완료 즉시 삭제 (위탁 업체 서버에 별도 저장하지 않음)"><strong>Retention</strong> — Deleted immediately upon completion of API processing (not stored separately on vendor servers)</li>
+        </ul>
+      </section>
+
+      <!-- 7 -->
+      <section class="policy-section" id="s7">
+        <div class="policy-section-num">07</div>
+        <h2 data-en="Data Deletion" data-ko="개인정보의 파기">Data Deletion</h2>
+        <p data-en="The Company destroys personal data without delay when it is no longer necessary — for example, when the retention period expires or the processing purpose has been achieved." data-ko="회사는 개인정보 보유 기간의 경과, 처리 목적 달성 등 개인정보가 불필요하게 되었을 때에는 지체 없이 해당 개인정보를 파기합니다.">The Company destroys personal data without delay when it is no longer necessary — for example, when the retention period expires or the processing purpose has been achieved.</p>
+        <ul>
+          <li data-en="<strong>Deletion method</strong> — Personal data stored in electronic file format is deleted using technical methods that make recovery impossible." data-ko="<strong>파기 방법</strong> — 전자적 파일 형태로 저장된 개인정보는 기록을 재생할 수 없는 기술적 방법을 사용하여 삭제합니다."><strong>Deletion method</strong> — Personal data stored in electronic file format is deleted using technical methods that make recovery impossible.</li>
+          <li data-en="<strong>Recording file deletion</strong> — Users are notified by email and in-app notification 7 days before the retention period expires, after which files are automatically deleted. Users may download the original file before expiry." data-ko="<strong>녹음 파일 파기</strong> — 플랜별 보관 기간 만료 7일 전 이메일 및 앱 알림으로 안내하며, 기간 만료 후 자동 삭제됩니다. 이용자는 보관 기간 내 원본 파일을 다운로드할 수 있습니다."><strong>Recording file deletion</strong> — Users are notified by email and in-app notification 7 days before the retention period expires, after which files are automatically deleted. Users may download the original file before expiry.</li>
+        </ul>
+      </section>
+
+      <!-- 8 -->
+      <section class="policy-section" id="s8">
+        <div class="policy-section-num">08</div>
+        <h2 data-en="Your Rights" data-ko="이용자의 권리·의무 및 행사 방법">Your Rights</h2>
+        <p data-en="Users may exercise the following rights at any time." data-ko="이용자는 언제든지 다음의 권리를 행사할 수 있습니다.">Users may exercise the following rights at any time.</p>
+        <ul>
+          <li data-en="<strong>Right to access</strong> personal data" data-ko="<strong>개인정보 열람 요구</strong>"><strong>Right to access</strong> personal data</li>
+          <li data-en="<strong>Right to rectification</strong> of errors" data-ko="<strong>오류 등이 있을 경우 정정 요구</strong>"><strong>Right to rectification</strong> of errors</li>
+          <li data-en="<strong>Right to erasure</strong>" data-ko="<strong>삭제 요구</strong>"><strong>Right to erasure</strong></li>
+          <li data-en="<strong>Right to restriction</strong> of processing" data-ko="<strong>처리 정지 요구</strong>"><strong>Right to restriction</strong> of processing</li>
+        </ul>
+        <p data-en="Rights can be exercised via the in-app settings menu or by email (privacy@casefront.app), and the Company will act without delay." data-ko="권리 행사는 앱 내 설정 메뉴 또는 이메일(privacy@casefront.app)을 통해 가능하며, 회사는 이에 대해 지체 없이 조치하겠습니다.">Rights can be exercised via the in-app settings menu or by email (<a href="mailto:privacy@casefront.app">privacy@casefront.app</a>), and the Company will act without delay.</p>
+
+        <h3 data-en="Account Deletion" data-ko="계정 삭제">Account Deletion</h3>
+        <p data-en="Users may delete their account at any time via <strong>Settings &gt; Delete Account</strong> in the app. The following data will be deleted." data-ko="이용자는 앱 내 <strong>설정 &gt; 계정 삭제</strong>를 통해 언제든지 회원 탈퇴할 수 있습니다. 탈퇴 시 다음 데이터가 삭제됩니다.">Users may delete their account at any time via <strong>Settings &gt; Delete Account</strong> in the app. The following data will be deleted.</p>
+        <ul>
+          <li data-en="Account information (email, name, etc.)" data-ko="회원 정보 (이메일, 이름 등)">Account information (email, name, etc.)</li>
+          <li data-en="Recording files" data-ko="녹음 파일">Recording files</li>
+          <li data-en="STT transcripts and AI reports" data-ko="STT 텍스트 및 AI 리포트">STT transcripts and AI reports</li>
+          <li data-en="Subscription information" data-ko="구독 정보">Subscription information</li>
+        </ul>
+        <div class="info-block">
+          <p data-en="Information required to be retained by law (such as payment records) will be destroyed after the applicable period." data-ko="법령에 따라 보관이 필요한 정보(결제 기록 등)는 해당 기간 동안 보관 후 파기됩니다.">Information required to be retained by law (such as payment records) will be destroyed after the applicable period.</p>
+        </div>
+      </section>
+
+      <!-- 9 -->
+      <section class="policy-section" id="s9">
+        <div class="policy-section-num">09</div>
+        <h2 data-en="Security Measures" data-ko="개인정보의 안전성 확보 조치">Security Measures</h2>
+        <p data-en="The Company takes the following measures to ensure the security of personal data." data-ko="회사는 개인정보의 안전성 확보를 위해 다음과 같은 조치를 취하고 있습니다.">The Company takes the following measures to ensure the security of personal data.</p>
+        <ul>
+          <li data-en="<strong>Encryption</strong> — Passwords are stored and managed in encrypted form, and SSL/TLS encrypted communication is used for data transmission." data-ko="<strong>암호화</strong> — 비밀번호는 암호화되어 저장·관리되며, 데이터 전송 시 SSL/TLS 암호화 통신을 사용합니다."><strong>Encryption</strong> — Passwords are stored and managed in encrypted form, and SSL/TLS encrypted communication is used for data transmission.</li>
+          <li data-en="<strong>Access restriction</strong> — Access to personal data is limited to the minimum number of personnel required." data-ko="<strong>접근 제한</strong> — 개인정보에 대한 접근 권한을 최소한의 인원으로 제한합니다."><strong>Access restriction</strong> — Access to personal data is limited to the minimum number of personnel required.</li>
+          <li data-en="<strong>Data isolation</strong> — Each law firm's data is logically fully isolated based on firm_id." data-ko="<strong>데이터 격리</strong> — 각 법률사무소의 데이터는 firm_id를 기준으로 논리적으로 완전히 격리됩니다."><strong>Data isolation</strong> — Each law firm's data is logically fully isolated based on firm_id.</li>
+          <li data-en="<strong>Storage security</strong> — Recording files are kept in a private (non-public) storage, accessible only to authenticated users." data-ko="<strong>저장소 보안</strong> — 녹음 파일은 비공개(Private) 저장소에 보관되며, 인증된 사용자만 접근할 수 있습니다."><strong>Storage security</strong> — Recording files are kept in a private (non-public) storage, accessible only to authenticated users.</li>
+        </ul>
+      </section>
+
+      <!-- 10 -->
+      <section class="policy-section" id="s10">
+        <div class="policy-section-num">10</div>
+        <h2 data-en="Special Notice on Recording Data" data-ko="녹음 데이터에 관한 특별 안내">Special Notice on Recording Data</h2>
+
+        <h3 data-en="Lawfulness of Recording" data-ko="녹음의 적법성">Lawfulness of Recording</h3>
+        <div class="warn-block">
+          <p data-en="This service provides a recording tool. Responsibility for the lawfulness of any recording rests with the user. Under applicable law, recording by a party to the conversation is generally lawful, while a third party secretly recording the conversation of others without their consent is unlawful." data-ko="본 서비스는 녹음 도구를 제공하며, 녹음의 적법성에 대한 책임은 이용자에게 있습니다. 「통신비밀보호법」에 따라 대화 당사자 일방의 동의 하에 녹음하는 것은 적법하나, 제3자가 타인의 대화를 몰래 녹음하는 것은 위법입니다.">This service provides a recording tool. Responsibility for the lawfulness of any recording rests with the user. Under applicable law, recording by a party to the conversation is generally lawful, while a third party secretly recording the conversation of others without their consent is unlawful.</p>
+        </div>
+
+        <h3 data-en="AI Processing Notice" data-ko="AI 처리 안내">AI Processing Notice</h3>
+        <p data-en="Recording files are automatically converted to text via AI speech recognition (STT) technology, and AI generates a case report based on the resulting transcript. AI-generated output is for reference only and does not constitute legal advice." data-ko="녹음 파일은 AI 음성인식(STT) 기술을 통해 자동으로 텍스트로 변환되며, 변환된 텍스트를 기반으로 AI가 사건 리포트를 생성합니다. AI 생성 결과물은 참고 자료이며, 법률 자문을 대체하지 않습니다.">Recording files are automatically converted to text via AI speech recognition (STT) technology, and AI generates a case report based on the resulting transcript. AI-generated output is for reference only and does not constitute legal advice.</p>
+
+        <h3 data-en="STT Accuracy" data-ko="STT 정확도">STT Accuracy</h3>
+        <p data-en="AI speech recognition results may not be 100% accurate and have no legal evidentiary value. Please refer to the original recording for accurate content." data-ko="AI 음성인식 결과는 100% 정확하지 않을 수 있으며, 법적 증거력이 없습니다. 정확한 내용은 원본 녹음을 확인해주시기 바랍니다.">AI speech recognition results may not be 100% accurate and have no legal evidentiary value. Please refer to the original recording for accurate content.</p>
+      </section>
+
+      <!-- 11 -->
+      <section class="policy-section" id="s11">
+        <div class="policy-section-num">11</div>
+        <h2 data-en="Privacy Officer" data-ko="개인정보 보호책임자">Privacy Officer</h2>
+        <p data-en="For inquiries, complaints, or remedies related to personal data, please contact the person below." data-ko="개인정보 관련 문의, 불만 처리, 피해 구제 등에 관한 사항은 아래 담당자에게 문의해주시기 바랍니다.">For inquiries, complaints, or remedies related to personal data, please contact the person below.</p>
+        <div class="contact-card">
+          <div class="contact-row">
+            <span class="contact-label" data-en="Name" data-ko="성명">Name</span>
+            <span class="contact-val">Hongseok Jang</span>
+          </div>
+          <div class="contact-row">
+            <span class="contact-label" data-en="Title" data-ko="직위">Title</span>
+            <span class="contact-val" data-en="CEO" data-ko="대표">CEO</span>
+          </div>
+          <div class="contact-row">
+            <span class="contact-label" data-en="Email" data-ko="이메일">Email</span>
+            <span class="contact-val"><a href="mailto:privacy@casefront.app">privacy@casefront.app</a></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 12 -->
+      <section class="policy-section" id="s12">
+        <div class="policy-section-num">12</div>
+        <h2 data-en="Policy Updates" data-ko="개인정보 처리방침 변경">Policy Updates</h2>
+        <p data-en="This Privacy Policy takes effect from the effective date above. If additions, deletions, or corrections are made in accordance with laws and regulations, changes will be announced via the notice board <strong>at least 7 days</strong> before taking effect." data-ko="이 개인정보 처리방침은 시행일로부터 적용되며, 법령 및 방침에 따른 변경 내용의 추가, 삭제 및 정정이 있는 경우에는 변경 사항의 시행 <strong>7일 전</strong>부터 공지사항을 통하여 고지할 것입니다.">This Privacy Policy takes effect from the effective date above. If additions, deletions, or corrections are made in accordance with laws and regulations, changes will be announced via the notice board <strong>at least 7 days</strong> before taking effect.</p>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<footer><div class="container">
+  <p>© 2026 CaseFront &nbsp;·&nbsp; <a href="/" data-en="Home" data-ko="홈">Home</a> &nbsp;·&nbsp; <a href="/privacy.html" data-en="Privacy Policy" data-ko="개인정보처리방침">Privacy Policy</a></p>
+</div></footer>
+
+<script>
+// ── Language switcher ──────────────────────────────────────────
+let currentLang = 'en';
+
+function setLang(lang) {
+  currentLang = lang;
+  document.documentElement.lang = lang === 'ko' ? 'ko' : 'en';
+
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent.trim() === (lang === 'ko' ? '한국어' : 'EN'));
+  });
+
+  document.querySelectorAll('[data-en]').forEach(el => {
+    const text = lang === 'ko' ? el.getAttribute('data-ko') : el.getAttribute('data-en');
+    if (text) el.innerHTML = text;
+  });
+
+  document.title = lang === 'ko'
+    ? '개인정보처리방침 — CaseFront'
+    : 'Privacy Policy — CaseFront';
+}
+
+// ── Nav scroll ─────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 20);
+});
+
+// ── TOC active highlight ───────────────────────────────────────
+const sections = document.querySelectorAll('.policy-section');
+const tocLinks  = document.querySelectorAll('.toc-list a');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 120) current = s.id; });
+  tocLinks.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+});
+</script>
+</body>
+</html>
