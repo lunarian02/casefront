@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
+  <!-- Bracket only, no background -->
+  <path d="M23 8H16C13.79 8 12 9.79 12 12V52C12 54.21 13.79 56 16 56H23" stroke="#1a2b5a" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M41 8H48C50.21 8 52 9.79 52 12V52C52 54.21 50.21 56 48 56H41" stroke="#1a2b5a" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="24" y1="24" x2="40" y2="24" stroke="#1a2b5a" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="24" y1="32" x2="36" y2="32" stroke="#4a7aef" stroke-width="2" stroke-linecap="round" opacity="0.45"/>
+  <line x1="24" y1="40" x2="38" y2="40" stroke="#4a7aef" stroke-width="2" stroke-linecap="round" opacity="0.25"/>
+</svg>
