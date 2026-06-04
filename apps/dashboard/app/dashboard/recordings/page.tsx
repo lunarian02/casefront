@@ -1,0 +1,241 @@
+'use client'
+import { useEffect, useState, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/hooks/useAuth'
+import { supabaseBrowser } from '@/lib/supabaseClient'
+import { formatDate } from '@/lib/utils'
+import Pagination from '@/components/Pagination'
+
+type RecordingRow = {
+  id: string
+  title: string
+  status: string
+  duration_seconds: number | null
+  created_at: string
+  recording_type: string
+  category: string | null
+  subcategory: string | null
+  client?: {
+    id: string
+    name: string
+    phone: string
+  } | null
+}
+
+function formatCaseType(category: string | null, subcategory: string | null): string {
+  if (!category) return '—'
+  if (!subcategory) return category
+  return `${category} > ${subcategory}`
+}
+
+function formatDuration(seconds: number | null): string {
+  if (!seconds) return '—'
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  if (h > 0) return `${h}시간 ${m}분`
+  return `${m}분`
+}
+
+function statusLabel(status: string): { text: string; color: string } {
+  if (status === 'completed') return { text: '완료', color: '#16A34A' }
+  if (status === 'failed') return { text: '오류', color: '#DC2626' }
+  return { text: '분석중', color: '#D97706' }
+}
+
+function consultationType(recordingType: string): string {
+  if (recordingType === 'call') return '전화'
+  return '대면'
+}
+
+const PAGE_SIZE = 20
+
+export default function RecordingsPage() {
+  const { session, loading } = useAuth()
+  const router = useRouter()
+  const [recordings, setRecordings] = useState<RecordingRow[]>([])
+  const [total, setTotal] = useState(0)
+  const [page, setPage] = useState(0)
+  const [fetching, setFetching] = useState(true)
+
+  const fetchRecordings = useCallback(() => {
+    if (!session) return
+    fetch(`/api/dashboard/recordings?offset=${page * PAGE_SIZE}`, {
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        setRecordings(data.recordings ?? [])
+        setTotal(data.total ?? 0)
+      })
+      .catch(() => {})
+      .finally(() => setFetching(false))
+  }, [session, page])
+
+  useEffect(() => {
+    fetchRecordings()
+  }, [fetchRecordings])
+
+  // Realtime: re-fetch on recording status updates (new completed/failed recordings)
+  useEffect(() => {
+    if (!session) return
+    const channel = supabaseBrowser
+      .channel('recordings-list')
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'recordings',
+      }, () => {
+        fetchRecordings()
+      })
+      .subscribe()
+    return () => { supabaseBrowser.removeChannel(channel) }
+  }, [session, fetchRecordings])
+
+  if (loading || fetching) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#1a2b5a', borderTopColor: 'transparent' }} />
+      </div>
+    )
+  }
+
+  return (
+    <div className="p-4 md:p-6 max-w-5xl">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <h1 className="text-xl font-bold text-slate-900">상담 목록</h1>
+          <p className="text-slate-500 text-sm mt-0.5">총 {total}건</p>
+        </div>
+        <button
+          onClick={() => router.push('/dashboard/upload')}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition-all"
+          style={{ background: '#4a7aef' }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = '#3b6bd9')}
+          onMouseLeave={(e) => (e.currentTarget.style.background = '#4a7aef')}
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+          </svg>
+          녹음 업로드
+        </button>
+      </div>
+
+      {recordings.length === 0 ? (
+        <EmptyState />
+
+      ) : (
+        <>
+          {/* Mobile: card list */}
+          <div className="md:hidden space-y-3 pb-6">
+            {recordings.map((r) => {
+              const s = statusLabel(r.status)
+              return (
+                <div
+                  key={r.id}
+                  onClick={() => router.push(`/dashboard/recordings/${r.id}`)}
+                  className="bg-white rounded-xl p-4 border border-slate-200 active:bg-slate-50 cursor-pointer"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium" style={{ color: s.color }}>{s.text}</span>
+                    <span className="text-xs text-slate-400">{formatDuration(r.duration_seconds)}</span>
+                  </div>
+                  <div className="font-semibold text-slate-900 text-base leading-snug mb-1">
+                    {r.client?.name ?? '의뢰인 미지정'}
+                  </div>
+                  {r.title && (
+                    <div className="text-sm text-slate-600 mb-1">{r.title}</div>
+                  )}
+                  <div className="flex items-center gap-2 text-sm text-slate-500">
+                    <span>{formatDate(r.created_at)}</span>
+                    <span className="text-slate-300">·</span>
+                    <span>{consultationType(r.recording_type)}</span>
+                    {r.category && (
+                      <>
+                        <span className="text-slate-300">·</span>
+                        <span>{r.category}{r.subcategory && ` > ${r.subcategory}`}</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Desktop: table */}
+          <div className="hidden md:block bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">의뢰인</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">상담일</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">요약</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">방식</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">유형</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">상태</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">녹음시간</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {recordings.map((r) => {
+                  const s = statusLabel(r.status)
+                  return (
+                    <tr
+                      key={r.id}
+                      onClick={() => router.push(`/dashboard/recordings/${r.id}`)}
+                      className="hover:bg-slate-50 cursor-pointer transition-colors"
+                    >
+                      <td className="px-4 py-3 text-sm font-medium text-slate-900">
+                        {r.client?.name ?? '—'}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-slate-500">
+                        {formatDate(r.created_at)}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-slate-600 max-w-xs truncate">
+                        {r.title || '—'}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-slate-600">
+                        {consultationType(r.recording_type)}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-slate-600">
+                        {formatCaseType(r.category, r.subcategory)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-sm font-medium" style={{ color: s.color }}>{s.text}</span>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-slate-500">
+                        {formatDuration(r.duration_seconds)}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          <Pagination
+            currentPage={page}
+            totalItems={total}
+            pageSize={PAGE_SIZE}
+            onPageChange={setPage}
+          />
+        </>
+      )}
+    </div>
+  )
+}
+
+function EmptyState() {
+  return (
+    <div className="text-center py-16 text-slate-400">
+      <svg className="w-12 h-12 mx-auto mb-4 text-slate-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+          d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+      </svg>
+      <p className="text-sm font-medium text-slate-500 mb-1">상담 목록이 없습니다</p>
+      <p className="text-sm">CaseFront 앱에서 상담을 녹음하면 여기에 표시됩니다.</p>
+    </div>
+  )
+}

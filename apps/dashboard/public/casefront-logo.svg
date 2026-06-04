@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="48" viewBox="0 0 200 48" fill="none">
+  <!-- Bracket icon -->
+  <path d="M13 4H7C5.34 4 4 5.34 4 7V41C4 42.66 5.34 44 7 44H13" stroke="#1a2b5a" stroke-width="3" stroke-linecap="round"/>
+  <path d="M31 4H37C38.66 4 40 5.34 40 7V41C40 42.66 38.66 44 37 44H31" stroke="#1a2b5a" stroke-width="3" stroke-linecap="round"/>
+  <line x1="14" y1="17" x2="30" y2="17" stroke="#1a2b5a" stroke-width="2" stroke-linecap="round"/>
+  <line x1="14" y1="24" x2="26" y2="24" stroke="#4a7aef" stroke-width="1.5" stroke-linecap="round" opacity="0.45"/>
+  <line x1="14" y1="31" x2="28" y2="31" stroke="#4a7aef" stroke-width="1.5" stroke-linecap="round" opacity="0.25"/>
+  <!-- Wordmark -->
+  <text x="52" y="32" font-family="Georgia, 'Times New Roman', serif" font-size="24" font-weight="600" fill="#1a1f36" letter-spacing="-0.3">CaseFront</text>
+</svg>

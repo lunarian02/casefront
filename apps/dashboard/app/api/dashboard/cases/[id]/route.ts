@@ -1,0 +1,303 @@
+import { NextResponse } from 'next/server'
+import { supabaseAdmin } from '@/lib/supabase'
+
+function normalizePhone(raw: string): string {
+  const digits = raw.replace(/\D/g, '')
+  if (digits.length === 11) return digits.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3')
+  if (digits.length === 10) return digits.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3')
+  return raw
+}
+
+async function getAuthFirm(request: Request) {
+  const token = request.headers.get('Authorization')?.replace('Bearer ', '')
+  if (!token) return null
+  const { data: { user }, error } = await supabaseAdmin.auth.getUser(token)
+  if (error || !user?.email) return null
+
+  const { data: firm } = await supabaseAdmin
+    .from('firms')
+    .select('id')
+    .eq('lawyer_email', user.email)
+    .maybeSingle()
+
+  return firm ?? null
+}
+
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id: caseId } = await params
+
+  const firm = await getAuthFirm(request)
+  if (!firm) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { data: caseData, error: caseError} = await supabaseAdmin
+    .from('cases')
+    .select('id, client_id, category, subcategory, status, summary, detail, parent_case_id, created_at')
+    .eq('id', caseId)
+    .eq('firm_id', firm.id)
+    .maybeSingle()
+
+  if (caseError || !caseData) {
+    return NextResponse.json({ error: 'Case not found' }, { status: 404 })
+  }
+
+  const channel = 'web'
+
+  // Fetch live client data (latest from clients table)
+  let liveClient = null
+  if (caseData.client_id) {
+    const { data: clientData } = await supabaseAdmin
+      .from('clients')
+      .select('id, name, phone, email, referrer')
+      .eq('id', caseData.client_id)
+      .eq('firm_id', firm.id)
+      .maybeSingle()
+    liveClient = clientData ?? null
+  }
+
+  // Fetch other cases for the same client (for connect modal)
+  let clientCases: Array<{ id: number; category: string; subcategory: string | null; created_at: string }> = []
+  if (caseData.client_id) {
+    const { data: cc } = await supabaseAdmin
+      .from('cases')
+      .select('id, category, subcategory, created_at')
+      .eq('client_id', caseData.client_id)
+      .eq('firm_id', firm.id)
+      .neq('id', caseId)
+      .order('created_at', { ascending: false })
+      .limit(20)
+    clientCases = cc ?? []
+  }
+
+  return NextResponse.json({
+    case: { ...caseData, channel },
+    client: liveClient,
+    clientCases,
+  })
+}
+
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id: caseId } = await params
+
+  const firm = await getAuthFirm(request)
+  if (!firm) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const body = await request.json()
+
+  // Merge from report
+  if ('merge_report_id' in body && 'merge_decisions' in body) {
+    const { merge_report_id, merge_decisions } = body
+
+    // Fetch report
+    const { data: report } = await supabaseAdmin
+      .from('reports')
+      .select('structured')
+      .eq('id', merge_report_id)
+      .maybeSingle()
+
+    if (!report?.structured) {
+      return NextResponse.json({ error: 'Report not found' }, { status: 404 })
+    }
+
+    // Fetch current case detail
+    const { data: currentCase } = await supabaseAdmin
+      .from('cases')
+      .select('detail')
+      .eq('id', caseId)
+      .eq('firm_id', firm.id)
+      .single()
+
+    const existingDetail = (currentCase?.detail as Record<string, unknown>) || {}
+    const newDetail = report.structured as Record<string, unknown>
+    const mergedDetail: Record<string, unknown> = {}
+
+    // Overview
+    if (merge_decisions.overview === 'keep_existing') {
+      mergedDetail.overview = existingDetail.overview || ''
+    } else if (merge_decisions.overview === 'use_new') {
+      mergedDetail.overview = newDetail.overview || ''
+    } else {
+      mergedDetail.overview = `${existingDetail.overview || ''}\n\n${newDetail.overview || ''}`.trim()
+    }
+
+    // Facts
+    if (merge_decisions.facts === 'keep_existing') {
+      mergedDetail.facts = existingDetail.facts || ''
+    } else if (merge_decisions.facts === 'use_new') {
+      mergedDetail.facts = newDetail.facts || ''
+    } else {
+      mergedDetail.facts = `${existingDetail.facts || ''}\n\n${newDetail.facts || ''}`.trim()
+    }
+
+    // Legal elements - merge by key
+    const existingElements = (existingDetail.legal_elements as Record<string, unknown>) || {}
+    const newElements = (newDetail.legal_elements as Record<string, unknown>) || {}
+    mergedDetail.legal_elements = { ...existingElements, ...newElements }
+
+    // Evidence - merge arrays
+    type EvidenceItem = { item: string; status: string; url: string | null }
+    if (merge_decisions.evidence === 'keep_existing') {
+      mergedDetail.evidence = existingDetail.evidence || []
+    } else if (merge_decisions.evidence === 'use_new') {
+      const newEvidence = (newDetail.evidence as string[]) || []
+      mergedDetail.evidence = newEvidence.map((item: string): EvidenceItem => ({
+        item,
+        status: '미확보',
+        url: null,
+      }))
+    } else {
+      const existingEvidence = (existingDetail.evidence as EvidenceItem[]) || []
+      const newEvidence = (newDetail.evidence as string[]) || []
+      const existingItems = new Set(existingEvidence.map(e => e.item))
+      const merged: EvidenceItem[] = [...existingEvidence]
+      newEvidence.forEach((item: string) => {
+        if (!existingItems.has(item)) {
+          merged.push({ item, status: '미확보', url: null })
+        }
+      })
+      mergedDetail.evidence = merged
+    }
+
+    // Update case
+    const { data, error } = await supabaseAdmin
+      .from('cases')
+      .update({ detail: mergedDetail })
+      .eq('id', caseId)
+      .eq('firm_id', firm.id)
+      .select()
+      .single()
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ case: data })
+  }
+
+  // Status update
+  if ('status' in body) {
+    const VALID_STATUSES = ['new', 'reviewing', 'done']
+    if (!VALID_STATUSES.includes(body.status)) {
+      return NextResponse.json({ error: '유효하지 않은 상태값입니다.' }, { status: 400 })
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from('cases')
+      .update({ status: body.status })
+      .eq('id', caseId)
+      .eq('firm_id', firm.id)
+      .select('id, status')
+      .single()
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ case: data })
+  }
+
+  // Connect to parent case
+  if ('parent_case_id' in body) {
+    const { data, error } = await supabaseAdmin
+      .from('cases')
+      .update({ parent_case_id: body.parent_case_id })
+      .eq('id', caseId)
+      .eq('firm_id', firm.id)
+      .select('id, parent_case_id')
+      .single()
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ case: data })
+  }
+
+  // Edit case fields (client info는 clients 테이블에서만 수정 가능)
+  const allowedEdits: Record<string, unknown> = {}
+  if ('category' in body) allowedEdits.category = body.category
+  if ('subcategory' in body) allowedEdits.subcategory = body.subcategory
+  if ('summary' in body) allowedEdits.summary = body.summary
+  if ('status' in body) allowedEdits.status = body.status
+
+  // Update detail JSONB (merge with existing)
+  if ('detail' in body && typeof body.detail === 'object') {
+    // Fetch current detail
+    const { data: current } = await supabaseAdmin
+      .from('cases')
+      .select('detail')
+      .eq('id', caseId)
+      .eq('firm_id', firm.id)
+      .single()
+
+    const existingDetail = (current?.detail as object) || {}
+    allowedEdits.detail = {
+      ...existingDetail,
+      ...body.detail,
+    }
+  }
+
+  // Update summary JSONB sub-fields (deprecated — kept for backward compatibility)
+  if ('summary_patch' in body && typeof body.summary_patch === 'object') {
+    // Fetch current summary
+    const { data: current } = await supabaseAdmin
+      .from('cases')
+      .select('summary')
+      .eq('id', caseId)
+      .eq('firm_id', firm.id)
+      .single()
+
+    if (current?.summary) {
+      allowedEdits.summary = {
+        ...(current.summary as object),
+        ...body.summary_patch,
+      }
+    }
+  }
+
+  if (Object.keys(allowedEdits).length === 0) {
+    return NextResponse.json({ error: '수정할 항목이 없습니다.' }, { status: 400 })
+  }
+
+  const { data, error } = await supabaseAdmin
+    .from('cases')
+    .update(allowedEdits)
+    .eq('id', caseId)
+    .eq('firm_id', firm.id)
+    .select()
+    .single()
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ case: data })
+}
+
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id: caseId } = await params
+
+  const firm = await getAuthFirm(request)
+  if (!firm) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  // Verify case exists and belongs to firm
+  const { data: caseData, error: findError } = await supabaseAdmin
+    .from('cases')
+    .select('id')
+    .eq('id', caseId)
+    .eq('firm_id', firm.id)
+    .maybeSingle()
+
+  if (findError || !caseData) {
+    return NextResponse.json({ error: '사건을 찾을 수 없습니다.' }, { status: 404 })
+  }
+
+  // Delete related records in order
+  await supabaseAdmin.from('case_notes').delete().eq('case_id', caseData.id)
+  await supabaseAdmin.from('files').delete().eq('case_id', caseData.id)
+
+  const { error: deleteError } = await supabaseAdmin
+    .from('cases')
+    .delete()
+    .eq('id', caseId)
+    .eq('firm_id', firm.id)
+
+  if (deleteError) {
+    return NextResponse.json({ error: deleteError.message }, { status: 500 })
+  }
+
+  return NextResponse.json({ ok: true })
+}
