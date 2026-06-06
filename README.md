@@ -5,7 +5,7 @@ Transform legal conversations into structured case reports.
 AI-powered legal intake platform for solo attorneys and small law firms.
 
 <p align="center">
-  <img src="docs/casefront_overview.png" width="1000">
+  <img src="casefront_overview.png" width="1000">
 </p>
 
 Live Demo: https://casefront.app/
