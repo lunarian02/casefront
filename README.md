@@ -2,7 +2,9 @@ Casefront
 
 Transform legal conversations into structured case reports.
 
-Casefront is an AI-powered legal intake platform designed for solo attorneys and small law firms.
+AI-powered legal intake platform for solo attorneys and small law firms.
+
+Live Demo: https://casefront.app/
 
 The platform helps law firms capture client inquiries, process consultation conversations, and organize potential cases into a structured workflow.
 
